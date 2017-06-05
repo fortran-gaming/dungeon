@@ -22,6 +22,7 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION VAPPLI(RI)
+	use,intrinsic:: iso_fortran_env,only: input_unit,output_unit
 	IMPLICIT INTEGER (A-Z)
 	INCLUDE 'dparam.for'
 	PARAMETER (MXNOP=39,MXJOKE=64,MXSMP=99)
@@ -980,7 +981,7 @@ C
 C
 C V74--	Version
 C
-74000	WRITE(OUTCH,74010) VMAJ,VMIN,VEDIT
+74000	WRITE(output_unit,74010) VMAJ,VMIN,VEDIT
 74010	FORMAT(' V',I1,'.',I1,A)
 	TELFLG=.TRUE.
 	RETURN
@@ -1162,12 +1163,12 @@ C
 90000	CALL GTTIME(K)				! get play time.
 	I=K/60
 	J=MOD(K,60)
-	WRITE(OUTCH,90010)
-	IF(I.NE.0) WRITE(OUTCH,90011) I
-	IF(I.GE.2) WRITE(OUTCH,90012)
-	IF(I.EQ.1) WRITE(OUTCH,90013)
-	IF(J.EQ.1) WRITE(OUTCH,90014) J
-	IF(J.NE.1) WRITE(OUTCH,90015) J
+	WRITE(output_unit,90010)
+	IF(I.NE.0) WRITE(output_unit,90011) I
+	IF(I.GE.2) WRITE(output_unit,90012)
+	IF(I.EQ.1) WRITE(output_unit,90013)
+	IF(J.EQ.1) WRITE(output_unit,90014) J
+	IF(J.NE.1) WRITE(output_unit,90015) J
 	TELFLG=.TRUE.
 	RETURN
 C
@@ -1241,7 +1242,7 @@ C
 	L=MIN0(4,IABS(J))			! scale.
 	CALL RSPEAK(473+L)			! describe health.
 	I=(30*(-J-1))+CTICK(CEVCUR)		! compute wait.
-	IF(J.NE.0) WRITE(OUTCH,94100) I
+	IF(J.NE.0) WRITE(output_unit,94100) I
 94100	FORMAT(' You will be cured after ',I3,' moves.')
 	CALL RSPEAK(478+K)			! how much more?
 	IF(DEATHS.NE.0) CALL RSPEAK(482+DEATHS)	! how many deaths?
@@ -1280,7 +1281,7 @@ C
 	IF(IAND(RFLAG(TSTRS), RSEEN).EQ.0) GO TO 95575	! really in end game?
 	SPELLF=.TRUE.				! tell him.
 	TELFLG=.TRUE.
-	WRITE(OUTCH,95510) PW(1)(1:len_trim(PW(1))),CH
+	WRITE(output_unit,95510) PW(1)(1:len_trim(PW(1))),CH
 95510	FORMAT(' A hollow voice replies: "',A,1X,A,'".')
 	RETURN
 C
@@ -1362,8 +1363,8 @@ C
 C V97-- Count (valuables, possessions in VALUAC)
 C
 97000	IF(PRSO.NE.MATCH) GO TO 97100		! matches?
-	IF(ORMTCH.EQ.1) WRITE(OUTCH,97010) ORMTCH	! print number.
-	IF(ORMTCH.NE.1) WRITE(OUTCH,97020) ORMTCH
+	IF(ORMTCH.EQ.1) WRITE(output_unit,97010) ORMTCH	! print number.
+	IF(ORMTCH.NE.1) WRITE(output_unit,97020) ORMTCH
 97010	FORMAT(' You have ',I1,' match.')
 97020	FORMAT(' You have ',I1,' matches.')
 	TELFLG=.TRUE.
@@ -1377,9 +1378,8 @@ C
 	IF(PRSO.EQ.GWISH) I=1061		! blessings.
 	IF(PRSO.EQ.HEADS) I=1084		! heads.
 	CALL RSPEAK(I)				! print response.
-	RETURN
-C
-	END
+
+	END function VAPPLI
 
 C TAKE-- Basic take sequence
 C
@@ -1439,8 +1439,7 @@ C
 	CALL SCRUPD(OFVAL(PRSO))		! update score.
 	OFVAL(PRSO)=0				! cant be scored again.
 	IF(FLG) CALL RSPEAK(559)		! tell taken.
-	RETURN
-C
+
 	END
 
 C DROP- Drop verb processor (also throw, pour water)
@@ -1584,6 +1583,7 @@ C
 C Declarations
 C
 	SUBROUTINE VALUAC(V)
+	use,intrinsic:: iso_fortran_env,only: input_unit,output_unit
 	IMPLICIT INTEGER (A-Z)
 	INCLUDE 'dparam.for'
 	LOGICAL LIT,F,F1,TAKE,PUT,DROP,NOTHIS,NOHERE,QHERE,QBUNCH
@@ -1607,8 +1607,8 @@ C
 	DO 50 J=1,OLNT				! count possessions.
 	  IF(OADV(J).EQ.WINNER) K=K+1
 50	CONTINUE
-	IF(K.EQ.1) WRITE(OUTCH,60) K
-	IF(K.NE.1) WRITE(OUTCH,70) K
+	IF(K.EQ.1) WRITE(output_unit,60) K
+	IF(K.NE.1) WRITE(output_unit,70) K
 60	FORMAT(' You have ',I1,' possession.')
 70	FORMAT(' You have ',I2,' possessions.')
 	TELFLG=.TRUE.
@@ -1621,14 +1621,14 @@ C
 	  IF((OADV(J).EQ.WINNER).AND.(OTVAL(J).GT.0)) K=K+1
 	  IF((OCAN(J).EQ.TCASE).AND.(OTVAL(J).GT.0)) L=L+1
 150	CONTINUE
-	IF(K.EQ.1) WRITE(OUTCH,160) K
-	IF(K.NE.1) WRITE(OUTCH,170) K
+	IF(K.EQ.1) WRITE(output_unit,160) K
+	IF(K.NE.1) WRITE(output_unit,170) K
 160	FORMAT(' You have ',I1,' valuable.')
 170	FORMAT(' You have ',I2,' valuables.')
 	TELFLG=.TRUE.
 	IF(HERE.NE.LROOM) RETURN
-	IF(L.EQ.1) WRITE(OUTCH,180) L
-	IF(L.NE.1) WRITE(OUTCH,190) L
+	IF(L.EQ.1) WRITE(output_unit,180) L
+	IF(L.NE.1) WRITE(output_unit,190) L
 180	FORMAT(' Your adventure has netted ',I1,' treasure.')
 190	FORMAT(' Your adventure has netted ',I2,' treasures.')
 	RETURN
@@ -1739,8 +1739,8 @@ C
 4500	IF(F) CALL RSPEAK(I)			! not lit, nothing, wrong verb?
 	PRSO=SAVEP				! restore PRSO.
 	BUNSUB=0				! cancel EXCEPT/BUT.
-	RETURN
-	END
+ 
+	END SUBROUTINE VALUAC
 
 C QBUNCH-	Is object in bunch vector?
 C
@@ -1756,9 +1756,8 @@ C
 	  IF(OBJ.EQ.BUNVEC(I)) RETURN		! got one.
 100	CONTINUE
 200	QBUNCH=.FALSE.				! not found.
-	RETURN
-C
-	END
+
+	END FUNCTION QBUNCH
 
 C SAVE- Save game state
 C
@@ -1768,7 +1767,7 @@ C
 	IMPLICIT INTEGER (A-Z)
 	INCLUDE 'dparam.for'
 C
-	IF(SUBLNT.EQ.0) SUBBUF='DSAVE.DAT'
+	IF(SUBLNT == 0) SUBBUF='DSAVE.DAT'
 	OPEN (UNIT=1,FILE=SUBBUF,ACCESS='SEQUENTIAL',
 	1	STATUS='UNKNOWN',FORM='UNFORMATTED',ERR=100)
 C
@@ -1789,45 +1788,46 @@ C
 	RETURN
 C
 100	CALL RSPEAK(598)			! cant do it.
-	RETURN
-	END
+
+	END SUBROUTINE SAVEGM
 
 C RESTORE- Restore game state
 C
 C Declarations
-C
+
 	SUBROUTINE RSTRGM
 	IMPLICIT INTEGER (A-Z)
 	INCLUDE 'dparam.for'
+      integer :: u
 C
 	IF(SUBLNT.EQ.0) SUBBUF='DSAVE.DAT'
-	OPEN (UNIT=1,FILE=SUBBUF,ACCESS='SEQUENTIAL',
+	OPEN (newUNIT=u,FILE=SUBBUF,ACCESS='SEQUENTIAL',
 	1	STATUS='OLD',FORM='UNFORMATTED',ERR=100)
 C
-	READ(1) I,J
+	READ(U) I,J
 	IF((I.NE.VMAJ).OR.(J.NE.VMIN)) GO TO 200
 C
-	READ(1) WINNER,HERE,THFPOS,TELFLG,THFFLG,THFACT,
+	READ(U) WINNER,HERE,THFPOS,TELFLG,THFFLG,THFACT,
 	1	SWDACT,SWDSTA,CPVEC
-	READ(1) PLTIME,MOVES,DEATHS,RWSCOR,EGSCOR,MXLOAD,
+	READ(U) PLTIME,MOVES,DEATHS,RWSCOR,EGSCOR,MXLOAD,
 	1	LTSHFT,BLOC,MUNGRM,HS,FROMDR,SCOLRM,SCOLAC
-	READ(1) ODESC1,ODESC2,OFLAG1,OFLAG2,OFVAL,OTVAL,
+	READ(U) ODESC1,ODESC2,OFLAG1,OFLAG2,OFVAL,OTVAL,
 	1	OSIZE,OCAPAC,OROOM,OADV,OCAN
-	READ(1) RDESC1,RVAL,RFLAG,TRAVEL
-	READ(1) AROOM,ASCORE,AVEHIC,ASTREN,AFLAG
-	READ(1) FLAGS,SWITCH,VPROB,CFLAG,CTICK,CCNCEL
+	READ(U) RDESC1,RVAL,RFLAG,TRAVEL
+	READ(U) AROOM,ASCORE,AVEHIC,ASTREN,AFLAG
+	READ(U) FLAGS,SWITCH,VPROB,CFLAG,CTICK,CCNCEL
 C
 	CALL RSPEAK(599)
-	CLOSE (UNIT=1)
+	CLOSE(U)
 	RETURN
 C
 100	CALL RSPEAK(598)			! cant do it.
 	RETURN
 C
 200	CALL RSPEAK(600)			! obsolete version
-	CLOSE (UNIT=1)
-	RETURN
-	END
+	CLOSE(U)
+
+	END SUBROUTINE RSTRGM
 
 C WALK- Move in specified direction
 C
@@ -1896,8 +1896,8 @@ C
 C
 900	WALK=MOVETO(XROOM1,WINNER)		! move to room.
 	IF(WALK) WALK=RMDESC(0)			! describe room.
-	RETURN
-	END
+
+	END FUNCTION WALK
 
 C CXAPPL- Conditional exit processors
 C

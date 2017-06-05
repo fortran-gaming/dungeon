@@ -20,16 +20,18 @@ C
 C Declarations
 C
 	SUBROUTINE RDLINE(INLINE,INLEN,WHO)
+	use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
 	IMPLICIT INTEGER(A-Z)
 	INCLUDE 'dparam.for'
 	CHARACTER*(TEXLNT) INLINE
 C
 	LUCVT=ICHAR('A')-ICHAR('a')		! case conversion factor.
 5	GO TO (90,10),WHO+1			! see who to prompt for.
-10	WRITE(OUTCH,50)				! prompt for game.
-50	FORMAT(' >',$)
+10	WRITE(output_unit,'(A)',advance='no') ' >'	! prompt for game.
+	flush(output_unit)
+
 C
-90	READ(INPCH,100,END=5) INLINE		! get input.
+90	READ(input_unit,100,END=5) INLINE		! get input.
 100	FORMAT(A)
 C
 	INLEN=NBLEN(INLINE)			! len w/o trailing blanks.
@@ -39,8 +41,8 @@ C
 	1	INLINE(I:I)=CHAR(ICHAR(INLINE(I:I))+LUCVT)
 400	CONTINUE
 	PRSCON=1				! restart lex scan.
-	RETURN
-	END
+
+	END SUBROUTINE RDLINE
 
 C PARSE-	Top level parse routine
 C
@@ -49,6 +51,7 @@ C
 C This routine details on bit 0 of PRSFLG
 C
 	LOGICAL FUNCTION PARSE(INLINE,INLEN,VBFLAG)
+	use, intrinsic:: iso_fortran_env,only: output_unit
 	IMPLICIT INTEGER(A-Z)
 	INCLUDE 'dparam.for'
 	CHARACTER*(TEXLNT) INLINE
@@ -86,17 +89,16 @@ C
 	  BAKBUF(I)=OUTBUF(I)
 400	CONTINUE
 	BAKLEN=OUTLEN				! save length
-	IF(DFLAG) WRITE(OUTCH,500) PARSE,PRSA,PRSO,PRSI
+	IF(DFLAG) WRITE(output_unit,500) PARSE,PRSA,PRSO,PRSI
 500	FORMAT(' PARSE RESULTS- ',L7,3I7)
 	RETURN
 C
 C Parse fails, disallow continuation
 C
 1000	PRSCON=1
-	IF(DFLAG) WRITE(OUTCH,500) PARSE,PRSA,PRSO,PRSI
-	RETURN
-C
-	END
+	IF(DFLAG) WRITE(output_unit,500) PARSE,PRSA,PRSO,PRSI
+
+	END FUNCTION PARSE
 
 C LEX-	Lexical analyzer
 C
@@ -105,6 +107,7 @@ C
 C This routine details on bit 1 of PRSFLG
 C
 	LOGICAL FUNCTION LEX(INLINE,INLEN,OUTBUF,OP,VBFLAG)
+	use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
 	IMPLICIT INTEGER(A-Z)
 	INCLUDE 'dparam.for'
 	CHARACTER*(TEXLNT) INLINE
@@ -146,7 +149,7 @@ C
 	IF((CP.EQ.0).AND.(OP.EQ.1)) RETURN	! any results?
 	IF(CP.EQ.0) OP=OP-1			! any last word?
 	LEX=.TRUE.
-	IF(DFLAG) WRITE(OUTCH,2020) CP,OP,PRSCON,(OUTBUF(I),I=1,OP)
+	IF(DFLAG) WRITE(output_unit,2020) CP,OP,PRSCON,(OUTBUF(I),I=1,OP)
 2020	FORMAT(' LEX RESULTS- ',3I7/1X,8(A,1X))
 	RETURN
 C
@@ -161,7 +164,7 @@ C
 	SUBBUF=INLINE(PRSCON:PRSCON+K-2)	! set up substring buffer,
 	SUBLNT=K-1				! length.
 	PRSCON=PRSCON+K				! skip over string.
-	IF(DFLAG) WRITE(OUTCH,3030) SUBLNT,SUBBUF(1:SUBLNT)
+	IF(DFLAG) WRITE(output_unit,3030) SUBLNT,SUBBUF(1:SUBLNT)
 3030	FORMAT(' SUBSTRING- ',I7,' "',A,'"')
 	GO TO 1000				! treat as end of word.
 C
@@ -185,9 +188,8 @@ C
 C Too many tokens.
 C
 5000	IF(VBFLAG) CALL RSPEAK(1048)		! too many tokens.
-	RETURN
-C
-	END
+
+	END FUNCTION LEX
 
 C SPARSE-	Start of parse
 C
@@ -196,6 +198,7 @@ C
 C This routine details on bit 2 of PRSFLG
 C
 	INTEGER FUNCTION SPARSE(LBUF,LLNT,VBFLAG)
+	use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
 	IMPLICIT INTEGER(A-Z)
 	INCLUDE 'dparam.for'
 	CHARACTER*(WRDLNT) LBUF(LEXMAX),WORD,LCWORD,LCIFY
@@ -875,7 +878,7 @@ C Not recognizable
 C
 	  IF(.NOT.VBFLAG) RETURN		! if mute, return
 	  LCWORD=LCIFY(WORD,1)			! convert to lower case
-	  WRITE(OUTCH,600) LCWORD(1:NBLEN(LCWORD)) ! don't recognize
+	  WRITE(output_unit,600) LCWORD(1:NBLEN(LCWORD)) ! don't recognize
 600	  FORMAT(' I don''t understand "',A,'".')
 	  CALL RSPEAK(ERRVOC)			! if extra verb, say so
 800	  TELFLG=.TRUE.				! something said.
@@ -920,7 +923,7 @@ C
 	IF(PRPVEC(PPTR).NE.0) GO TO 12000	! and prep already, die;
 	PRPVEC(PPTR)=PREP			! cvt to 'pick up frob'.
 1200	SPARSE=0				! parse succeeds.
-	IF(DFLAG) WRITE(OUTCH,1310) ACT,OBJ1,OBJ2,PREP1,PREP2
+	IF(DFLAG) WRITE(output_unit,1310) ACT,OBJ1,OBJ2,PREP1,PREP2
 1310	FORMAT(' SPARSE RESULTS- ',5I7)
 	RETURN
 
@@ -942,7 +945,7 @@ C
 2100	ACT=J					! save index to verb.
 	OACT=0					! no orphan.
 	ANDFLG=.FALSE.				! clear 'AND' flag.
-	IF(DFLAG) WRITE(OUTCH,2020) J
+	IF(DFLAG) WRITE(output_unit,2020) J
 2020	FORMAT(' SPARSE- ACT AT ',I6)
 	GO TO 1000				! done.
 C
@@ -985,7 +988,7 @@ C
 4600	IF(ANDFLG) GO TO 8000			! 'AND' pending?
 	IF(PREP.NE.0) GO TO 1000		! already have one? ignore.
 	PREP=PVOC(J)				! no, get index.
-	IF(DFLAG) WRITE(OUTCH,4030) J
+	IF(DFLAG) WRITE(output_unit,4030) J
 4030	FORMAT(' SPARSE- PREP AT ',I6)
 	GO TO 1000
 C
@@ -995,7 +998,7 @@ C
 	ADJPTR=K				! save string pointer.
 	IF((I.LT.LLNT).OR.(OFLAG.EQ.0).OR.(ONAME.EQ.' '))
 	1	GO TO 1000			! last word + orphan string?
-	IF(DFLAG) WRITE(OUTCH,5040) ADJ,ONAME	! have orphan.
+	IF(DFLAG) WRITE(output_unit,5040) ADJ,ONAME	! have orphan.
 5040	FORMAT(' SPARSE- ADJ AT ',I6,' ORPHAN= ',A)
 	WORD=ONAME				! get object string.
 	GO TO 400				! go search object names.
@@ -1003,7 +1006,7 @@ C
 C 6000--	Object
 C
 6000	OBJ=GETOBJ(J,ADJ,0)			! identify object.
-	IF(DFLAG) WRITE(OUTCH,6010) J,OBJ
+	IF(DFLAG) WRITE(output_unit,6010) J,OBJ
 6010	FORMAT(' SPARSE- OBJ AT ',I6,'  OBJ= ',I6)
 	IF(OBJ.LE.0) GO TO 7000			! if le, couldnt.
 	IF(OBJ.NE.ITOBJ) GO TO 6100		! "it"?
@@ -1051,7 +1054,7 @@ C
 	IF(VBFLAG) CALL RSPEAK(579)		! not lit, report.
 	GO TO 800				! go clean up state.
 C
-7100	IF(VBFLAG) WRITE(OUTCH,7110)
+7100	IF(VBFLAG) WRITE(output_unit,7110)
 	1	LCWRD1(1:NBLEN(LCWRD1)+1),LCWORD(1:NBLEN(LCWORD))
 7110	FORMAT(' I can''t see any',A,A,' here.')
 	GO TO 800				! go clean up state.
@@ -1062,7 +1065,7 @@ C
 C
 7300	IF(ACT.EQ.0) ACT=IAND(OFLAG, OACT)		! if no act, get orphan.
 	CALL ORPHAN(-1,ACT,PREP1,OBJ1,PREP,WORD,0,0)	! orphan the world.
-	IF(VBFLAG) WRITE(OUTCH,7310)
+	IF(VBFLAG) WRITE(output_unit,7310)
 	1	LCWRD1(1:NBLEN(LCWRD1)+1),LCWORD(1:NBLEN(LCWORD))
 7310	FORMAT(' Which',A,A,' do you mean?')
 	GO TO 800				! go clean up state.
@@ -1118,20 +1121,20 @@ C
 C 13000--	EXCEPT/BUT errors.
 C
 13000	LCWORD=LCIFY(WORD,1)
-	IF(VBFLAG) WRITE(OUTCH,13010) LCWORD(1:NBLEN(LCWORD))	! wrong place.
+	IF(VBFLAG) WRITE(output_unit,13010) LCWORD(1:NBLEN(LCWORD))	! wrong place.
 13010	FORMAT(' Misplaced "',A,'".')
 	GO TO 800				! go clean up state.
 C
 13100	LCWORD=LCIFY(WORD,2)				! wrong case.
-	IF(VBFLAG) WRITE(OUTCH,13110) LCWORD(1:NBLEN(LCWORD))	! not coll.
+	IF(VBFLAG) WRITE(output_unit,13110) LCWORD(1:NBLEN(LCWORD))	! not coll.
 13110	FORMAT(' "',A,'" can only be used with "everything",',
 	1 ' "valuables", or "possessions".')
 	GO TO 800				! go clean up state.
 C
 13200	IF(VBFLAG) CALL RSPEAK(619)		! no objects.
 	GO TO 800				! go clean up state.
-C
-	END
+
+	END FUNCTION SPARSE
 
 C GETOBJ--	Find obj described by adj, name pair
 C
@@ -1140,6 +1143,7 @@ C
 C This routine details on bit 3 of PRSFLG
 C
 	INTEGER FUNCTION GETOBJ(OIDX,AIDX,SPCOBJ)
+	use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
 	IMPLICIT INTEGER(A-Z)
 	INCLUDE 'dparam.for'
 	LOGICAL THISIT,GHERE,LIT,CHOMP,DFLAG,NOADJS
@@ -1151,7 +1155,7 @@ C
 	IF(.NOT.LIT(HERE)) GO TO 200		! lit?
 C
 	OBJ=SCHLST(OIDX,AIDX,HERE,0,0,SPCOBJ)	! search room.
-	IF(DFLAG) WRITE(OUTCH,10) OBJ
+	IF(DFLAG) WRITE(output_unit,10) OBJ
 10	FORMAT(' SCHLST- ROOM SCH ',I6)
 	IF(OBJ) 1000,200,100			! test result.
 100	IF((AV.EQ.0).OR.(AV.EQ.OBJ).OR.(OCAN(OBJ).EQ.AV).OR.
@@ -1160,7 +1164,7 @@ C
 C
 200	IF(AV.EQ.0) GO TO 400			! in vehicle?
 	NOBJ=SCHLST(OIDX,AIDX,0,AV,0,SPCOBJ)	! search vehicle.
-	IF(DFLAG) WRITE(OUTCH,220) NOBJ
+	IF(DFLAG) WRITE(output_unit,220) NOBJ
 220	FORMAT(' SCHLST- VEH SCH  ',I6)
 	IF(NOBJ) 800,400,300			! test result.
 300	CHOMP=.FALSE.				! reachable.
@@ -1169,7 +1173,7 @@ C
 	OBJ=NOBJ
 C
 400	NOBJ=SCHLST(OIDX,AIDX,0,0,WINNER,SPCOBJ)	! search adventurer.
-	IF(DFLAG) WRITE(OUTCH,430) NOBJ
+	IF(DFLAG) WRITE(output_unit,430) NOBJ
 430	FORMAT(' SCHLST- ADV SCH  ',I6)
 	IF(NOBJ) 800,900,500			! test result
 500	IF(OBJ.EQ.0) GO TO 800			! any previous? no, use nobj.
@@ -1196,7 +1200,7 @@ C
 1200	CONTINUE
 C
 1500	CONTINUE				! end of search.
-	IF(DFLAG) WRITE(OUTCH,1540) GETOBJ
+	IF(DFLAG) WRITE(output_unit,1540) GETOBJ
 1540	FORMAT(' SCHLST- RESULT   ',I6)
 	RETURN
 	END
@@ -1310,6 +1314,7 @@ C
 C This routine details on bit 4 of PRSFLG
 C
 	LOGICAL FUNCTION SYNMCH(X)
+	use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
 	IMPLICIT INTEGER(A-Z)
 	INCLUDE 'dparam.for'
 	LOGICAL SYNEQL,TAKEIT,DFLAG
@@ -1329,7 +1334,7 @@ C
 	J=J+1					! advance to next.
 C
 200	CALL UNPACK(J,NEWJ)			! unpack syntax.
-	IF(DFLAG) WRITE(OUTCH,210) J,OBJ1,PREP1,DOBJ,DFL1,DFL2
+	IF(DFLAG) WRITE(output_unit,210) J,OBJ1,PREP1,DOBJ,DFL1,DFL2
 210	FORMAT(' SYNMCH DOBJ INPUTS TO SYNEQL- ',6I7)
 	SPREP=IAND(DOBJ, VPMASK)		! save expected prep.
 	IF(SYNEQL(PREP1,OBJ1,DOBJ,DFL1,DFL2)) GO TO 1000
@@ -1353,7 +1358,7 @@ C
 C
 C Direct syntax match succeeded, try indirect.
 C
-1000	IF(DFLAG) WRITE(OUTCH,1010) J,OBJ2,PREP2,IOBJ,IFL1,IFL2
+1000	IF(DFLAG) WRITE(output_unit,1010) J,OBJ2,PREP2,IOBJ,IFL1,IFL2
 1010	FORMAT(' SYNMCH IOBJ INPUTS TO SYNEQL- ',6I7)
 	SPREP=IAND(IOBJ, VPMASK)		! save expected prep.
 	IF(SYNEQL(PREP2,OBJ2,IOBJ,IFL1,IFL2)) GO TO 6000
@@ -1363,7 +1368,7 @@ C
 	IF(OBJ2.NE.0) GO TO 3000		! if ind object, on to next.
 2500	IF((QPREP.EQ.0).OR.(QPREP.EQ.SPREP)) DFORCE=J	 ! if prep mch.
 	IF(IAND(VFLAG, SDRIV).NE.0) DRIVE=J	! if driver, record.
-	IF(DFLAG) WRITE(OUTCH,2510) J,QPREP,SPREP,DFORCE,DRIVE
+	IF(DFLAG) WRITE(output_unit,2510) J,QPREP,SPREP,DFORCE,DRIVE
 2510	FORMAT(' SYNMCH DEFAULT SYNTAXES- ',5I7)
 3000	J=NEWJ
 	IF(J.LT.LIMIT) GO TO 200		! more to do?
@@ -1373,7 +1378,7 @@ C
 C Match has failed.  If default syntax exists, try to snarf
 C orphans or GWIMs, or make new orphans.
 C
-3100	IF(DFLAG) WRITE(OUTCH,3110) DRIVE,DFORCE,OBJ1,OBJ2
+3100	IF(DFLAG) WRITE(output_unit,3110) DRIVE,DFORCE,OBJ1,OBJ2
 3110	FORMAT(' SYNMCH, DRIVE=',2I6,'  OBJECTS =',2I6)
 	IF(DRIVE.EQ.0) DRIVE=DFORCE		! no driver? use force.
 	IF(DRIVE.EQ.0) GO TO 10000		! any driver?
@@ -1392,13 +1397,13 @@ C
 C Orphan fails, try GWIM.
 C
 3500	OBJ1=GWIM(DOBJ,DFW1,DFW2)		! get gwim.
-	IF(DFLAG) WRITE(OUTCH,3530) OBJ1
+	IF(DFLAG) WRITE(output_unit,3530) OBJ1
 3530	FORMAT(' SYNMCH- DO GWIM= ',I6)
 	IF(OBJ1.GT.0) GO TO 4000		! test result.
 	CALL ORPHAN(-1,ACT,0,0,IAND(DOBJ, VPMASK),' ',PREP2,OBJ2)	! fails, orphan.
 	BUNSUB=0				! no EXCEPT clause.
 	IF(OBJ2.GT.0) GO TO 3800		! if iobj, go print.
-3700	WRITE(OUTCH,3750)
+3700	WRITE(output_unit,3750)
 	1	LCWORD(1:NBLEN(LCWORD)),LCPRP1(1:NBLEN(LCPRP1)+1)
 3750	FORMAT(1X,A,A,'what?')
 	TELFLG=.TRUE.
@@ -1407,7 +1412,7 @@ C
 3800	X=IABS(ODESC2(OBJ2))			! get iobj description.
 	READ(DBCH,REC=X) J,STR			! read data base.
 	CALL TXCRYP(X,STR)			! decrypt the line.
-	WRITE(OUTCH,3880) LCWORD(1:NBLEN(LCWORD)),
+	WRITE(output_unit,3880) LCWORD(1:NBLEN(LCWORD)),
 	1	LCPRP1(1:NBLEN(LCPRP1)+1),
 	2	LCPRP2(1:NBLEN(LCPRP2)+1),STR(1:NBLEN(STR))
 3880	FORMAT(1X,A,A,'what',A,'the ',A,'?')
@@ -1426,7 +1431,7 @@ C
 C Orphan fails, try GWIM.
 C
 4500	OBJ2=GWIM(IOBJ,IFW1,IFW2)		! gwim.
-	IF(DFLAG) WRITE(OUTCH,4550) OBJ2
+	IF(DFLAG) WRITE(output_unit,4550) OBJ2
 4550	FORMAT(' SYNMCH- IO GWIM= ',I6)
 	IF(OBJ2.GT.0) GO TO 6000
 	IF(OBJ1.GT.0) GO TO 4600		! if dobj, go print.
@@ -1440,7 +1445,7 @@ C
 	X=IABS(ODESC2(OBJ1))			! get dobj description.
 	READ(DBCH,REC=X) J,STR			! read data base.
 	CALL TXCRYP(X,STR)			! decrypt the line.
-	WRITE(OUTCH,4660) LCWORD(1:NBLEN(LCWORD)),
+	WRITE(output_unit,4660) LCWORD(1:NBLEN(LCWORD)),
 	1	LCPRP1(1:NBLEN(LCPRP1)+1),
 	2	STR(1:NBLEN(STR)),LCPRP2(1:NBLEN(LCPRP2)+1)
 4660	FORMAT(1X,A,A,'the ',A,A,'what?')
@@ -1469,11 +1474,11 @@ C
 	IF(.NOT.TAKEIT(PRSO,DOBJ)) RETURN	! try take.
 	IF(.NOT.TAKEIT(PRSI,IOBJ)) RETURN	! try take.
 	SYNMCH=.TRUE.
-	IF(DFLAG) WRITE(OUTCH,7050) SYNMCH,PRSA,PRSO,PRSI,ACT,OBJ1,OBJ2
+	IF(DFLAG) WRITE(output_unit,7050) 
+     &    SYNMCH,PRSA,PRSO,PRSI,ACT,OBJ1,OBJ2
 7050	FORMAT(' SYNMCH- RESULTS ',L1,6I7)
-	RETURN
-C
-	END
+
+	END FUNCTION SYNMCH
 
 C UNPACK-	Unpack syntax specification, adv pointer
 C

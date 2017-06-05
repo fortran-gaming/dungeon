@@ -1,4 +1,4 @@
-FC = gfortran -g -std=legacy
+FC = gfortran -g -std=legacy -Wline-truncation
 SOURCE = dungeon.o game.o gdt.o objects.o parser.o rooms.o subr.o timefnc.o verbs.o
 EXE = dungeon
 
