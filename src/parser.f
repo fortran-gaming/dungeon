@@ -28,8 +28,8 @@ C
       integer,parameter :: TEXLNT=76 
 
       ! Parser vocabularies
-      CHARACTER(WRDLNT) OWORD(OWMAX),VWORD(VWMAX)
-      integer OVOC(OVMAX),VVOC(VVMAX)
+      CHARACTER(WRDLNT) VWORD(VWMAX)
+      integer VVOC(VVMAX)
 
     
 C Exit definitions
@@ -351,217 +351,185 @@ C
 C OBJECTS--	Maps objects to object indices,
 C 		same format as AVOC.
 C
-	DATA (OWORD(I),I=1,40) /
-	1 'BAG','SACK','GARLIC','CLOVE',
-	1 'FOOD','SANDWICH','LUNCH','DINNER',
-	2 'GUNK','PIECE','SLAG','COAL',
-	3 'PILE','HEAP','FIGURINE','MACHINE',
-	4 'PDP10','VAX','DRYER','LID',
-	5 'DIAMOND','CASE','BOTTLE','CONTAINE',
-	6 'WATER','QUANTITY','LIQUID','H2O',
-	7 'ROPE','HEMP','COIL','KNIFE',
-	8 'BLADE','SWORD','ORCHRIST','GLAMDRIN',
-	9 'LAMP','LANTERN','RUG','CARPET'/
+      character, parameter :: OWORD(:)= [character(wrdlnt):: 'BAG',
+     &'SACK','GARLIC','CLOVE','FOOD','SANDWICH','LUNCH','DINNER',
+     2 'GUNK','PIECE','SLAG','COAL',
+     3 'PILE','HEAP','FIGURINE','MACHINE',
+     4 'PDP10','VAX','DRYER','LID',
+     5 'DIAMOND','CASE','BOTTLE','CONTAINE',
+     6 'WATER','QUANTITY','LIQUID','H2O',
+     7 'ROPE','HEMP','COIL','KNIFE',
+     8 'BLADE','SWORD','ORCHRIST','GLAMDRIN',
+     9 'LAMP','LANTERN','RUG','CARPET', 
+     1 'LEAVES','LEAF','TROLL','AXE',
+     1 'PRAYER','KEYS','KEY','SET',
+     2 'BONES','SKELETON','BODY','COINS',
+     3 'BAR','NECKLACE','PEARLS','MIRROR',
+     4 'ICE','MASS','GLACIER','RUBY',
+     5 'TRIDENT','FORK','COFFIN','CASKET',
+     6 'TORCH','CAGE','DUMBWAIT','BASKET',
+     7 'BRACELET','JEWEL','TIMBER','BOX',
+     8 'STRADIVA','VIOLIN','ENGRAVIN','INSCRIPT',
+     9 'GHOST','SPIRIT','FIEND','GRAIL',
+     1 'TRUNK','CHEST','BELL','BOOK',
+     1 'BIBLE','GOODBOOK','CANDLES','PAIR',
+     2 'GUIDEBOO','GUIDE','PAPER','NEWSPAPE',
+     3 'ISSUE','REPORT','MAGAZINE','NEWS',
+     4 'MATCHBOO','MATCH','MATCHES','ADVERTIS',
+     5 'PAMPHLET','LEAFLET','BOOKLET','MAILBOX',
+     6 'TUBE','TOOTHPAS','PUTTY','MATERIAL',
+     7 'GLUE','WRENCH','SCREWDRI','CYCLOPS',
+     8 'MONSTER','CHALICE','CUP','GOBLET',
+     9 'PAINTING','ART','CANVAS','PICTURE',
+     1 'WORK','MASTERPI','THIEF','ROBBER',
+     1 'CRIMINAL','BANDIT','CROOK','GENT',
+     2 'GENTLEMA','MAN','INDIVIDU','BAGMAN',
+     3 'STILETTO','WINDOW','BOLT','NUT',
+     4 'GRATE','GRATING','DOOR','TRAP-DOO',
+     5 'SWITCH','HEAD','CORPSE','BODIES',
+     6 'DAM','GATES','GATE','FCD',
+     7 'RAIL','RAILING','BUTTON','BUBBLE',
+     8 'LEAK','DRIP','HOLE','BAT',
+     9 'RAINBOW','POT','STATUE','SCULPTUR',
+     1 'ROCK','BOAT','PLASTIC','PUMP',
+     1 'AIRPUMP','AIR-PUMP','LABEL','FINEPRIN',
+     2 'STICK','BARREL','BUOY','EMERALD',
+     3 'SHOVEL','GUANO','CRAP','SHIT',
+     4 'HUNK','BALLOON','RECEPTAC','WIRE',
+     5 'HOOK','ZORKMID','COIN','SAFE',
+     6 'CARD','NOTE','SLOT','CROWN',
+     7 'BRICK','FUSE','GNOME','STAMP',
+     8 'TOMB','CRYPT','GRAVE','HEADS',
+     9 'POLES','IMPLEMEN','LOSERS','COKES',
+     1 'LISTINGS','OUTPUT','PRINTOUT','SPHERE',
+     1 'BALL','ETCHING','WALLS','WALL',
+     2 'FLASK','POOL','SEWAGE','TIN',
+     3 'SAFFRON','SPICES','TABLE','POST',
+     4 'POSTS','BUCKET','CAKE','ICING',
+     5 'ROBOT','ROBBY','C3PO','R2D2',
+     6 'PANEL','POLE','TBAR','T-BAR',
+     7 'ARROW','POINT','BEAM','DIAL',
+     8 'SUNDIAL','1','ONE','2',
+     9 'TWO','3','THREE','4',
+     1 'FOUR','5','FIVE','6',
+     1 'SIX','7','SEVEN','8',
+     2 'EIGHT','WARNING','SLIT','IT',
+     3 'THAT','THIS','ME','MYSELF',
+     4 'CRETIN','ALL','EVERYTHI','TREASURE',
+     5 'VALUABLE','SAILOR','TEETH','GRUE',
+     6 'HAND','HANDS','LUNGS','AIR',
+     7 'AVIATOR','FLYER','TREE','CLIFF',
+     8 'LEDGE','PORTRAIT','STACK','BILLS',
+     9 'VAULT','CUBE','LETTERIN','CURTAIN',
+     1 'LIGHT','NEST','EGG','BAUBLE',
+     1 'CANARY','BIRD','SONGBIRD','GUARD',
+     2 'GUARDIAN','ROSE','STRUCTUR','CHANNEL',
+     3 'KEEPER','LADDER','BROCHURE','WISH',
+     4 'GROUND','EARTH','SAND','WELL',
+     5 'SLIDE','CHUTE','HOUSE','BOTTLES',
+     6 'BUNCH','PALANTIR','STONE','FLINT',
+     7 'POSSESSI','GOOP','BEACH','GRIP',
+     8 'HANDGRIP','PRINT','ETCHINGS','CRACK',
+     9 'KEYHOLE','MAT','STOVE','PLATINUM',
+     1 'HIM','SELF','GOLD','SAPPHIRE',
+     1 'IVORY','MASTER','CANDLE','JADE',
+     2 'SCREEN','BLESSING','GHOSTS','SPIRITS',
+     3 'CORPSES','JEWELS','CLIFFS','CHIMNEY',
+     4 ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
+     & ' ',' ',' ',' ',' ',' ',' ',' ',' ']
 C
-	DATA (OVOC(I),I=1,71) /
-	1 1,-25,-100,1,2,2,
-	1 3,3,3,3,
-	2 4,-55,4,-143,-186,-282,4,5,
-	3 5,-18,-38,-72,-73,-87,-88,-122,-148,5,6,7,
-	4 7,7,7,7,-200,-201,
-	5 8,9,-123,10,-121,10,
-	6 11,-273,11,-273,11,-273,11,-273,
-	7 12,-101,-282,12,12,-110,13,-24,
-	8 13,-14,14,14,14,
-	9 15,-16,-22,15,-16,-22,17,17/
-C
-	DATA (OWORD(I),I=41,80) /
-	1 'LEAVES','LEAF','TROLL','AXE',
-	1 'PRAYER','KEYS','KEY','SET',
-	2 'BONES','SKELETON','BODY','COINS',
-	3 'BAR','NECKLACE','PEARLS','MIRROR',
-	4 'ICE','MASS','GLACIER','RUBY',
-	5 'TRIDENT','FORK','COFFIN','CASKET',
-	6 'TORCH','CAGE','DUMBWAIT','BASKET',
-	7 'BRACELET','JEWEL','TIMBER','BOX',
-	8 'STRADIVA','VIOLIN','ENGRAVIN','INSCRIPT',
-	9 'GHOST','SPIRIT','FIEND','GRAIL'/
-C
-	DATA (OVOC(I),I=72,130) /
-	1 18,18,19,-111,20,
-	1 44,-47,23,23,-205,23,
-	2 21,21,21,-72,-73,25,
-	3 26,-165,-168,27,27,28,-29,-276,
-	4 30,30,30,31,
-	5 32,32,33,33,
-	6 34,35,-36,-124,-125,35,-36,35,-36,-98,-113,
-	7 37,37,38,39,-53,-105,
-	8 40,40,41,41,-44,
-	9 42,42,42,43/
-C
-	DATA (OWORD(I),I=81,120) /
-	1 'TRUNK','CHEST','BELL','BOOK',
-	1 'BIBLE','GOODBOOK','CANDLES','PAIR',
-	2 'GUIDEBOO','GUIDE','PAPER','NEWSPAPE',
-	3 'ISSUE','REPORT','MAGAZINE','NEWS',
-	4 'MATCHBOO','MATCH','MATCHES','ADVERTIS',
-	5 'PAMPHLET','LEAFLET','BOOKLET','MAILBOX',
-	6 'TUBE','TOOTHPAS','PUTTY','MATERIAL',
-	7 'GLUE','WRENCH','SCREWDRI','CYCLOPS',
-	8 'MONSTER','CHALICE','CUP','GOBLET',
-	9 'PAINTING','ART','CANVAS','PICTURE'/
-C
-	DATA (OVOC(I),I=131,182) /
-	1 45,45,-193,46,-190,47,-49,-114,-115,-116,-117,
-	1 47,47,48,48,
-	2 49,49,50,-122,-143,-186,50,
-	3 50,50,50,50,
-	4 51,51,51,52,
-	5 52,52,52,53,
-	6 54,54,55,55,
-	7 55,56,57,58,
-	8 58,59,59,59,
-	9 60,-149,60,-149,60,60/
-C
-	DATA (OWORD(I),I=121,160) /
-	1 'WORK','MASTERPI','THIEF','ROBBER',
-	1 'CRIMINAL','BANDIT','CROOK','GENT',
-	2 'GENTLEMA','MAN','INDIVIDU','BAGMAN',
-	3 'STILETTO','WINDOW','BOLT','NUT',
-	4 'GRATE','GRATING','DOOR','TRAP-DOO',
-	5 'SWITCH','HEAD','CORPSE','BODIES',
-	6 'DAM','GATES','GATE','FCD',
-	7 'RAIL','RAILING','BUTTON','BUBBLE',
-	8 'LEAK','DRIP','HOLE','BAT',
-	9 'RAINBOW','POT','STATUE','SCULPTUR'/
-C
-	DATA (OVOC(I),I=183,258) /
-	1 60,60,61,61,
-	1 61,61,61,61,
-	2 61,61,61,61,
-	3 62,63,-198,-210,64,64,
-	4 65,65,66,-67,-68,-69,-119,-164,
-	4	-172,-173,-174,-175,-189,-197,66,
-	5 70,-79,-80,-81,-82,-170,71,-120,72,-73,72,-73,
-	6 74,74,-76,74,-76,74,
-	7 75,75,76,-79,-80,-81,-82,-127,-128,-129,-170,-176,77,
-	8 78,-191,78,78,-107,-202,-203,83,
-	9 84,85,86,86/
-C
-	DATA (OWORD(I),I=161,200) /
-	1 'ROCK','BOAT','PLASTIC','PUMP',
-	1 'AIRPUMP','AIR-PUMP','LABEL','FINEPRIN',
-	2 'STICK','BARREL','BUOY','EMERALD',
-	3 'SHOVEL','GUANO','CRAP','SHIT',
-	4 'HUNK','BALLOON','RECEPTAC','WIRE',
-	5 'HOOK','ZORKMID','COIN','SAFE',
-	6 'CARD','NOTE','SLOT','CROWN',
-	7 'BRICK','FUSE','GNOME','STAMP',
-	8 'TOMB','CRYPT','GRAVE','HEADS',
-	9 'POLES','IMPLEMEN','LOSERS','COKES'/
-C
-	DATA (OVOC(I),I=259,312) /
-	1 86,87,-88,-90,87,-88,-90,89,
-	1 89,89,91,-112,91,
-	2 92,93,94,95,
-	3 96,97,97,97,
-	4 97,98,-113,99,101,-110,
-	5 102,-103,104,-148,104,105,
-	6 106,-188,106,-186,107,-187,108,
-	7 109,110,111,-152,118,-196,
-	8 119,119,119,120,
-	9 120,120,120,121/
-C
-	DATA (OWORD(I),I=201,240) /
-	1 'LISTINGS','OUTPUT','PRINTOUT','SPHERE',
-	1 'BALL','ETCHING','WALLS','WALL',
-	2 'FLASK','POOL','SEWAGE','TIN',
-	3 'SAFFRON','SPICES','TABLE','POST',
-	4 'POSTS','BUCKET','CAKE','ICING',
-	5 'ROBOT','ROBBY','C3PO','R2D2',
-	6 'PANEL','POLE','TBAR','T-BAR',
-	7 'ARROW','POINT','BEAM','DIAL',
-	8 'SUNDIAL','1','ONE','2',
-	9 'TWO','3','THREE','4'/
-C
-	DATA (OVOC(I),I=313,387) /
-	1 122,122,122,126,-206,-209,
-	1 126,130,-131,130,-131,-257,130,-131,-159,
-	1	-160,-161,-162,-163,-164,-257,-265,-269,-270,-271,-272,
-	2 132,133,133,134,
-	3 134,134,135,-204,136,-166,-167,
-	4 136,137,138,-139,-140,-141,139,-140,-141,
-	5 142,142,142,142,
-	6 159,-160,-161,-162,-163,-164,-194,-277,120,-166,-167,168,168,
-	7 169,169,171,177,
-	8 177,178,178,179,
-	9 179,180,180,181/
-C
-	DATA (OWORD(I),I=241,280) /
-	1 'FOUR','5','FIVE','6',
-	1 'SIX','7','SEVEN','8',
-	2 'EIGHT','WARNING','SLIT','IT',
-	3 'THAT','THIS','ME','MYSELF',
-	4 'CRETIN','ALL','EVERYTHI','TREASURE',
-	5 'VALUABLE','SAILOR','TEETH','GRUE',
-	6 'HAND','HANDS','LUNGS','AIR',
-	7 'AVIATOR','FLYER','TREE','CLIFF',
-	8 'LEDGE','PORTRAIT','STACK','BILLS',
-	9 'VAULT','CUBE','LETTERIN','CURTAIN'/
-C
-	DATA (OVOC(I),I=388,432) /
-	1 181,182,182,183,
-	1 183,184,184,185,
-	2 185,186,187,250,
-	3 250,250,251,251,
-	4 251,252,252,253,
-	5 253,255,256,258,
-	6 259,259,260,260,
-	7 261,261,144,-145,-268,146,-147,
-	8 146,149,122,-148,148,
-	9 150,150,67,-150,151/
-C
-	DATA (OWORD(I),I=281,320) /
-	1 'LIGHT','NEST','EGG','BAUBLE',
-	1 'CANARY','BIRD','SONGBIRD','GUARD',
-	2 'GUARDIAN','ROSE','STRUCTUR','CHANNEL',
-	3 'KEEPER','LADDER','BROCHURE','WISH',
-	4 'GROUND','EARTH','SAND','WELL',
-	5 'SLIDE','CHUTE','HOUSE','BOTTLES',
-	6 'BUNCH','PALANTIR','STONE','FLINT',
-	7 'POSSESSI','GOOP','BEACH','GRIP',
-	8 'HANDGRIP','PRINT','ETCHINGS','CRACK',
-	9 'KEYHOLE','MAT','STOVE','PLATINUM'/
-C
-	DATA (OVOC(I),I=433,485) /
-	1 15,-151,-171,153,154,-155,156,
-	1 157,-158,267,267,274,
-	2 274,275,276,278,
-	3 279,280,195,-262,263,
-	4 264,264,192,-264,281,
-	5 283,283,266,121,
-	6 121,126,-206,-209,126,-206,-209,51,
-	7 254,133,192,167,
-	8 167,91,-122,130,-131,199,
-	9 202,-203,207,208,26/
-C
-	DATA (OWORD(I),I=321,360) /
-	1 'HIM','SELF','GOLD','SAPPHIRE',
-	1 'IVORY','MASTER','CANDLE','JADE',
-	2 'SCREEN','BLESSING','GHOSTS','SPIRITS',
-	3 'CORPSES','JEWELS','CLIFFS','CHIMNEY',
-	4 24*' '/
-C
-	DATA (OVOC(I),I=486,529) /
-	1 250,251,85,-104,37,
-	1 34,279,48,6,
-	2 151,263,42,42,
-	3 72,-73,37,-45,146,-147,211,
-	4 24*0/
+      integer,parameter:: OVOC(:)=[
+     1 1,-25,-100,1,2,2,
+     1 3,3,3,3,
+     2 4,-55,4,-143,-186,-282,4,5,
+     3 5,-18,-38,-72,-73,-87,-88,-122,-148,5,6,7,
+     4 7,7,7,7,-200,-201,
+     5 8,9,-123,10,-121,10,
+     6 11,-273,11,-273,11,-273,11,-273,
+     7 12,-101,-282,12,12,-110,13,-24,
+     8 13,-14,14,14,14,
+     9 15,-16,-22,15,-16,-22,17,17,
+     1 18,18,19,-111,20,
+     1 44,-47,23,23,-205,23,
+     2 21,21,21,-72,-73,25,
+     3 26,-165,-168,27,27,28,-29,-276,
+     4 30,30,30,31,
+     5 32,32,33,33,
+     6 34,35,-36,-124,-125,35,-36,35,-36,-98,-113,
+     7 37,37,38,39,-53,-105,
+     8 40,40,41,41,-44,
+     9 42,42,42,43,
+     1 45,45,-193,46,-190,47,-49,-114,-115,-116,-117,
+     1 47,47,48,48,
+     2 49,49,50,-122,-143,-186,50,
+     3 50,50,50,50,
+     4 51,51,51,52,
+     5 52,52,52,53,
+     6 54,54,55,55,
+     7 55,56,57,58,
+     8 58,59,59,59,
+     9 60,-149,60,-149,60,60,
+     1 60,60,61,61,
+     1 61,61,61,61,
+     2 61,61,61,61,
+     3 62,63,-198,-210,64,64,
+     4 65,65,66,-67,-68,-69,-119,-164,
+     4     -172,-173,-174,-175,-189,-197,66,
+     5 70,-79,-80,-81,-82,-170,71,-120,72,-73,72,-73,
+     6 74,74,-76,74,-76,74,
+     7 75,75,76,-79,-80,-81,-82,-127,-128,-129,-170,-176,77,
+     8 78,-191,78,78,-107,-202,-203,83,
+     9 84,85,86,86,
+     1 86,87,-88,-90,87,-88,-90,89,
+     1 89,89,91,-112,91,
+     2 92,93,94,95,
+     3 96,97,97,97,
+     4 97,98,-113,99,101,-110,
+     5 102,-103,104,-148,104,105,
+     6 106,-188,106,-186,107,-187,108,
+     7 109,110,111,-152,118,-196,
+     8 119,119,119,120,
+     9 120,120,120,121,
+     1 122,122,122,126,-206,-209,
+     1 126,130,-131,130,-131,-257,130,-131,-159,
+     1     -160,-161,-162,-163,-164,-257,-265,-269,-270,-271,-272,
+     2 132,133,133,134,
+     3 134,134,135,-204,136,-166,-167,
+     4 136,137,138,-139,-140,-141,139,-140,-141,
+     5 142,142,142,142,
+     6 159,-160,-161,-162,-163,-164,-194,-277,120,-166,-167,168,168,
+     7 169,169,171,177,
+     8 177,178,178,179,
+     9 179,180,180,181,
+     1 181,182,182,183,
+     1 183,184,184,185,
+     2 185,186,187,250,
+     3 250,250,251,251,
+     4 251,252,252,253,
+     5 253,255,256,258,
+     6 259,259,260,260,
+     7 261,261,144,-145,-268,146,-147,
+     8 146,149,122,-148,148,
+     9 150,150,67,-150,151,
+     1 15,-151,-171,153,154,-155,156,
+     1 157,-158,267,267,274,
+     2 274,275,276,278,
+     3 279,280,195,-262,263,
+     4 264,264,192,-264,281,
+     5 283,283,266,121,
+     6 121,126,-206,-209,126,-206,-209,51,
+     7 254,133,192,167,
+     8 167,91,-122,130,-131,199,
+     9 202,-203,207,208,26,
+     1 250,251,85,-104,37,
+     1 34,279,48,6,
+     2 151,263,42,42,
+     3 72,-73,37,-45,146,-147,211,
+     4 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
 C SPARSE, PAGE 5
 C
-C VERBS--	Maps verbs to syntax slots
+C VERBS--     Maps verbs to syntax slots
 C
 C Vocabulary entries are variable length and consist of one
 C or more words.  If an entry contains more than one word,
@@ -571,38 +539,38 @@ C
 C Syntax entries consist of a flag word followed by 0, 1, or 2
 C Object descriptions.  The flag word has the following format--
 C
-C bit <14>	if 1, syntax includes direct object
-C bit <13>	if 1, syntax includes indirect object
-C bit <12>	if 1, direct object is implicit (standard form)
-C bit <11>	if 1, direct and indirect object must be swapped
-C			after syntax processing
-C bit <10>	if 1, this is default syntax for orphanery
-C bits <8:0>	verb number for VAPPLI
+C bit <14>     if 1, syntax includes direct object
+C bit <13>     if 1, syntax includes indirect object
+C bit <12>     if 1, direct object is implicit (standard form)
+C bit <11>     if 1, direct and indirect object must be swapped
+C               after syntax processing
+C bit <10>     if 1, this is default syntax for orphanery
+C bits <8:0>     verb number for VAPPLI
 C
 C Object descriptions consist of a flag word and two FWIM words.
 C The flag word has the following format--
 C
-C bit <14>	if 1, search adventurer for object
-C bit <13>	if 1, search room for object
-C bit <12>	if 1, parser will try to take object
-C bit <11>	if 1, adventurer must have object
-C bit <10>	if 1, qualifying bits (normally -1,-1) are same
-C			as FWIM bits
-C bit <9>	if 1, object must be reachable
-C bits <8:0>	preposition number for SYNMCH
+C bit <14>     if 1, search adventurer for object
+C bit <13>     if 1, search room for object
+C bit <12>     if 1, parser will try to take object
+C bit <11>     if 1, adventurer must have object
+C bit <10>     if 1, qualifying bits (normally -1,-1) are same
+C               as FWIM bits
+C bit <9>     if 1, object must be reachable
+C bits <8:0>     preposition number for SYNMCH
 C
 C The FWIM words have the same format as the two object flag words.
 C
 C Note that bits 12 and 11 of object descriptions actually have
 C four distinct states--
 C
-C	bit 12	bit 11	mdldesc		interpretation
-C	------	------	-------		---------------
+C     bit 12     bit 11     mdldesc          interpretation
+C     ------     ------     -------          ---------------
 C
-C	  0	  0	 --		no parser action
-C	  0	  1	 HAVE		adventurer must have object
-C	  1	  0	 TRY		try to take, dont care if fail
-C	  1	  1	 TAKE		try to take, care if fail
+C       0       0      --          no parser action
+C       0       1      HAVE          adventurer must have object
+C       1       0      TRY          try to take, dont care if fail
+C       1       1      TAKE          try to take, care if fail
 C
 
 C SPARSE, PAGE 6
@@ -848,27 +816,27 @@ C
 	  IF(ACT.EQ.0) GO TO 80			! any verb yet?
 	  IF(IAND(VVOC(ACT+1), SVMASK).NE.WALKW) GO TO 200	! walk?
 80	  DO 100 J=1,DWMAX			! then chk for dir.
-	    IF(WORD.EQ.DWORD(J)) GO TO 3000	! match to direction?
+	    IF(WORD == DWORD(J)) GO TO 3000	! match to direction?
 100	  CONTINUE
 C
 C Not an action, check for preposition, adjective, or object.
 C
 200	  DO 250 J=1,PWMAX			! look for preposition.
-	    IF(WORD.EQ.PWORD(J)) GO TO 4000	! match to preposition?
+	    IF(WORD == PWORD(J)) GO TO 4000	! match to preposition?
 250	  CONTINUE
 C
 	  J=1					! look for adjective.
 	  DO 350 K=1,AWMAX
-	    IF(WORD.EQ.AWORD(K)) GO TO 5000	! match to adjective?
+	    IF(WORD == AWORD(K)) GO TO 5000	! match to adjective?
 300	    J=J+1				! advance to next entry.
-	    IF(AVOC(J).LT.0) GO TO 300		! found next entry yet?
+	    IF(AVOC(J) < 0) GO TO 300		! found next entry yet?
 350	  CONTINUE
 C
 400	  J=1					! look for object.
 	  DO 550 K=1,OWMAX
-	    IF(WORD.EQ.OWORD(K)) GO TO 6000	! match to object?
+	    IF(WORD == OWORD(K)) GO TO 6000	! match to object?
 500	    J=J+1				! advance to next entry.
-	    IF(OVOC(J).LT.0) GO TO 500		! found next entry yet?
+	    IF(OVOC(J) < 0) GO TO 500		! found next entry yet?
 550	  CONTINUE
 C
 C Not recognizable
@@ -884,7 +852,7 @@ C
 
 C SPARSE, PAGE 9
 C
-1000	IF(I.LT.LLNT) GO TO 10			! end of do loop
+1000	IF(I < LLNT) GO TO 10			! end of do loop
 C
 C At end of parse, check for:
 C	1. dangling adjective
@@ -893,9 +861,9 @@ C	3. simple directions
 C	4. orphan preposition
 C	5. dangling preposition
 C
-	IF(ADJ.NE.0) GO TO 4500			! dangling adjective?
+	IF(ADJ /= 0) GO TO 4500			! dangling adjective?
 	IF(BUNFLG) OBJ1=BUNOBJ			! bunched object?
-	IF(BUNFLG.AND.(BUNSUB.NE.0).AND.(BUNLNT.EQ.0))
+	IF(BUNFLG.AND.(BUNSUB /= 0).AND.(BUNLNT == 0))
 	1	GO TO 13200			! except for nothing?
 	IF(ACT.EQ.0) ACT=IAND(OFLAG, OACT)	! if no action, take orphan.
 	IF(ACT.EQ.0) GO TO 10000		! no action, punt.
