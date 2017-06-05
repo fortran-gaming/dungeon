@@ -23,7 +23,6 @@ C Declarations
 C
       module verbs
       use state
-      use subr,only: rnd,fights
       use timefnc,only: blow
   
       use,intrinsic:: iso_fortran_env,only: output_unit
@@ -33,7 +32,8 @@ C
       LOGICAL FUNCTION VAPPLI(RI)
       use state
       use objapp
-      use subr
+      use subr,only:lit
+      use io,only: savegm
       use timefnc,only: clockd,fightd
 
 
@@ -1767,72 +1767,7 @@ C QBUNCH-      Is object in bunch vector?
 
       END FUNCTION QBUNCH
 
-C SAVE- Save game state
-C
-      SUBROUTINE SAVEGM
-      use subr
-      integer u,i
-C
-      IF(SUBLNT == 0) SUBBUF='DSAVE.DAT'
-      OPEN (newUNIT=u,FILE=SUBBUF,ACCESS='SEQUENTIAL',
-     &      STATUS='UNKNOWN',FORM='UNFORMATTED',ERR=100)
-C
-      CALL GTTIME(I)                        ! get time.
-      WRITE(u) VMAJ,VMIN
-      WRITE(u) WINNER,HERE,THFPOS,TELFLG,THFFLG,THFACT,
-     &      SWDACT,SWDSTA,CPVEC
-      WRITE(u) I,MOVES,DEATHS,RWSCOR,EGSCOR,MXLOAD,
-     &      LTSHFT,BLOC,MUNGRM,HS,FROMDR,SCOLRM,SCOLAC
-      WRITE(u) ODESC1,ODESC2,OFLAG1,OFLAG2,OFVAL,OTVAL,
-     &      OSIZE,OCAPAC,OROOM,OADV,OCAN
-      WRITE(u) RDESC1,RVAL,RFLAG,TRAVEL
-      WRITE(u) AROOM,ASCORE,AVEHIC,ASTREN,AFLAG
-      WRITE(u) FLAGS,SWITCH,VPROB,CFLAG,CTICK,CCNCEL
-C
-      CALL RSPEAK(597)
-      CLOSE (u)
-      RETURN
-C
-100      CALL RSPEAK(598)                  ! cant do it.
 
-      END SUBROUTINE SAVEGM
-
-C RESTORE- Restore game state
-C
-C Declarations
-
-      SUBROUTINE RSTRGM
-      use subr,only: rspeak
-      integer :: u,i,j
-C
-      IF(SUBLNT==0) SUBBUF='DSAVE.DAT'
-      OPEN (newUNIT=u,FILE=SUBBUF,ACCESS='SEQUENTIAL',
-     &      STATUS='OLD',FORM='UNFORMATTED',ERR=100)
-C
-      READ(U) I,J
-      IF((I.NE.VMAJ).OR.(J.NE.VMIN)) GO TO 200
-C
-      READ(U) WINNER,HERE,THFPOS,TELFLG,THFFLG,THFACT,
-     &      SWDACT,SWDSTA,CPVEC
-      READ(U) PLTIME,MOVES,DEATHS,RWSCOR,EGSCOR,MXLOAD,
-     &      LTSHFT,BLOC,MUNGRM,HS,FROMDR,SCOLRM,SCOLAC
-      READ(U) ODESC1,ODESC2,OFLAG1,OFLAG2,OFVAL,OTVAL,
-     &      OSIZE,OCAPAC,OROOM,OADV,OCAN
-      READ(U) RDESC1,RVAL,RFLAG,TRAVEL
-      READ(U) AROOM,ASCORE,AVEHIC,ASTREN,AFLAG
-      READ(U) FLAGS,SWITCH,VPROB,CFLAG,CTICK,CCNCEL
-C
-      CALL RSPEAK(599)
-      CLOSE(U)
-      RETURN
-C
-100      CALL RSPEAK(598)                  ! cant do it.
-      RETURN
-C
-200      CALL RSPEAK(600)                  ! obsolete version
-      CLOSE(U)
-
-      END SUBROUTINE RSTRGM
 
 C WALK- Move in specified direction
 C

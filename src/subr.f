@@ -10,121 +10,21 @@ C                  Added GRANITE WALL to GHERE.
 C 30-Jan-94      RMS      Fixed bugs from MS DOS port.
 C 30-Jun-92      RMS      Changed file names to lower case.
 C 29-Jun-92      RMS      Removed extraneous declaration in RMDESC.
-C
-C RSPEAK-- Output random message routine
-C
-C Called by--
-C
-C      CALL RSPEAK(MSGNUM)
       module subr
-      use state
-      use io
+
       use,intrinsic:: iso_fortran_env, only: input_unit,output_unit
       implicit none
       
-      public:: rnd,rspeak,qhere,newsta,qempty
+      public:: rnd,qhere,newsta,qempty
       contains
 
-      SUBROUTINE RSPEAK(N)
-      integer, intent(in) :: n
 
-      CALL RSPSB2(N,0,0)
-      END SUBROUTINE RSPEAK
-C
-C RSPSUB-- Output random message with substitutable argument
-C
-C Called by--
-C
-C      CALL RSPSUB(MSGNUM,SUBNUM)
-C
-      SUBROUTINE RSPSUB(N,S1)
-
-      integer, intent(in) :: n,s1
-C
-      CALL RSPSB2(N,S1,0)
-
-      END SUBROUTINE RSPSUB
-
-C RSPSB2-- Output random message with substitutable arguments
-C
-C Called by--
-C
-C      CALL RSPSB2(MSGNUM,S1,S2)
-C
-      SUBROUTINE RSPSB2(A,B,C)
-      use state!, only: texlnt
-
-      integer, intent(in) :: a,b,c
-
-      CHARACTER(TEXLNT) B1,B2
-
-      integer x,y,z,i,j,newrec,oldrec
-
-C Convert all arguments from dictionary numbers (if positive)
-c to absolute record numbers.
-C
-      X=A                              ! set up work variables.
-      Y=B
-      Z=C
-      IF(X > 0) X=RTEXT(X)                  ! if >0, look up in rtext.
-      IF(Y > 0) Y=RTEXT(Y)
-      IF(Z > 0) Z=RTEXT(Z)
-      X=IABS(X)                        ! take abs value.
-      Y=IABS(Y)
-      Z=IABS(Z)
-      IF(X == 0) RETURN                  ! anything to do?
-      TELFLG=.TRUE.                        ! said something.
-C
-      READ(DBCH,REC=X) OLDREC,B1            ! read first line.
-100   CALL TXCRYP(X,B1)                  ! decrypt line.
-C
-200   IF(Y.EQ.0) GO TO 400                  ! any substitutable?
-      I=INDEX(B1,'#')                        ! look for #.
-      IF(I>0) GO TO 1000                  ! found?
-C
-400   WRITE(output_unit,650) B1(1:MAX0(1,len_trim(B1)))! output line.
-650   FORMAT(1X,A)
-      X=X+1                              ! on to next record.
-      READ(DBCH,REC=X) NEWREC,B1            ! read next record.
-      IF(OLDREC.EQ.NEWREC) GO TO 100            ! continuation?
-      RETURN                              ! no, exit.
-
-C RSPSB2, PAGE 2
-C
-C Substitution with substitutable available.
-C I is index of # in B1.
-C Y is number of record to substitute.
-C
-C Procedure:
-C   1) Copy rest of B1 to B2
-C   2) Read substitutable over B1
-C   3) Restore tail of original B1
-C
-C The implicit assumption here is that the substitutable string
-c is very short.
-C
-1000      B2(1:(TEXLNT-I))=B1(I+1:TEXLNT)            ! copy rest of B1.
-C
-      READ(DBCH,REC=Y) J,B1(I:TEXLNT)            ! read sub record.
-      CALL TXCRYP(Y,B1(I:TEXLNT))            ! decrypt sub record.
-      J=len_trim(B1)                        ! backscan for blanks.
-      B1(J+1:TEXLNT)=B2(1:TEXLNT-J)
-C
-      Y=Z                              ! set up for next
-      Z=0                              ! substitution and
-      GO TO 200                        ! recheck line.
-
-      END SUBROUTINE RSPSB2
- 
 C OBJACT-- Apply objects from parse vector
-C
-C Declarations
-C
       LOGICAL FUNCTION OBJACT()
        use state!, only: prsi,prso
       use objapp,only: oappli
 
-C
+
       OBJACT=.TRUE.                        ! assume wins.
       IF(PRSI.EQ.0) GO TO 100                  ! ind object?
       IF(OAPPLI(OACTIO(PRSI),0)) RETURN      ! yes, let it handle.
@@ -142,7 +42,7 @@ C Declarations
 C
       SUBROUTINE BUG(A,B)
       use state
-      use verbs,only: savegm
+      use io,only: savegm
       integer, intent(in) :: A,B
 
       WRITE(output_unit,100) A,B                  ! gonzo
@@ -165,6 +65,7 @@ C
 C      CALL NEWSTA(OBJECT,STRING,NEWROOM,NEWCON,NEWADV)
 C
       SUBROUTINE NEWSTA(O,R,RM,CN,AD)
+      use io,only: rspeak
       use state, only: oroom,ocan,oadv
       integer, intent(in) :: o,r, rm, cn, ad
 
@@ -212,6 +113,7 @@ C
 C Declarations
 C
       SUBROUTINE JIGSUP(DESC)
+      use io,only: rspeak
        use state!,only: KITCH,CLEAR,FORE3,FORE2,SHOUS,FORE2,KITCH,EHOUS,
 
       integer, intent(in) :: desc
@@ -345,6 +247,7 @@ C
       LOGICAL FUNCTION RMDESC(FULL)
       use state
       use rooms,only: rappli
+      use io,only: rspeak
       integer, intent(in) :: full
 
       integer i,ra
@@ -401,6 +304,7 @@ C Declarations
 C
       SUBROUTINE PRINCR(FULL,RM)
        use state
+      use io,only: rspeak
       integer, intent(in) :: FULL,RM
 
       integer i,j,k
@@ -455,6 +359,7 @@ C Declarations
 C
       SUBROUTINE INVENT(ADV)
       use state
+        use io,only: rspeak
       integer, intent(in) :: adv
 
       integer i,j
@@ -486,6 +391,7 @@ C PRINCO-      Print contents of object
 
       SUBROUTINE PRINCO(OBJ,DESC,LDESCF)
       use state
+      use io,only: rspeak
       integer, intent(in) :: obj,desc
       logical, intent(in) :: LDESCF
 
@@ -540,6 +446,7 @@ C Declarations
 C
       LOGICAL FUNCTION MOVETO(NR,WHO)
       use state
+      use io,only: rspeak
       integer, intent(in) :: nr,who
 
       integer j,bits
@@ -588,6 +495,7 @@ C Declarations
 C
       SUBROUTINE SCORE(FLG)
       use state
+      use io,only: rspeak
       LOGICAL,intent(in) :: FLG
       INTEGER,parameter :: RANK(*)=[20,19,18,16,12,8,4,2,1,0],
      & ERANK(*) = [20,15,10,5,0]
@@ -753,7 +661,7 @@ C
 C      YES-IS-TRUE=YESNO(QUESTION,YES-STRING,NO-STRING)
 C
       LOGICAL FUNCTION YESNO(Q,Y,N)
-
+      use io,only: rspeak
       integer, intent(in) :: Q,Y,N
 
       CHARACTER(1) ANS
@@ -908,6 +816,7 @@ C Declarations
 C
       LOGICAL FUNCTION OPNCLS(OBJ,SO,SC)
       use state!, only: oflag2
+      use io,only: rspeak
       integer, intent(in) :: obj,so,sc
 
       LOGICAL QOPEN
@@ -1191,6 +1100,7 @@ C
 C Declarations
 C
       SUBROUTINE CPINFO(RMK,ST)
+       use io,only: rspeak
        use state,only: cpoutf,cpvec
       integer, intent(in) :: rmk, st
 
