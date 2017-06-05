@@ -67,16 +67,19 @@ C
 C This routine details on bit 0 of PRSFLG
 C
       LOGICAL FUNCTION PARSE(INLINE,INLEN,VBFLAG)
-      use, intrinsic:: iso_fortran_env,only: output_unit
-      IMPLICIT INTEGER(A-Z)
-      INCLUDE 'dparam.for'
-      CHARACTER(TEXLNT) INLINE
+
+      CHARACTER(*), intent(in) :: INLINE
+      integer, intent(in) :: inlen
+      logical, intent(in) :: vbflag
+    
       CHARACTER(WRDLNT) OUTBUF(LEXMAX),BAKBUF(LEXMAX)
-      LOGICAL LEX,SYNMCH,DFLAG,VBFLAG
+      LOGICAL LEX,SYNMCH,DFLAG
+      integer i,outlen
+
       SAVE BAKBUF,BAKLEN
       DATA BAKBUF(1)/'L'/,BAKLEN/1/
 C
-      DFLAG=IAND(PRSFLG, 1).NE.0
+      DFLAG=IAND(PRSFLG, 1)/=0
       PARSE=.FALSE.                        ! assume fails.
       PRSA=0                              ! zero outputs.
       PRSI=0
@@ -94,8 +97,8 @@ C Parse requires validation
 C
 200      IF(.NOT.VBFLAG) GO TO 350            ! echo mode, force fail.
       IF(.NOT.SYNMCH()) GO TO 1000            ! do syn match.
-      IF(PRSO.EQ.BUNOBJ) LASTIT=BUNVEC(1)      ! record for "it".
-      IF((PRSO.GT.0).AND.(PRSO.LT.BUNOBJ)) LASTIT=PRSO
+      IF(PRSO==BUNOBJ) LASTIT=BUNVEC(1)      ! record for "it".
+      IF((PRSO>0).AND.(PRSO.LT.BUNOBJ)) LASTIT=PRSO
 C
 C Successful parse or successful validation
 C
@@ -123,47 +126,51 @@ C
 C This routine details on bit 1 of PRSFLG
 C
       LOGICAL FUNCTION LEX(INLINE,INLEN,OUTBUF,OP,VBFLAG)
-      use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
-      IMPLICIT INTEGER(A-Z)
-      INCLUDE 'dparam.for'
-      CHARACTER*(TEXLNT) INLINE
-      CHARACTER*(WRDLNT) OUTBUF(LEXMAX)
-      CHARACTER*1 J
-      LOGICAL DFLAG,VBFLAG
+
+      CHARACTER(*),intent(in) :: INLINE
+      integer, intent(in) :: inlen
+      CHARACTER(WRDLNT), intent(out) :: OUTBUF(LEXMAX)
+      integer, intent(out) :: op
+      logical, intent(in) :: vbflag
+
+      integer cp,i,k
+
+      CHARACTER(1) J
+      LOGICAL DFLAG
 C
-      DFLAG=IAND(PRSFLG, 2).NE.0
+      DFLAG=IAND(PRSFLG, 2) /= 0
       LEX=.FALSE.                        ! assume lex fails.
       OP=0                              ! output ptr.
-      DO 10 I=1,LEXMAX                  ! clear output buf.
+      DO I=1,LEXMAX                  ! clear output buf.
         OUTBUF(I)=' '
-10      CONTINUE
+      enddo
 C
-50      OP=OP+1                              ! adv output ptr.
+50    OP=OP+1                              ! adv output ptr.
       CP=0                              ! char ptr=0.
 C
-200      IF(PRSCON.GT.INLEN) GO TO 2000            ! end of input?
+200      IF(PRSCON > INLEN) GO TO 2000            ! end of input?
       J=INLINE(PRSCON:PRSCON)                  ! no, get character,
-      IF((J.EQ.'"').OR.(J.EQ.'''')) GO TO 3000! substring?
+      IF((J=='"').OR.(J=='''')) GO TO 3000! substring?
       PRSCON=PRSCON+1                        ! advance ptr.
-      IF(J.EQ.' ') GO TO 1000                  ! space?
-      IF((J.EQ.'.').OR.(J.EQ.';').OR.
-     &  (J.EQ.'!').or.(J.EQ.'?')) GO TO 2000      ! end of command?
-      IF(J.EQ.',') GO TO 4000                  ! comma?
-      IF(OP.GT.LEXMAX) GO TO 5000            ! too many tokens?
+      IF(J==' ') GO TO 1000                  ! space?
+      IF((J=='.').OR.(J==';').OR.
+     &  (J=='!').or.(J=='?')) GO TO 2000      ! end of command?
+      IF(J==',') GO TO 4000                  ! comma?
+      IF(OP > LEXMAX) GO TO 5000            ! too many tokens?
       CP=CP+1                              ! adv char ptr.
-      IF(CP.LE.WRDLNT) OUTBUF(OP)(CP:CP)=J      ! insert char in word.
+      IF(CP<=WRDLNT) OUTBUF(OP)(CP:CP)=J      ! insert char in word.
       GO TO 200
 C
 C Space.
 C
-1000      IF(CP.EQ.0) GO TO 200                  ! any word yet?
+1000      IF(CP==0) GO TO 200                  ! any word yet?
       GO TO 50                        ! yes, adv op.
 C
 C End of input, see if partial word available.
 C
-2000      IF(PRSCON.GT.INLEN) PRSCON=1            ! force parse restart.
-      IF((CP.EQ.0).AND.(OP.EQ.1)) RETURN      ! any results?
-      IF(CP.EQ.0) OP=OP-1                  ! any last word?
+2000      IF(PRSCON > INLEN) PRSCON=1            ! force parse restart.
+      IF((CP==0).AND.(OP==1)) RETURN      ! any results?
+      IF(CP==0) OP=OP-1                  ! any last word?
       LEX=.TRUE.
       IF(DFLAG) WRITE(output_unit,2020) CP,OP,PRSCON,(OUTBUF(I),I=1,OP)
 2020      FORMAT(' LEX RESULTS- ',3I7/1X,8(A,1X))
@@ -171,10 +178,10 @@ C
 C
 C Substring, J is delimiter.
 C
-3000      IF(SUBLNT.NE.0) GO TO 3400            ! already got one?
+3000      IF(SUBLNT/=0) GO TO 3400            ! already got one?
 3100      PRSCON=PRSCON+1                        ! skip initial quote.
-      IF(PRSCON.GT.INLEN) GO TO 3500            ! any more characters?
-      IF(INLINE(PRSCON:PRSCON).EQ.' ') GO TO 3100      ! skip blanks.
+      IF(PRSCON > INLEN) GO TO 3500            ! any more characters?
+      IF(INLINE(PRSCON:PRSCON)==' ') GO TO 3100      ! skip blanks.
       K=INDEX(INLINE(PRSCON:INLEN),J)            ! find closing quote.
       IF(K.LE.1) GO TO 3500                  ! none or empty?
       SUBBUF=INLINE(PRSCON:PRSCON+K-2)      ! set up substring buffer,
@@ -192,9 +199,9 @@ C
 C
 C Comma.
 C
-4000      IF(CP.NE.0) OP=OP+1                  ! if partial word, go to next.
-      IF(OP.EQ.1) GO TO 4500                  ! no first word? die.
-      IF(OP.GT.LEXMAX) GO TO 5000            ! too many tokens?
+4000      IF(CP/=0) OP=OP+1                  ! if partial word, go to next.
+      IF(OP==1) GO TO 4500                  ! no first word? die.
+      IF(OP>LEXMAX) GO TO 5000            ! too many tokens?
       OUTBUF(OP)='AND'                  ! insert 'AND'.
       GO TO 50                        ! start new word
 C
@@ -214,6 +221,7 @@ C
 C This routine details on bit 2 of PRSFLG
 C
       INTEGER FUNCTION SPARSE(LBUF,LLNT,VBFLAG)
+
       character(*), intent(inout) :: LBUF(:)
       integer, intent(inout) :: llnt
       logical, intent(in) :: vbflag
@@ -221,7 +229,8 @@ C
       CHARACTER(WRDLNT) WORD,LCWORD,LCIFY
       CHARACTER(WRDLNT+2) LCWRD1
       LOGICAL LIT,DFLAG,ANDFLG,BUNFLG
-      INTEGER OBJVEC(2),PRPVEC(2)
+      INTEGER OBJVEC(2),PRPVEC(2),adj,adjptr,errvoc,i,j,k,lobj,obj,
+     & pptr, prep
       EQUIVALENCE (OBJVEC(1),OBJ1),(PRPVEC(1),PREP1)
 
 C SPARSE, PAGE 2
@@ -230,13 +239,13 @@ C Vocabularies
 C
 C Buzz words--      ignored in syntactic processing
 C
-        character,parameter:: BWORD(:)=[character(wrdlnt):: 'BY','IS',
+        character,parameter:: BWORD(*)=[character(wrdlnt):: 'BY','IS',
      & 'A','AN','THE','AM','ARE','TODAY','MY','YOUR','OUR','HIS']
 
 C
 C Directions--      maps directions to indices
 C
-      character,parameter :: DWORD(:)=[character(wrdlnt) :: 
+      character,parameter :: DWORD(*)=[character(wrdlnt) :: 
      & 'N','NORTH','S','SOUTH', 'E','EAST','W','WEST',
      & 'SE','SW','NE','NW','U','UP','D','DOWN',
      & 'LAUNCH','LAND','EXIT','OUT','TRAVEL','IN','CROSS',' ',' ']
@@ -246,66 +255,14 @@ C
      & XUP,XUP,XDOWN,XDOWN, XLAUN,XLAND,XEXIT,XEXIT,
      & XCROSS,XENTER,XCROSS,0,0]
 
-C SPARSE, PAGE 3
-C
-C Adjectives--      maps adjectives to object numbers
-C
-C Each string entry in aword corresponds to a list of one or more
-C object numbers in AVOC.  Object entries are delimited by the first
-C object being positive, and all subsequent objects in the same entry
-C being negative.
-C
-      character,parameter :: AWORD(*) =[character(wrdlnt) ::
-     & 'BROWN','ELONGATE','HOT','PEPPER','VITREOUS','JADE','HUGE',
-     & 'ENORMOUS', 'TROPHY','CLEAR','LARGE','NASTY',
-     & 'ELVISH','BRASS','BROKEN','ORIENTAL', 'BLOODY','RUSTY',
-     & 'BURNED-O','DEAD', 'OLD','LEATHER','PLATINUM','PEARL',
-     & 'MOBY','CRYSTAL','GOLD','IVORY', 'SAPPHIRE','WOODEN','WOOD',
-     & 'STEEL','DENTED','FANCY','ANCIENT','SMALL','BLACK','TOUR',
-     & 'VISCOUS','VICIOUS', 'GLASS','TRAP','FRONT','STONE',
-     & 'MANGLED','RED','YELLOW','BLUE', 'VAMPIRE','MAGIC','SEAWORTH',
-     & 'TAN','SHARP','WICKER','CLOTH','BRAIDED','GAUDY','SQUARE','CLAY',
-     & 'SHINY','THIN','GREEN','PURPLE','WHITE','MARBLE','COKE','EMPTY',
-     & 'ROUND','TRIANGUL','RARE','OBLONG','EAT-ME','EATME','ORANGE',
-     & 'ECCH','ROCKY','SHEER','200','NEAT','SHIMMERI','ZURICH','BIRDS',
-     & 'ENCRUSTE','BEAUTIFU','CLOCKWOR','MECHANIC','MAHOGANY','PINE',
-     & 'LONG','CENTER','SHORT','T','COMPASS','BRONZE','CELL','LOCKED',
-     & 'SUN','BARE','SONG','NORTH','NORTHERN','SOUTH','SOUTHERN','EAST',
-     & 'EASTERN','WEST','WESTERN','DUNGEON','FREE','GRANITE','LOWERED',
-     & 'VOLCANO','MAN-SIZE','METAL','PLASTIC','SILVER', 'USED',
-     & 'USELESS','SEEING','ONE-EYED','HOLY','HAND-HEL','UNRUSTY',
-     & 'PLAIN','PRICELES','SANDY','GIGANTIC','LINE-PRI','FLATHEAD',
-     & 'FINE','SHADY','SUSPICIO','CROSS','TOOL','CONTROL','DON',
-     & 'WOODS','GOLDEN','OAK','BARRED', 'DUSTY','NARROW','IRON',
-     & 'WELCOME','RUBBER','SKELETON','ALL','ZORKMID',' ',' ',' ',' ',
-     & ' ',' ',' ',' ',' ',' ',' ',' ']
-C
-      integer,parameter:: AVOC(*) =[1,-81,-133,1,3,-190,3, 4,6,8,8,-122,
-     & 9,10,12,-26,-47,-95,-96,-123,-133,-135,-144,-145,-150,-176,-191,
-     & 13,-19, 14,15,-16,-46,-156,-190,16,-22,-38,-92,-113,-155,-158,17,
-     & 20,24,-205,22,22, 25,-41,-44,-45,-208,25,26,27, 31,32,-126,-206,
-     & -209,33,-85,-104,-157,-158,-188,34,37,38,-67,-75,-93,-136,-137,
-     & -165,-173,-174,-175,-197,-204,38,-67,-136,-137,-165,-173,-174,
-     & -175,39,-105,-124,-125,-189,39,40,41,-44,5,-46,-52,-53,-89,-102,
-     & -103,-153,-187,47,-162,49,55,62,10,-126,-132,-206,-209,66,68,69,
-     & -150,-278,72,-124,79,-94,-140,-161,-170,-171,-190,-209,80,-159,
-     & 82,-112,-114,-141,-206,83,90,-281,90,91,92,98,100,101,108,109,
-     & -127,109,110,110,77,-115,-143,116,117,-126,-147,-160,-266,119,
-     & 121,121,128,129,134,135,138,138,139,141,146,146,148,148,151,
-     & 152,153,-154,-155,154,-155,86,-156,157,-158,157,-158,163,164,
-     & 166,166,167,168,169,-275,172,174,-175,174,177,259,267,269,
-     & 269,270,270,271,271,67,-272,67,-272,279,195,-262,265,36,111,
-     & 93,64,-99,-200,-201,77,-87,-88,-90,59,22,22,126,-206,-209,58
-     & 43,89,13,13, 104,192,122,122,118,91,61,61,165,193,194,196,
-     &  196,157,-158,197,198,-210,204,199,205,207,207,23,253,-254,104,
-     & -148,0,0,0,0,0,0,0,0,0,0,0,0]
+
 
 C SPARSE, PAGE 4
 C
 C OBJECTS--      Maps objects to object indices,
 C             same format as AVOC.
 C
-      character, parameter :: OWORD(:)= [character(wrdlnt):: 'BAG',
+      character, parameter :: OWORD(*)= [character(wrdlnt):: 'BAG',
      &'SACK','GARLIC','CLOVE','FOOD','SANDWICH','LUNCH','DINNER',
      & 'GUNK','PIECE','SLAG','COAL',
      3 'PILE','HEAP','FIGURINE','MACHINE',
@@ -392,7 +349,7 @@ C
      4 ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
      & ' ',' ',' ',' ',' ',' ',' ',' ',' ']
 C
-      integer,parameter:: OVOC(:)=[
+      integer,parameter:: OVOC(*)=[
      & 1,-25,-100,1,2,2,
      & 3,3,3,3,
      & 4,-55,4,-143,-186,-282,4,5,
@@ -527,105 +484,6 @@ C       1       0      TRY          try to take, dont care if fail
 C       1       1      TAKE          try to take, care if fail
 C
 
-C SPARSE, PAGE 6
-C
-      
-       integer, parameter :: vvoc(*)=[integer:: 1,70,1,71,1,72,1,73,
-     & 1,74,1,75, 1,76,1,77,1,56,1,79,1,80,1,81,1,82, 1,83,1,84,1,40,
-     5 1,41,1,42,1,43, 1,44, 1,45,1,46,1,47, 1,48,1,49, 1,50,1,51,
-     & 1,52,1,53, 1,54,1,55, 1,169,1,149,1,150,1,90, 1,94,1,105,1,133,
-     4 1,128,1,95,1,96,1,57,1,58,1,59,1,60,1,65,1,66,1, 67, 1, O'50147',
-     & 4,O'40170',O'60000',-1,-1,11,O'60206',O'61000',
-     & '200'O,0,'61002'O,-1,-1, '40206'O,'61000'O,'200'O,0,4,'40177'O,
-     & '60000'O,-1,-1, 2,'125'O,'50125'O,1,'50153'O, 1,'50156'O,9,
-     & '50160'O,'40160'O,'61012'O,-1,-1,'40241'O,'61010'O,-1,-1,
-     & 5,'52127'O,'70127'O,'61002'O,-1,-1,
-     3 1,'50157'O,1,'50171'O,1,'50201'O,
-     4 11,'42161'O,'61000'O,0,'10000'O,
-     4     '60242'O,'61000'O,0,'10000'O,'61015'O,-1,-1,
-     4 9,'50216'O,'40126'O,'61016'O,-1,-1,'40126'O,'61005'O,-1,-1,
-     5 7,'60215'O,'21000'O,0,'200'O,'44002'O,0,'1000'O,
-     5 4,'40202'O,'21000'O,0,2,
-     6 5,'52130'O,'70130'O,'61002'O,-1,-1,
-     7 7,'60211'O,'61000'O,'20'O,0,'64002'O,'10'O,0,
-     7 12,'40235'O,'20007'O,0,'4000'O,'40236'O,'20006'O,0,'4000'O,
-     7     '40234'O,'20000'O,0,'4000'O,
-     7 4,'40176'O,'61000'O,'10200'O,0,
-     7 21,'60131'O,'20005'O,0,'40000'O,'44002'O,4,0,
-     7      '60131'O,'20016'O,0,'40000'O,'44002'O,4,0,
-     7      '60131'O,'20000'O,0,'40000'O,'44002'O,4,0,
-     8 8,'40203'O,'20000'O,0,2,'40203'O,'20015'O,0,2,
-     8 4,'40210'O,'61000'O,'400'O,0,
-     9 25,'42221'O,'41000'O,-1,-1,
-     9     '60220'O,'41000'O,-1,-1,'61005'O,-1,-1,
-     9     '60220'O,'41000'O,-1,-1,'61006'O,-1,-1,
-     9     '60220'O,'41000'O,-1,-1,'61016'O,-1,-1,
-     & 4,'40207'O,'75000'O,'2000'O,0,
-     & 4,'40174'O,'75000'O,'100'O,0,
-     & 11,'72222'O,'21004'O,'40'O,0,'64222'O,'21000'O,'40'O,0,
-     &     '61000'O,-1,-1,
-     & 2,'2227'O,'50227'O,
-     & 15,'62146'O,'61007'O,-1,-1,'61002'O,4,0,
-     &     '40122'O,'61007'O,-1,-1,'40165'O,'61005'O,-1,-1,
-     & 4,'70146'O,'61002'O,4,0,
-     3 5,'133'O,'40133'O,'61001'O,-1,-1,
-     4 7,'60213'O,'21000'O,0,'200'O,'44002'O,0,'1000'O,
-     4 12,'42166'O,'61003'O,-1,-1,'40166'O,'61012'O,-1,-1,
-     4     '40215'O,'23006'O,'40'O,0,
-     5 11,'42173'O,'75000'O,'100'O,0,'60211'O,'61000'O,'100'O,0,
-     5     '54002'O,'10'O,0,
-     5 7,'60134'O,'20000'O,-1,-1,'74002'O,4,0,
-     6 31,'167'O,'40170'O,'60003'O,-1,-1,'40231'O,'61010'O,-1,-1,
-     6     '40230'O,'60005'O,-1,-1,'40230'O,'60016'O,-1,-1,
-     6     '60144'O,'60003'O,-1,-1,'61002'O,-1,-1,
-     6     '60144'O,'60003'O,-1,-1,'61016'O,-1,-1,
-     6 4,'70145'O,'61002'O,'10'O,0,
-     6 4,'40172'O,'20000'O,-1,-1,
-     7 8,'42172'O,'21000'O,-1,-1,'40172'O,'21012'O,-1,-1,
-     8 5,'52212'O,'70212'O,'44002'O,-1,-1,
-     8 11,'42175'O,'61000'O,'10200'O,0,'60175'O,'61000'O,'10200'O,0,
-     8     '54002'O,4,'1000'O,
-     8 4,'40204'O,'61007'O,'20000'O,'40'O,
-     9 4,'70152'O,'61002'O,-1,-1,
-     & 7,'60212'O,'21000'O,0,'200'O,'44002'O,0,'1000'O,
-     & 25,'42223'O,'41000'O,'400'O,0,
-     &     '60223'O,'41000'O,'400'O,0,'61005'O,-1,-1,
-     &     '60223'O,'41000'O,'400'O,0,'61016'O,-1,-1,
-     &     '60240'O,'41000'O,'400'O,0,'61012'O,-1,-1,
-     & 4,'40232'O,'60007'O,-1,-1,
-     & 16,'72220'O,'61005'O,-1,-1,'70220'O,'61016'O,-1,-1,
-     &     '40221'O,'61006'O,-1,-1,'70241'O,'61010'O,-1,-1,
-     & 5,'52155'O,'40155'O,'61007'O,-1,-1,
-     3 18,'42144'O,'71000'O,'40000'O,0,
-     3     '60144'O,'71000'O,'40000'O,0,'61002'O,-1,-1,
-     3     '60144'O,'71000'O,'40000'O,0,'61016'O,-1,-1,
-     3 12,'60215'O,'23000'O,'40'O,0,'44002'O,0,'1000'O,
-     3     '42215'O,'23000'O,'40'O,0,'50173'O,
-     4 7,'60214'O,'44000'O,0,'1000'O,'21003'O,0,'200'O,
-     5 11,'42204'O,'61000'O,'20000'O,'40'O,
-     5     '60204'O,'61000'O,'20000'O,0,'61015'O,-1,-1,
-     5 4,'40217'O,'20000'O,0,'2000'O,
-     6 21,'62224'O,'44000'O,-1,-1,'21003'O,'40'O,0,
-     6     '60224'O,'44000'O,-1,-1,'21016'O,'40'O,0,
-     6     '60220'O,'44000'O,-1,-1,'61005'O,-1,-1,
-     7 11,'70162'O,'61004'O,-1,-1,'60163'O,'21007'O,'40'O,0,
-     7     '65002'O,4,0,
-     7 22,'62164'O,'61000'O,2,0,'64002'O,4,0,
-     7     '40173'O,'75012'O,'100'O,0,'40174'O,'75013'O,'100'O,0,
-     7     '60237'O,'61000'O,2,0,'20004'O,-1,-1,
-     7 7,'60135'O,'21000'O,-1,-1,'74002'O,4,0,
-     8 8,'42150'O,'20000'O,'40'O,0,'40150'O,'20007'O,'40'O,0,
-     9 4,'40154'O,'40000'O,-1,-1,
-     9 5,'50233'O,'40233'O,'61007'O,-1,-1,
-     & 2,167,'50126'O,2,168,'50220'O,1,'50243'O,
-     & 4,'70244'O,'41002'O,-1,-1,
-     & 5,'50245'O,'70245'O,'75002'O,4,0,
-     & 4,'40246'O,'61014'O,-1,-1,
-     & 4,'70241'O,'61010'O,-1,-1,1,'50105'O,
-     3 1,'50104'O,19,'42204'O,'61000'O,'20000'O,'40'O,
-     3     '40202'O,'21005'O,0,2,'40203'O,'21015'O,0,2,
-     3     '60204'O,'61000'O,'20000'O,'40'O,'61015'O,-1,-1,
-     3 1,'50141'O,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
 
 C SPARSE, PAGE 7
@@ -654,30 +512,30 @@ C
 10      I=I+1                              ! do 1000 i=1,llnt
         WORD=LBUF(I)                        ! get current token.
         ERRVOC=0                        ! assume won't find
-        IF(WORD.EQ.' ') GO TO 1000            ! blank? ignore.
-        IF(WORD.EQ.'AND') GO TO 1500            ! 'AND'?
-        IF((WORD.EQ.'EXCEPT').OR.(WORD.EQ.'BUT')) GO TO 2500
+        IF(WORD==' ') GO TO 1000            ! blank? ignore.
+        IF(WORD=='AND') GO TO 1500            ! 'AND'?
+        IF((WORD=='EXCEPT').OR.(WORD=='BUT')) GO TO 2500
 C
 C Check for buzz word
 C
         DO J=1,BWMAX
           IF(WORD == BWORD(J)) GO TO 1000      ! if match, ignore.
-      enddo
+        enddo
 C
 C Check for action or direction
 C
         J=1                              ! check for action.
         DO 70 K=1,VWMAX
-          IF(VWORD(K)(1:1).EQ.'*') GO TO 65      ! synonym?
-          IF(WORD.EQ.VWORD(K)) GO TO 2000      ! match to base word?
+          IF(VWORD(K)(1:1)=='*') GO TO 65      ! synonym?
+          IF(WORD==VWORD(K)) GO TO 2000      ! match to base word?
           J=J+VVOC(J)+1                  ! skip over syntax.
           GO TO 70
-65          IF(WORD.EQ.VWORD(K)(2:WRDLNT)) GO TO 2000 ! synonym match?
+65          IF(WORD==VWORD(K)(2:WRDLNT)) GO TO 2000 ! synonym match?
 70        CONTINUE
 C
-75        IF((ADJ.NE.0).OR.(PREP.NE.0).OR.(OBJ1.NE.0)) GO TO 200
-        IF(ACT.EQ.0) GO TO 80                  ! any verb yet?
-        IF(IAND(VVOC(ACT+1), SVMASK).NE.WALKW) GO TO 200      ! walk?
+75        IF((ADJ/=0).OR.(PREP/=0).OR.(OBJ1/=0)) GO TO 200
+        IF(ACT==0) GO TO 80                  ! any verb yet?
+        IF(IAND(VVOC(ACT+1), SVMASK)/=WALKW) GO TO 200      ! walk?
 80        DO 100 J=1,DWMAX                  ! then chk for dir.
           IF(WORD == DWORD(J)) GO TO 3000      ! match to direction?
 100        CONTINUE
@@ -728,11 +586,11 @@ C
       IF(BUNFLG) OBJ1=BUNOBJ                  ! bunched object?
       IF(BUNFLG.AND.(BUNSUB /= 0).AND.(BUNLNT == 0))
      &      GO TO 13200                  ! except for nothing?
-      IF(ACT.EQ.0) ACT=IAND(OFLAG, OACT)      ! if no action, take orphan.
-      IF(ACT.EQ.0) GO TO 10000            ! no action, punt.
-      IF((IAND(VVOC(ACT+1), SVMASK).NE.WALKW).OR.(OBJ1.LT.XMIN))
+      IF(ACT==0) ACT=IAND(OFLAG, OACT)      ! if no action, take orphan.
+      IF(ACT==0) GO TO 10000            ! no action, punt.
+      IF((IAND(VVOC(ACT+1), SVMASK)/=WALKW).OR.(OBJ1.LT.XMIN))
      &      GO TO 1100                  ! simple direction?
-      IF ((OBJ2.NE.0).OR.(PREP1.NE.0).OR.(PREP2.NE.0))
+      IF ((OBJ2/=0).OR.(PREP1/=0).OR.(PREP2/=0))
      &      GO TO 1050                  ! no extra junk?
       PRSA=WALKW                        ! yes, win totally.
       PRSO=OBJ1
@@ -742,13 +600,13 @@ C
 1050      IF(VBFLAG) CALL RSPEAK(618)            ! direction+junk, fail.
       GO TO 800                        ! clean up state.
 C
-1100      IF((OFLAG.NE.0).AND.(OPREP.NE.0).AND.(PREP.EQ.0).AND.
-     &      (OBJ1.NE.0).AND.(OBJ2.EQ.0).AND.(ACT.EQ.OACT))
+1100      IF((OFLAG/=0).AND.(OPREP/=0).AND.(PREP==0).AND.
+     &      (OBJ1/=0).AND.(OBJ2==0).AND.(ACT==OACT))
      &      GO TO 11000
 C
-      IF(PREP.EQ.0) GO TO 1200            ! if dangling prep,
-      IF(PPTR.EQ.0) GO TO 12000            ! and no object, die;
-      IF(PRPVEC(PPTR).NE.0) GO TO 12000      ! and prep already, die;
+      IF(PREP==0) GO TO 1200            ! if dangling prep,
+      IF(PPTR==0) GO TO 12000            ! and no object, die;
+      IF(PRPVEC(PPTR)/=0) GO TO 12000      ! and prep already, die;
       PRPVEC(PPTR)=PREP                  ! cvt to 'pick up frob'.
 1200      SPARSE=0                        ! parse succeeds.
       IF(DFLAG) WRITE(output_unit,1310) ACT,OBJ1,OBJ2,PREP1,PREP2
@@ -759,14 +617,14 @@ C SPARSE, PAGE 10
 C
 C 1500--      AND
 C
-1500      IF(ADJ.NE.0) GO TO 4100                  ! dangling adj? treat as obj.
-      IF((PREP.NE.0).OR.(PPTR.NE.1)) GO TO 8000      ! prep or not dir obj?
+1500      IF(ADJ/=0) GO TO 4100                  ! dangling adj? treat as obj.
+      IF((PREP/=0).OR.(PPTR/=1)) GO TO 8000      ! prep or not dir obj?
       ANDFLG=.TRUE.                        ! flag 'AND'.
       GO TO 1000                        ! done.
 C
 C 2000--      Action
 C
-2000      IF(ACT.EQ.0) GO TO 2100                  ! got one already?
+2000      IF(ACT==0) GO TO 2100                  ! got one already?
       ERRVOC=624                        ! flag for error report.
       GO TO 75                        ! try to construe differently.
 C
@@ -779,14 +637,14 @@ C
 C
 C 2500--      EXCEPT/BUT
 C
-2500      IF(ADJ.NE.0) GO TO 4100                  ! dangling adjective?
-      IF(ANDFLG.OR.BUNFLG.OR.(PPTR.NE.1).OR.
+2500      IF(ADJ/=0) GO TO 4100                  ! dangling adjective?
+      IF(ANDFLG.OR.BUNFLG.OR.(PPTR/=1).OR.
      &      (I.GE.LLNT)) GO TO 13000      ! not in right place?
-      IF(LBUF(I+1).NE.'FOR') GO TO 2600      ! except for?
+      IF(LBUF(I+1)/='FOR') GO TO 2600      ! except for?
       I=I+1                              ! skip over.
       IF(I.GE.LLNT) GO TO 13000            ! out of text?
-2600      IF((OBJ1.NE.EVERY).AND.(OBJ1.NE.VALUA).AND.
-     &  (OBJ1.NE.POSSE)) GO TO 13100            ! "collective" EXCEPT?
+2600      IF((OBJ1/=EVERY).AND.(OBJ1/=VALUA).AND.
+     &  (OBJ1/=POSSE)) GO TO 13100            ! "collective" EXCEPT?
       ANDFLG=.TRUE.                        ! force next object
       BUNFLG=.TRUE.                        ! into bunch vector.
       BUNLNT=0                        ! start at top.
@@ -800,14 +658,14 @@ C            and global wall takes is found if no adjective given.
 C
 3000      OBJ=DVOC(J)                        ! save direction.
       ACT=1                              ! find value for action.
-3600      IF(VVOC(ACT).EQ.0) CALL BUG(310,ACT)      ! can't find walk.
-      IF(IAND(VVOC(ACT+1), SVMASK).EQ.WALKW) GO TO 6300 ! treat as obj.
+3600      IF(VVOC(ACT)==0) CALL BUG(310,ACT)      ! can't find walk.
+      IF(IAND(VVOC(ACT+1), SVMASK)==WALKW) GO TO 6300 ! treat as obj.
       ACT=ACT+VVOC(ACT)+1                  ! to next syntax entry.
       GO TO 3600
 C
 C 4000--      Preposition (or dangling adjective at end of parse)
 C
-4000      IF(ADJ.EQ.0) GO TO 4600                  ! dangling adjective?
+4000      IF(ADJ==0) GO TO 4600                  ! dangling adjective?
 4100      I=I-1                              ! back up parse stream.
 4500      WORD=AWORD(ADJPTR)                  ! get adjective string.
       ADJ=0                              ! now an object.
@@ -824,7 +682,7 @@ C 5000--      Adjective
 C
 5000      ADJ=J                              ! save adjective.
       ADJPTR=K                        ! save string pointer.
-      IF((I.LT.LLNT).OR.(OFLAG.EQ.0).OR.(ONAME.EQ.' '))
+      IF((I.LT.LLNT).OR.(OFLAG==0).OR.(ONAME==' '))
      &      GO TO 1000                  ! last word + orphan string?
       IF(DFLAG) WRITE(output_unit,5040) ADJ,ONAME      ! have orphan.
 5040      FORMAT(' SPARSE- ADJ AT ',I6,' ORPHAN= ',A)
@@ -837,14 +695,14 @@ C
       IF(DFLAG) WRITE(output_unit,6010) J,OBJ
 6010      FORMAT(' SPARSE- OBJ AT ',I6,'  OBJ= ',I6)
       IF(OBJ.LE.0) GO TO 7000                  ! if le, couldnt.
-      IF(OBJ.NE.ITOBJ) GO TO 6100            ! "it"?
-      IF(IAND(OFLAG, OOBJ1).NE.0) LASTIT=IAND(OFLAG, OOBJ1)      ! orphan?
+      IF(OBJ/=ITOBJ) GO TO 6100            ! "it"?
+      IF(IAND(OFLAG, OOBJ1)/=0) LASTIT=IAND(OFLAG, OOBJ1)      ! orphan?
       OBJ=GETOBJ(0,0,LASTIT)                  ! find it.
       IF(OBJ.LE.0) GO TO 7500                  ! if le, couldnt.
 C
-6100      IF(PREP.NE.9) GO TO 6200            ! "of" obj?
-      IF((LOBJ.EQ.OBJ).OR.(LOBJ.EQ.OCAN(OBJ))) GO TO 6500      ! same as prev?
-      IF((LOBJ.EQ.EVERY).AND.((OBJ.EQ.VALUA).OR.(OBJ.EQ.POSSE)))
+6100      IF(PREP/=9) GO TO 6200            ! "of" obj?
+      IF((LOBJ==OBJ).OR.(LOBJ==OCAN(OBJ))) GO TO 6500      ! same as prev?
+      IF((LOBJ==EVERY).AND.((OBJ==VALUA).OR.(OBJ==POSSE)))
      &      GO TO 6350                  ! all of "collective"?
 6150      IF(VBFLAG) CALL RSPEAK(601)            ! doesn't work
       GO TO 800                        ! clean up state.
@@ -856,11 +714,11 @@ C
       BUNFLG=.TRUE.                        ! flag bunch of objects.
       BUNSUB=0                        ! no EXCEPT/BUT clause.
 6250      BUNLNT=BUNLNT+1                        ! advance bunch pointer.
-      IF(BUNLNT.GT.BUNMAX) GO TO 9000            ! too many objects?
+      IF(BUNLNT>BUNMAX) GO TO 9000            ! too many objects?
       BUNVEC(BUNLNT)=OBJ                  ! add to bunch vector.
       GO TO 6500
 C
-6300      IF(PPTR.EQ.2) GO TO 9000            ! too many objs?
+6300      IF(PPTR==2) GO TO 9000            ! too many objs?
       PPTR=PPTR+1
       PRPVEC(PPTR)=PREP
 6350      OBJVEC(PPTR)=OBJ                  ! stuff into vector.
@@ -887,11 +745,11 @@ C
 7110      FORMAT(' I can''t see any',A,A,' here.')
       GO TO 800                        ! go clean up state.
 C
-7200      IF(OBJ.NE.-10000) GO TO 7300            ! inside vehicle?
+7200      IF(OBJ/=-10000) GO TO 7300            ! inside vehicle?
       IF(VBFLAG) CALL RSPSUB(620,ODESC2(AVEHIC(WINNER)))
       GO TO 800                        ! go clean up state.
 C
-7300      IF(ACT.EQ.0) ACT=IAND(OFLAG, OACT)            ! if no act, get orphan.
+7300      IF(ACT==0) ACT=IAND(OFLAG, OACT)            ! if no act, get orphan.
       CALL ORPHAN(-1,ACT,PREP1,OBJ1,PREP,WORD,0,0)      ! orphan the world.
       IF(VBFLAG) WRITE(output_unit,7310)
      &      LCWRD1(1:len_trim(LCWRD1)+1),LCWORD(1:len_trim(LCWORD))
@@ -920,7 +778,7 @@ C
 C
 C 10000--      No action, punt.
 C
-10000      IF(OBJ1.EQ.0) GO TO 10100            ! any direct object?
+10000      IF(OBJ1==0) GO TO 10100            ! any direct object?
       IF(VBFLAG) CALL RSPSUB(621,ODESC2(OBJ1))      ! what to do?
       CALL ORPHAN(-1,0,PREP1,OBJ1,0,' ',0,0)
       RETURN
@@ -929,9 +787,9 @@ C
       GO TO 800                        ! go clean up state.
 C
 C 11000--      Orphan preposition.  Conditions are
-C            OBJ1.NE.0, OBJ2=0, PREP=0, ACT=OACT
+C            OBJ1/=0, OBJ2=0, PREP=0, ACT=OACT
 C
-11000      IF(OOBJ1.NE.0) GO TO 11500            ! orphan object?
+11000      IF(OOBJ1/=0) GO TO 11500            ! orphan object?
       PREP1=OPREP                        ! no, just use prep.
       GO TO 1200
 C
@@ -973,10 +831,11 @@ C
       INTEGER FUNCTION GETOBJ(OIDX,AIDX,SPCOBJ)
       
       integer, intent(in) :: oidx, aidx,spcobj
-
+      
+      integer av,i,nobj,obj
       LOGICAL THISIT,GHERE,LIT,CHOMP,DFLAG,NOADJS
 C
-      DFLAG=IAND(PRSFLG, 8).NE.0
+      DFLAG=IAND(PRSFLG, 8)/=0
       CHOMP=.FALSE.
       AV=AVEHIC(WINNER)
       OBJ=0                              ! assume dark.
@@ -986,26 +845,26 @@ C
       IF(DFLAG) WRITE(output_unit,10) OBJ
 10      FORMAT(' SCHLST- ROOM SCH ',I6)
       IF(OBJ) 1000,200,100                  ! test result.
-100      IF((AV.EQ.0).OR.(AV.EQ.OBJ).OR.(OCAN(OBJ).EQ.AV).OR.
-     &      (IAND(OFLAG2(OBJ), FINDBT).NE.0)) GO TO 200
+100      IF((AV==0).OR.(AV==OBJ).OR.(OCAN(OBJ)==AV).OR.
+     &      (IAND(OFLAG2(OBJ), FINDBT)/=0)) GO TO 200
       CHOMP=.TRUE.                        ! not reachable.
 C
-200      IF(AV.EQ.0) GO TO 400                  ! in vehicle?
+200      IF(AV==0) GO TO 400                  ! in vehicle?
       NOBJ=SCHLST(OIDX,AIDX,0,AV,0,SPCOBJ)      ! search vehicle.
       IF(DFLAG) WRITE(output_unit,220) NOBJ
 220      FORMAT(' SCHLST- VEH SCH  ',I6)
       IF(NOBJ) 800,400,300                  ! test result.
 300      CHOMP=.FALSE.                        ! reachable.
-      IF(OBJ.EQ.NOBJ) GO TO 400            ! same as before?
-      IF(OBJ.NE.0) NOBJ=-NOBJ                  ! amb result?
+      IF(OBJ==NOBJ) GO TO 400            ! same as before?
+      IF(OBJ/=0) NOBJ=-NOBJ                  ! amb result?
       OBJ=NOBJ
 C
 400      NOBJ=SCHLST(OIDX,AIDX,0,0,WINNER,SPCOBJ)      ! search adventurer.
       IF(DFLAG) WRITE(output_unit,430) NOBJ
 430      FORMAT(' SCHLST- ADV SCH  ',I6)
       IF(NOBJ) 800,900,500                  ! test result
-500      IF(OBJ.EQ.0) GO TO 800                  ! any previous? no, use nobj.
-      IF(AIDX.NE.0) GO TO 600                  ! yes, amb, any adj?
+500      IF(OBJ==0) GO TO 800                  ! any previous? no, use nobj.
+      IF(AIDX/=0) GO TO 600                  ! yes, amb, any adj?
       IF(NOADJS(OBJ).NEQV.NOADJS(NOBJ)) GO TO 700 ! both adj or no adj?
 600      OBJ=-NOBJ                        ! ambiguous result.
       GO TO 900
@@ -1018,8 +877,8 @@ C
       DO 1200 I=STRBIT+1,OLNT                  ! no, search globals.
         IF(.NOT.THISIT(OIDX,AIDX,I,SPCOBJ)) GO TO 1200
         IF(.NOT.GHERE(I,HERE)) GO TO 1200      ! can it be here?
-        IF(GETOBJ.EQ.0) GO TO 1150            ! got one yet?
-        IF(AIDX.NE.0) GO TO 1050            ! yes, no adj?
+        IF(GETOBJ==0) GO TO 1150            ! got one yet?
+        IF(AIDX/=0) GO TO 1050            ! yes, no adj?
         IF(NOADJS(GETOBJ).NEQV.NOADJS(I)) GO TO 1100      ! only one with no adj?
 1050        GETOBJ=-I                        ! ambiguous
         GO TO 1200
@@ -1042,12 +901,13 @@ C
       integer, intent(in) :: oidx, aidx, rm,cn,ad,spcobj
 
       LOGICAL THISIT,QHERE,NOTRAN,NOVIS,AEMPTY,NOADJS
+      integer o,i,j,x
 C
 C Functions and data
 C
-      NOTRAN(O)=(IAND(OFLAG1(O),TRANBT).EQ.0).AND.
-     &      (IAND(OFLAG2(O), OPENBT).EQ.0)
-      NOVIS(O)=(IAND(OFLAG1(O), VISIBT).EQ.0)
+      NOTRAN(O)=(IAND(OFLAG1(O),TRANBT)==0).AND.
+     &      (IAND(OFLAG2(O), OPENBT)==0)
+      NOVIS(O)=(IAND(OFLAG1(O), VISIBT)==0)
 C
       SCHLST=0                        ! no result.
       AEMPTY=.FALSE.                        ! no ambiguous empty.
@@ -1057,8 +917,8 @@ C
      &       ((CN==0).OR.(OCAN(I)/=CN)).AND.
      3       ((AD==0).OR.(OADV(I)/=AD)))) GO TO 1000
         IF(.NOT.THISIT(OIDX,AIDX,I,SPCOBJ)) GO TO 200
-        IF(SCHLST.EQ.0) GO TO 150            ! got one already?
-        IF(AIDX.NE.0) GO TO 2000            ! adj? then ambiguous
+        IF(SCHLST==0) GO TO 150            ! got one already?
+        IF(AIDX/=0) GO TO 2000            ! adj? then ambiguous
         IF(NOADJS(I)) GO TO 100            ! new have no adj?
         AEMPTY=.TRUE.                        ! no, old might, flag.
         GO TO 200
@@ -1080,15 +940,15 @@ C
           IF(NOVIS(J).OR. (.NOT.THISIT(OIDX,AIDX,J,SPCOBJ)))
      &      GO TO 500                  ! visible & match?
           X=OCAN(J)                        ! get container.
-300          IF(X.EQ.I) GO TO 400            ! inside target?
-          IF(X.EQ.0) GO TO 500            ! inside anything?
+300          IF(X==I) GO TO 400            ! inside target?
+          IF(X==0) GO TO 500            ! inside anything?
           IF(NOVIS(X).OR.NOTRAN(X).OR.
-     &      (IAND(OFLAG2(X), SCHBT).EQ.0)) GO TO 500
+     &      (IAND(OFLAG2(X), SCHBT)==0)) GO TO 500
           X=OCAN(X)                        ! go another level.
           GO TO 300
 C
-400          IF(SCHLST.EQ.0) GO TO 450            ! already got one?
-          IF(AIDX.NE.0) GO TO 2000            ! adj? then ambiguous.
+400          IF(SCHLST==0) GO TO 450            ! already got one?
+          IF(AIDX/=0) GO TO 2000            ! adj? then ambiguous.
           IF(NOADJS(J)) GO TO 425            ! new have no adj?
           AEMPTY=.TRUE.                  ! no, ambiguous empty.
           GO TO 500
@@ -1098,7 +958,7 @@ C
 500        CONTINUE
 C
 1000      CONTINUE
-      IF(.NOT.AEMPTY.OR.(SCHLST.EQ.0)) RETURN      ! if none or not amb, done.
+      IF(.NOT.AEMPTY.OR.(SCHLST==0)) RETURN      ! if none or not amb, done.
       IF(NOADJS(SCHLST)) RETURN            ! if amb, and no adj, done.
 2000      SCHLST=-SCHLST                        ! amb return.
  
@@ -1119,14 +979,14 @@ C Check for object names
 C
       IF(OIDX == 0) RETURN                  ! no obj? lose.
       I=OIDX
-100      IF(ABS(OVOC(I)).EQ.OBJ) GO TO 200      ! found it?
+100      IF(ABS(OVOC(I))==OBJ) GO TO 200      ! found it?
       I=I+1                              ! adv to next.
       IF(OVOC(I).LT.0) GO TO 100            ! still part of list?
       RETURN                              ! if done, lose.
 C
-200      IF(AIDX.EQ.0) GO TO 500                  ! no adj? done.
+200      IF(AIDX==0) GO TO 500                  ! no adj? done.
       I=AIDX
-300      IF(ABS(AVOC(I)).EQ.OBJ) GO TO 500      ! found it?
+300      IF(ABS(AVOC(I))==OBJ) GO TO 500      ! found it?
       I=I+1                              ! adv to next.
       IF(AVOC(I) < 0) GO TO 300            ! still part of list?
       RETURN                              ! if done, lose.
@@ -1147,6 +1007,8 @@ C
       CHARACTER(TEXLNT) STR
       CHARACTER(WRDLNT) FINDVB,LCIFY,LCWORD
       CHARACTER(WRDLNT+2) LCPRP1,LCPRP2
+      integer dforce,drive,j,x,limit,newj,qprep,sprep
+       
 
 C SYNMCH, PAGE 2
 C
@@ -1179,7 +1041,7 @@ C
 C
 C Direct syntax match and direct-as-indirect fail.
 C
-500      IF(OBJ1.NE.0) GO TO 3000            ! if direct obj, on to next.
+500      IF(OBJ1/=0) GO TO 3000            ! if direct obj, on to next.
       GO TO 2500                        ! go do defaults.
 C
 C Direct syntax match succeeded, try indirect.
@@ -1191,9 +1053,9 @@ C
 C
 C Indirect syntax match fails.
 C
-      IF(OBJ2.NE.0) GO TO 3000            ! if ind object, on to next.
-2500      IF((QPREP.EQ.0).OR.(QPREP.EQ.SPREP)) DFORCE=J       ! if prep mch.
-      IF(IAND(VFLAG, SDRIV).NE.0) DRIVE=J      ! if driver, record.
+      IF(OBJ2/=0) GO TO 3000            ! if ind object, on to next.
+2500      IF((QPREP==0).OR.(QPREP==SPREP)) DFORCE=J       ! if prep mch.
+      IF(IAND(VFLAG, SDRIV)/=0) DRIVE=J      ! if driver, record.
       IF(DFLAG) WRITE(output_unit,2510) J,QPREP,SPREP,DFORCE,DRIVE
 2510      FORMAT(' SYNMCH DEFAULT SYNTAXES- ',5I7)
 3000      J=NEWJ
@@ -1206,8 +1068,8 @@ C orphans or GWIMs, or make new orphans.
 C
 3100      IF(DFLAG) WRITE(output_unit,3110) DRIVE,DFORCE,OBJ1,OBJ2
 3110      FORMAT(' SYNMCH, DRIVE=',2I6,'  OBJECTS =',2I6)
-      IF(DRIVE.EQ.0) DRIVE=DFORCE            ! no driver? use force.
-      IF(DRIVE.EQ.0) GO TO 10000            ! any driver?
+      IF(DRIVE==0) DRIVE=DFORCE            ! no driver? use force.
+      IF(DRIVE==0) GO TO 10000            ! any driver?
       CALL UNPACK(DRIVE,DFORCE)            ! unpack dflt syntax.
       LCWORD=LCIFY(FINDVB(DRIVE),2)            ! get verb string.
       LCPRP1=' '//LCIFY(FINDPR(IAND(DOBJ, VPMASK)),1)//' '
@@ -1215,9 +1077,9 @@ C
 C
 C Try to fill direct object slot if that was the problem.
 C
-      IF((IAND(VFLAG, SDIR).EQ.0).OR.(OBJ1.NE.0)) GO TO 4000
+      IF((IAND(VFLAG, SDIR)==0).OR.(OBJ1/=0)) GO TO 4000
       OBJ1=IAND(OFLAG, OOBJ1)
-      IF(OBJ1.EQ.0) GO TO 3500            ! any orphan?
+      IF(OBJ1==0) GO TO 3500            ! any orphan?
       IF(SYNEQL(OPREP1,OBJ1,DOBJ,DFL1,DFL2)) GO TO 4000
 C
 C Orphan fails, try GWIM.
@@ -1225,10 +1087,10 @@ C
 3500      OBJ1=GWIM(DOBJ,DFW1,DFW2)            ! get gwim.
       IF(DFLAG) WRITE(output_unit,3530) OBJ1
 3530      FORMAT(' SYNMCH- DO GWIM= ',I6)
-      IF(OBJ1.GT.0) GO TO 4000            ! test result.
+      IF(OBJ1>0) GO TO 4000            ! test result.
       CALL ORPHAN(-1,ACT,0,0,IAND(DOBJ, VPMASK),' ',PREP2,OBJ2)      ! fails, orphan.
       BUNSUB=0                        ! no EXCEPT clause.
-      IF(OBJ2.GT.0) GO TO 3800            ! if iobj, go print.
+      IF(OBJ2>0) GO TO 3800            ! if iobj, go print.
 3700      WRITE(output_unit,3750)
      &      LCWORD(1:len_trim(LCWORD)),LCPRP1(1:len_trim(LCPRP1)+1)
 3750      FORMAT(1X,A,A,'what?')
@@ -1249,9 +1111,9 @@ C SYNMCH, PAGE 4
 C
 C Try to fill indirect object slot if that was the problem.
 C
-4000      IF((IAND(VFLAG, SIND).EQ.0).OR.(OBJ2.NE.0)) GO TO 6000
+4000      IF((IAND(VFLAG, SIND)==0).OR.(OBJ2/=0)) GO TO 6000
       OBJ2=IAND(OFLAG, OOBJ2)
-      IF(OBJ2.EQ.0) GO TO 4500            ! any orphan?
+      IF(OBJ2==0) GO TO 4500            ! any orphan?
       IF(SYNEQL(OPREP2,OBJ2,IOBJ,IFL1,IFL2)) GO TO 6000
 C
 C Orphan fails, try GWIM.
@@ -1259,8 +1121,8 @@ C
 4500      OBJ2=GWIM(IOBJ,IFW1,IFW2)            ! gwim.
       IF(DFLAG) WRITE(output_unit,4550) OBJ2
 4550      FORMAT(' SYNMCH- IO GWIM= ',I6)
-      IF(OBJ2.GT.0) GO TO 6000
-      IF(OBJ1.GT.0) GO TO 4600            ! if dobj, go print.
+      IF(OBJ2>0) GO TO 6000
+      IF(OBJ1>0) GO TO 4600            ! if dobj, go print.
       CALL ORPHAN(-1,ACT,IAND(OFLAG, OPREP1),
      &      IAND(OFLAG, OOBJ1),IAND(IOBJ, VPMASK),' ',0,0)
       GO TO 3700
@@ -1289,7 +1151,7 @@ C
 C Now try to take individual objects and
 C in general clean up the parse vector.
 C
-6000      IF(IAND(VFLAG, SFLIP).EQ.0) GO TO 7000      ! flip?
+6000      IF(IAND(VFLAG, SFLIP)==0) GO TO 7000      ! flip?
       J=OBJ1                              ! yes.
       OBJ1=OBJ2
       OBJ2=J
@@ -1320,10 +1182,10 @@ C
 C
       VFLAG=VVOC(OLDJ)
       J=OLDJ+1
-      IF(IAND(VFLAG, SDIR).EQ.0) RETURN      ! dir object?
+      IF(IAND(VFLAG, SDIR)==0) RETURN      ! dir object?
       DFL1=-1                              ! assume std.
       DFL2=-1
-      IF(IAND(VFLAG, SSTD).EQ.0) GO TO 100      ! std object?
+      IF(IAND(VFLAG, SSTD)==0) GO TO 100      ! std object?
       DFW1=-1                              ! yes.
       DFW2=-1
       DOBJ=VABIT+VRBIT+VFBIT
@@ -1333,18 +1195,18 @@ C
       DFW1=VVOC(J+1)
       DFW2=VVOC(J+2)
       J=J+3
-      IF(IAND(DOBJ, VEBIT).EQ.0) GO TO 200      ! vbit = vfwim?
+      IF(IAND(DOBJ, VEBIT)==0) GO TO 200      ! vbit = vfwim?
       DFL1=DFW1                        ! yes.
       DFL2=DFW2
 C
-200      IF(IAND(VFLAG, SIND).EQ.0) RETURN      ! ind object?
+200      IF(IAND(VFLAG, SIND)==0) RETURN      ! ind object?
       IFL1=-1                              ! assume std.
       IFL2=-1
       IOBJ=VVOC(J)
       IFW1=VVOC(J+1)
       IFW2=VVOC(J+2)
       J=J+3
-      IF(IAND(IOBJ, VEBIT).EQ.0) RETURN      ! vbit = vfwim?
+      IF(IAND(IOBJ, VEBIT)==0) RETURN      ! vbit = vfwim?
       IFL1=IFW1                        ! yes.
       IFL2=IFW2
       
@@ -1358,13 +1220,13 @@ C
       IMPLICIT INTEGER(A-Z)
       INCLUDE 'dparam.for'
 C
-      IF(OBJ.EQ.0) GO TO 100                  ! any object?
-      SYNEQL=(PREP.EQ.IAND(SPREP, VPMASK)).AND.
+      IF(OBJ==0) GO TO 100                  ! any object?
+      SYNEQL=(PREP==IAND(SPREP, VPMASK)).AND.
      &      (IOR(IAND(SFL1, OFLAG1(OBJ)),
-     &        IAND(SFL2, OFLAG2(OBJ))).NE.0)
+     &        IAND(SFL2, OFLAG2(OBJ)))/=0)
       RETURN
 C
-100      SYNEQL=(PREP.EQ.0).AND.(SFL1.EQ.0).AND.(SFL2.EQ.0)
+100      SYNEQL=(PREP==0).AND.(SFL1==0).AND.(SFL2==0)
 
       END FUNCTION SYNEQL
 
@@ -1377,7 +1239,7 @@ C
 
       integer, intent(in) :: obj,sflag
       LOGICAL TAKE,LIT
-      integer i,odo2
+      integer i,odo2,sva,svi,svo,x
 C
       TAKEIT=.FALSE.                        ! assume loses.
       IF((OBJ==0).OR.(OBJ > STRBIT).OR.DEADF)
@@ -1422,7 +1284,7 @@ C
       CALL RSPEAK(579)                  ! can't do it.
       RETURN
 C
-3500      SVA=PRSA                        ! save parse vector
+3500  SVA=PRSA                        ! save parse vector
       SVO=PRSO
       SVI=PRSI
       PRSA=TAKEW                        ! make 'take obj'
