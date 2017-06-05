@@ -32,18 +32,18 @@ C
 
       LOGICAL FUNCTION VAPPLI(RI)
       use state
-      integer,external :: rnd,blow,fights
-      logical, external :: objact,OAPPLI
+      use objapp
+      use subr
+      use timefnc,only: clockd,fightd
+
+
       integer,intent(in) :: ri
       
       integer,PARAMETER :: MXNOP=39,MXJOKE=64,MXSMP=99,NUMANS=16
       
-      LOGICAL LIT,WASLIT
-      LOGICAL QEMPTY,RMDESC,CLOCKD
-      LOGICAL MOVETO,YESNO
+      LOGICAL WASLIT 
       LOGICAL QOPEN,EDIBLE,DRKBLE
-      LOGICAL TAKE,PUT,DROP,WALK
-      LOGICAL QHERE,FINDXT,F
+      LOGICAL F
       INTEGER,parameter::JOKES(*) = [4,5,3,304,305,306,307,308,309,310,
      & 311,312, 313,5314,5319,324,325,883,884,120,120,0,0,0,0]
       integer,parameter :: ANSWER(*)=[0,1,2,2,3,4,4,4,4,4,5,5,5,6,7,7]
@@ -519,7 +519,7 @@ C
       I=PRSO                              ! fill x with y becomes
       PRSO=PRSI                        ! put y in x
       PRSI=I
-      VAPPLI=PUT(.TRUE.)
+      VAPPLI=PUT()
       RETURN
 C
 C V135,V136--      Eat/Drink
@@ -653,13 +653,13 @@ C
 C
 C V144--      Put
 C
-44000      VAPPLI=PUT(.TRUE.)
+44000      VAPPLI=PUT()
       RETURN
 C
 C V145,V148--      Drop/Throw
 C
 45000      CONTINUE                        ! throw.
-48000      VAPPLI=DROP(.TRUE.)                  ! drop.
+48000      VAPPLI=DROP()                  ! drop.
       RETURN
 C
 C V146--      Give
@@ -683,7 +683,7 @@ C
 C
 47100      IF(PRSI.EQ.0) GO TO 48000            ! pour x, treat like drop.
       PRSA=PUTW                        ! else, treat like put.
-      VAPPLI=PUT(.TRUE.)
+      VAPPLI=PUT()
       RETURN
 C
 C V149--      Save
@@ -1397,10 +1397,10 @@ C Take an object (for verbs take, put, drop, read, etc.)
 C
       LOGICAL FUNCTION TAKE(FLG)
       use state
-      integer,external :: rnd,weighr
+      use subr,only: objact,rspeak,rnd,weighr,scrupd,newsta,qhere
+      use objapp,only: oappli
       LOGICAL,intent(in) :: flg
 
-      logical OBJACT,OAPPLI,QHERE
       integer i,x,r
 
 
@@ -1458,8 +1458,8 @@ C
 C Declarations
 C
       LOGICAL FUNCTION DROP()
-
-      LOGICAL F,PUT,OBJACT
+      use subr,only: rspsub,newsta,rspeak,objact,scrupd
+      LOGICAL F
       integer i,x
       
       IF(IAND(OFLAG2(PRSO), NOCHBT).EQ.0) GO TO 100
@@ -1477,7 +1477,7 @@ C
 200      IF(OADV(PRSO).NE.WINNER) GO TO 1000      ! is he carrying obj?
 300      IF(AVEHIC(WINNER).EQ.0) GO TO 400      ! is he in vehicle?
       PRSI=AVEHIC(WINNER)                  ! yes,
-      F=PUT(.TRUE.)                        ! drop into vehicle.
+      F=PUT()                        ! drop into vehicle.
       PRSI=0                              ! disarm parser.
       RETURN                              ! done.
 C
@@ -1502,8 +1502,8 @@ C
 C Declarations
 C
       LOGICAL FUNCTION PUT()
-      integer,external :: weighr
-      LOGICAL QOPEN,QHERE,OBJACT,TAKE
+      use subr
+      LOGICAL QOPEN
       integer r,j,svi,svo
 
       QOPEN(R)=IAND(OFLAG2(R), OPENBT).NE.0
@@ -1591,8 +1591,10 @@ C Declarations
 C
       SUBROUTINE VALUAC()
       use state
+      use subr
+      
       integer r,av,i,j,k,l,saveh,savep
-      LOGICAL LIT,F,F1,TAKE,PUT,DROP,NOTHIS,NOHERE,QHERE,QBUNCH
+      LOGICAL F,F1,NOTHIS,NOHERE
 C
 C Functions and data
 C
@@ -1689,7 +1691,7 @@ C
         PRSO=BUNVEC(I)                  ! get next item.
         F=.FALSE.
         CALL RSPSUB(580,ODESC2(PRSO))
-        F1=DROP(.TRUE.)
+        F1=DROP()
         IF(SAVEH.NE.HERE) GO TO 4500
 1300      CONTINUE
       GO TO 4000                        ! go clean up.
@@ -1699,7 +1701,7 @@ C
      &      GO TO 1500
         F=.FALSE.
         CALL RSPSUB(580,ODESC2(PRSO))
-        F1=DROP(.TRUE.)
+        F1=DROP()
         IF(SAVEH.NE.HERE) GO TO 4500
 1500      CONTINUE
       GO TO 4000                        ! go clean up.
@@ -1714,7 +1716,7 @@ C
         PRSO=BUNVEC(I)                  ! get next item.
         F=.FALSE.
         CALL RSPSUB(580,ODESC2(PRSO))
-        F1=PUT(.TRUE.)
+        F1=PUT()
         IF(SAVEH.NE.HERE) GO TO 4500
 2300      CONTINUE
       GO TO 4000                        ! go clean up.
@@ -1728,7 +1730,7 @@ C
      &      (IAND(OFLAG1(PRSO), VISIBT).EQ.0)) GO TO 2500
         F=.FALSE.
         CALL RSPSUB(580,ODESC2(PRSO))
-        F1=PUT(.TRUE.)
+        F1=PUT()
         IF(SAVEH.NE.HERE) GO TO 4500
 2500      CONTINUE
       GO TO 4000                        ! go clean up.
@@ -1768,6 +1770,7 @@ C QBUNCH-      Is object in bunch vector?
 C SAVE- Save game state
 C
       SUBROUTINE SAVEGM
+      use subr
       integer u,i
 C
       IF(SUBLNT == 0) SUBBUF='DSAVE.DAT'
@@ -1799,7 +1802,7 @@ C
 C Declarations
 
       SUBROUTINE RSTRGM
-
+      use subr,only: rspeak
       integer :: u,i,j
 C
       IF(SUBLNT==0) SUBBUF='DSAVE.DAT'
@@ -1836,8 +1839,8 @@ C
 C Declarations
 C
       LOGICAL FUNCTION WALK()
-      integer,external :: rnd
-      LOGICAL FINDXT,QOPEN,LIT,PROB,MOVETO,RMDESC
+      use subr
+      LOGICAL QOPEN
       integer o
       QOPEN(O)=IAND(OFLAG2(O), OPENBT).NE.0
 
@@ -1902,7 +1905,7 @@ C CXAPPL- Conditional exit processors
 
       INTEGER FUNCTION CXAPPL(RI)
       use state
-      integer,external :: rnd,mrhere,weighr
+      use subr
       integer,intent(in) :: ri
       integer i,j,k,ldir,nxt
 

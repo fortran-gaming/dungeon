@@ -122,8 +122,8 @@ C Declarations
 C
       LOGICAL FUNCTION OBJACT()
        use state!, only: prsi,prso
+      use objapp,only: oappli
 
-      LOGICAL,external:: OAPPLI
 C
       OBJACT=.TRUE.                        ! assume wins.
       IF(PRSI.EQ.0) GO TO 100                  ! ind object?
@@ -142,6 +142,7 @@ C Declarations
 C
       SUBROUTINE BUG(A,B)
       use state
+      use verbs,only: savegm
       integer, intent(in) :: A,B
 
       WRITE(output_unit,100) A,B                  ! gonzo
@@ -216,7 +217,7 @@ C
       integer, intent(in) :: desc
 
       integer i,j,nonofl
-      LOGICAL MOVETO,QHERE,F
+      LOGICAL F
       INTEGER,parameter :: RLIST(*)=
      & [KITCH,CLEAR,FORE3,FORE2,SHOUS,FORE2,KITCH,EHOUS]
 
@@ -324,7 +325,7 @@ C Declarations
 C
       LOGICAL FUNCTION PROB(G,B)
       use state,only: badlkf
-      integer,external :: rnd
+
       integer, intent(in) :: G,B
 
         integer i
@@ -343,14 +344,12 @@ C when there is no direct object.
 C
       LOGICAL FUNCTION RMDESC(FULL)
       use state
+      use rooms,only: rappli
       integer, intent(in) :: full
 
       integer i,ra
 C FULL=      0/1/2/3=      full/obj/room/full but no applicable
-C
-C Declarations
 
-      LOGICAL PROB,LIT
 
       RMDESC=.TRUE.                        ! assume wins.
       RA=RACTIO(HERE)                        ! get room action.
@@ -690,10 +689,9 @@ C
       use state
       integer, intent(in) :: F1,F2,RM,CON,ADV
       LOGICAL, intent(in) :: NOCARE
-      Logical QHERE
 
         integer i,j
-C
+
       FWIM=0                              ! assume nothing.
       DO 1000 I=1,OLNT                  ! loop
         IF(((RM.EQ.0).OR.(.NOT.QHERE(I,RM))) .AND.
@@ -807,8 +805,6 @@ C
 
         integer i
 
-      LOGICAL PROB,QHERE
-C
       ROBRM=0                              ! count objects
       DO 100 I=1,OLNT                        ! loop on objects.
         IF(.NOT. QHERE(I,RM)) GO TO 100
@@ -826,17 +822,13 @@ C
       END FUNCTION ROBRM
  
 C WINNIN-- See if villain is winning
-C
-C Declarations
-C
+
       LOGICAL FUNCTION WINNIN(VL,HR)
       use state
       integer, intent(in):: vl, hr
 
         integer ps,vs
 
-      LOGICAL PROB
-C
       VS=OCAPAC(VL)                        ! villain strength
       PS=VS-FIGHTS(HR,.TRUE.)                  ! his margin over hero
       WINNIN=PROB(90,100)
@@ -852,9 +844,7 @@ C
       END FUNCTION WINNIN
 
 C FIGHTS-- Compute fight strength
-C
-C Declarations
-C
+
       INTEGER FUNCTION FIGHTS(H,FLG)
         use state
 
@@ -955,7 +945,6 @@ C
       use state!, only: rflag,deadf,olnt,onbt
 
       integer, intent(in) :: rm
-      LOGICAL QHERE
       integer i,j,oa
 C
       LIT=.TRUE.                        ! assume wins

@@ -18,15 +18,18 @@ C Declarations
       implicit none
 
 
-      public:: protct
+      public:: protct,game,initfl,xvehic
       contains
 
       SUBROUTINE GAME
       use state
-      logical,external :: OBJACT
-      integer,external :: OACTOR
-      LOGICAL RMDESC,VAPPLI,AAPPLI
-      LOGICAL F,PARSE,FINDXT,XVEHIC,LIT,PRVLIT
+      use subr
+      use verbs
+      use timefnc
+      use parser
+      use rooms
+
+      LOGICAL F,PRVLIT
       integer vprsc,SVPRSO,SVPRSC,PRVHER,i
 
 C GAME, PAGE 2
@@ -43,7 +46,7 @@ C
       IF(PRSCON <= 1) CALL RDLINE(INBUF,INLNT,1) ! read command.
 C
       IF(INBUF(PRSCON:INLNT) /= 'GDT') GO TO 200      ! call on gdt?
-      CALL GDT                        ! yes, invoke.
+!      CALL GDT                        ! TODO: yes, invoke.
       PRSCON=1                        ! force restart.
       GO TO 100                        ! onward.
 C
@@ -69,7 +72,7 @@ C
       IF(.NOT.LIT(HERE)) PRSCON=1            ! if not lit, restart.
       GO TO 100
 C
-900      CALL VALUAC(PRSO)                  ! collective object.
+900      CALL VALUAC                  ! collective object.
       GO TO 350
 
 C GAME, PAGE 3
@@ -156,7 +159,7 @@ C
       HERE=AROOM(WINNER)
       GO TO 400                        ! rejoin main loop.
 C
-2900  CALL VALUAC(PRSO)                  ! collective object.
+2900  CALL VALUAC()                  ! collective object.
       GO TO 2350
 
       END SUBROUTINE GAME
@@ -167,8 +170,10 @@ C Declarations
 C
       SUBROUTINE XENDMV(FLAG)
       use state
+      use subr
+      use timefnc
       logical, intent(in) :: FLAG
-      LOGICAL F,CLOCKD,XVEHIC
+      LOGICAL F
 C
       IF(.NOT.FLAG) CALL RSPEAK(341)            ! default remark.
       IF(THFACT) CALL THIEFD                  ! thief demon.

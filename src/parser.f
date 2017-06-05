@@ -24,6 +24,8 @@ C
      & int64
       use state
       implicit none
+      
+      public:: gwim,takeit
 
       contains
 
@@ -67,13 +69,13 @@ C
 C This routine details on bit 0 of PRSFLG
 C
       LOGICAL FUNCTION PARSE(INLINE,INLEN,VBFLAG)
-
+        use subr,only: orphan
       CHARACTER(*), intent(in) :: INLINE
       integer, intent(in) :: inlen
       logical, intent(in) :: vbflag
     
       CHARACTER(WRDLNT) OUTBUF(LEXMAX)
-      LOGICAL LEX,SYNMCH,DFLAG
+      LOGICAL DFLAG
       integer i,outlen
 
       
@@ -127,7 +129,7 @@ C
 C This routine details on bit 1 of PRSFLG
 C
       LOGICAL FUNCTION LEX(INLINE,INLEN,OUTBUF,OP,VBFLAG)
-
+       use subr, only: rspeak
       CHARACTER(*),intent(in) :: INLINE
       integer, intent(in) :: inlen
       CHARACTER(WRDLNT), intent(out) :: OUTBUF(LEXMAX)
@@ -223,13 +225,14 @@ C This routine details on bit 2 of PRSFLG
 C
       INTEGER FUNCTION SPARSE(LBUF,LLNT,VBFLAG)
       use state,only: vword,prep1,obj1
+      use subr
       character(*), intent(inout) :: LBUF(:)
       integer, intent(inout) :: llnt
       logical, intent(in) :: vbflag
 
-      CHARACTER(WRDLNT) WORD,LCWORD,LCIFY
+      CHARACTER(WRDLNT) WORD,LCWORD
       CHARACTER(WRDLNT+2) LCWRD1
-      LOGICAL LIT,DFLAG,ANDFLG,BUNFLG
+      LOGICAL DFLAG,ANDFLG,BUNFLG
       INTEGER OBJVEC(2),PRPVEC(2),adj,adjptr,errvoc,i,j,k,lobj,obj,
      & pptr, prep
 !      EQUIVALENCE (OBJVEC(1),OBJ1),(PRPVEC(1),PREP1)
@@ -659,24 +662,21 @@ C
       END FUNCTION SPARSE
 
 C GETOBJ--      Find obj described by adj, name pair
-C
-C Declarations
-C
 C This routine details on bit 3 of PRSFLG
-C
+
       INTEGER FUNCTION GETOBJ(OIDX,AIDX,SPCOBJ)
-      
+      use subr
       integer, intent(in) :: oidx, aidx,spcobj
       
       integer av,i,nobj,obj
-      LOGICAL THISIT,GHERE,LIT,CHOMP,DFLAG,NOADJS
-C
+      LOGICAL CHOMP,DFLAG
+
       DFLAG=IAND(PRSFLG, 8)/=0
       CHOMP=.FALSE.
       AV=AVEHIC(WINNER)
       OBJ=0                              ! assume dark.
       IF(.NOT.LIT(HERE)) GO TO 200            ! lit?
-C
+
       OBJ=SCHLST(OIDX,AIDX,HERE,0,0,SPCOBJ)      ! search room.
       IF(DFLAG) WRITE(output_unit,10) OBJ
 10      FORMAT(' SCHLST- ROOM SCH ',I6)
@@ -733,10 +733,10 @@ C
 C Declarations
 C
       INTEGER FUNCTION SCHLST(OIDX,AIDX,RM,CN,AD,SPCOBJ)
-
+        use subr
       integer, intent(in) :: oidx, aidx, rm,cn,ad,spcobj
 
-      LOGICAL THISIT,QHERE,NOTRAN,NOVIS,AEMPTY,NOADJS
+      LOGICAL NOTRAN,NOVIS,AEMPTY
       integer o,i,j,x
 C
 C Functions and data
@@ -839,10 +839,11 @@ C
 C This routine details on bit 4 of PRSFLG
 C
       LOGICAL FUNCTION SYNMCH()
-  
-      LOGICAL SYNEQL,TAKEIT,DFLAG
+      use io
+      use subr
+      LOGICAL DFLAG
       CHARACTER(TEXLNT) STR
-      CHARACTER(WRDLNT) FINDVB,LCIFY,LCWORD
+      CHARACTER(WRDLNT) LCWORD
       CHARACTER(WRDLNT+2) LCPRP1,LCPRP2
       integer dforce,drive,j,x,limit,newj,qprep,sprep
        
@@ -1081,9 +1082,10 @@ C Declarations
 C
       LOGICAL FUNCTION TAKEIT(OBJ,SFLAG)
       use state, only: odesc2
-
+      use subr
+      use verbs,only: take
       integer, intent(in) :: obj,sflag
-      LOGICAL TAKE,LIT
+
       integer i,odo2,sva,svi,svo,x
 C
       TAKEIT=.FALSE.                        ! assume loses.
@@ -1152,11 +1154,11 @@ C
 C Declarations
 C
       INTEGER FUNCTION GWIM(SFLAG,SFW1,SFW2)
-
+      use subr
       integer, intent(in) :: sflag,sfw1,sfw2
-      integer, external :: fwim
+
       integer av,robj
-      LOGICAL TAKEIT,NOCARE,LIT
+      LOGICAL NOCARE
 C
       GWIM=0                              ! no result.
       IF(DEADF) RETURN                  ! dead? gwim disabled.

@@ -16,7 +16,7 @@ C CLOCKD- Intermove clock events demon
 C
 C Declarations
       module timefnc
-      use subr
+        use subr,only: newsta,rspeak,rspsub,qhere
       implicit none
       contains
 
@@ -43,12 +43,13 @@ C Declarations
 C
       SUBROUTINE CEVAPP(RI)
       use state
+      use subr
       integer,intent(in) :: ri
-      integer,external :: mrhere
+
 
       INTEGER CNDTCK(10),LMPTCK(12),r,j,i,bc,br
-      LOGICAL FINDXT,LIT,RMDESC,QOPEN,MOVETO
-      LOGICAL F,QLEDGE,QHERE,PROB,WASLIT
+      LOGICAL QOPEN
+      LOGICAL F,QLEDGE,WASLIT
 C
 C Functions and data
 C
@@ -554,10 +555,11 @@ C FIGHTD- Intermove fight demon
 
       SUBROUTINE FIGHTD
       use state
+      use objapp,only: oappli
+      use subr
 
-      integer, external :: rnd
       integer i,res,ra,out,obj,j
-      LOGICAL PROB,OAPPLI,F
+      LOGICAL F
       integer,parameter :: ROUT=1
 
 C FIGHTD, PAGE 2
@@ -638,12 +640,14 @@ C Declarations
 C
       INTEGER FUNCTION BLOW(H,V,RMK,HFLG,OUT)
       use state
-      integer, external :: fights,fwim,rnd,vilstr
+      use objapp,only: oappli
+      use subr
+
       integer, intent(in) :: H,V,RMK,OUT
       LOGICAL,intent(in) :: HFLG
 
        integer att,def,dv,dweap,i,j,mi,oa,od,pblose,ra,res,tbl
-      logical OAPPLI,PROB,F
+      logical F
 C
 C Functions and data
 C
@@ -829,10 +833,9 @@ C Declarations
 C
       SUBROUTINE SWORDD
       use state
-
+      use subr,only: findxt
       integer i,ng
-      LOGICAL INFEST,FINDXT
-C
+
       IF(OADV(SWORD)/=PLAYER) GO TO 500      ! holding sword?
       NG=2                              ! assume vill close.
       IF(INFEST(HERE)) GO TO 300            ! vill here?
@@ -876,10 +879,11 @@ C Declarations
 C
       LOGICAL FUNCTION AAPPLI(RI)
       use state
+      use subr,only: qhere,moveto,findxt,rspeak,bug,newsta
       integer,intent(in) :: ri
       integer i,j
 
-      LOGICAL F,MOVETO,QHERE,FINDXT
+      LOGICAL F
 C
       IF(RI==0) GO TO 10                  ! if zero, no app.
       AAPPLI=.TRUE.                        ! assume wins.
@@ -1039,9 +1043,9 @@ C This routine details on bit 6 of PRSFLG
 C
       SUBROUTINE THIEFD
       use state
-      integer,external :: robrm,robadv
+      use subr
       integer r,i,j,nr,rhere,rmk
-      LOGICAL DFLAG,ONCE,PROB,QHERE,QSTILL,LIT,WINNIN,WASLIT
+      LOGICAL DFLAG,ONCE,QSTILL,WASLIT
 C
 C Functions AND DATA
 C

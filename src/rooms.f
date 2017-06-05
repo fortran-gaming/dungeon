@@ -19,17 +19,15 @@ C Declarations
 
       SUBROUTINE RAPPLI(RI)
       use state
-      integer, external :: rnd
+      use subr
+
 	  integer, intent(in) :: RI
     
       
       integer i,r,j
 
-	LOGICAL QOPEN,QON,QHERE,PROB,F
-	LOGICAL MOVETO,LIT,RMDESC,QEMPTY
-C
-C Functions and data
-C
+	LOGICAL QOPEN,QON,F
+	
 	QOPEN(R)=IAND(OFLAG2(R), OPENBT)/=0
 	QON(R)=IAND(OFLAG1(R), ONBT) /= 0
 C
@@ -810,8 +808,9 @@ C Declarations
 C
       SUBROUTINE LOOKTO(NRM,SRM,NT,ST,HT)
       use state, only: here,mdir,mloc,mr1f,mr2f,mropnf
+      use subr
       integer, intent(in) :: NRM,SRM,NT,ST,HT
-      integer, external :: mrhere
+
       integer dir,i,m1,mrbf
 
 	CALL RSPEAK(HT)				! describe hall.
@@ -846,6 +845,7 @@ C EWTELL--	Describe e/w narrow rooms
 C
       SUBROUTINE EWTELL(RM,ST)
       use state,only: mdir,mr1f,mr2f,mrae,mropnf
+      use subr,only: rspeak
 	  integer,intent(in) :: rm,st
     
       integer i

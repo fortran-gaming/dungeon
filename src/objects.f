@@ -22,20 +22,22 @@ C Declarations
       module objapp
       implicit none
       
-      public:: oappli,thiefp,cyclop,nobjs,trollp
+      public:: oappli,thiefp,cyclop,nobjs,trollp,mirpan
       
       contains
 
       LOGICAL FUNCTION OAPPLI(RI,ARG)
       use state
-      integer,external :: rnd,robadv,robrm
+      use subr
+      use timefnc,only: clockd
+
       integer, intent(in) :: ri,arg
 
-      LOGICAL SOBJS
-      LOGICAL QOPEN,QON,LIT,WASLIT
-      LOGICAL MOVETO,RMDESC,CLOCKD
-      LOGICAL BALLOP
-      LOGICAL QEMPTY,F,OPNCLS
+
+      LOGICAL QOPEN,QON,WASLIT
+
+
+      LOGICAL F
       integer, PARAMETER :: MXSMP=99
       integer r,av,flobts,i,j,nloc,odi2,odo2
 
@@ -753,11 +755,10 @@ C Declarations
 C
       LOGICAL FUNCTION SOBJS(RI,ARG)
       use state
-      integer,external :: robadv,robrm,rnd
+      use subr
       integer,intent(in) :: ri,arg
 
-      LOGICAL MOVETO,OPNCLS,LIT,WASLIT
-      LOGICAL F,QOPEN
+      LOGICAL WASLIT,F,QOPEN
       integer r,av,i,mroom,odi2,odo2
 C
 C Functions and data
@@ -1392,7 +1393,7 @@ C
       integer,intent(in) :: RI,ARG
 
       LOGICAL QOPEN,F
-      LOGICAL MIRPAN, WASLIT
+      LOGICAL  WASLIT
       integer r,av,i,j,k,nxt,obj,odi2,odo2,svflag,svhere,target,wl
 C
 C Functions and data
@@ -2306,7 +2307,7 @@ C Declarations
 C
       LOGICAL FUNCTION MIRPAN(ST,PNF)
       use state
-      integer,external :: mrhere
+      use subr
       integer,intent(in) :: ST
       LOGICAL,intent(in) :: PNF
       
@@ -2354,9 +2355,9 @@ C Declarations
 C
       LOGICAL FUNCTION BALLOP(ARG)
       use state
+      use subr
       integer, intent(in) :: arg
-      LOGICAL FINDXT,QEMPTY
-C
+
       BALLOP=.TRUE.                        ! assume wins.
       IF(ARG/=2) GO TO 200                  ! readout?
       IF(PRSA/=LOOKW) GO TO 10            ! only process look.
@@ -2415,10 +2416,10 @@ C
 
       LOGICAL FUNCTION TROLLP()
       use state
-      logical, external :: QHERE
+      use subr
+
       integer i
-      LOGICAL PROB
-C
+
       TROLLP=.TRUE.                        ! assume wins.
       IF(PRSA/=FIGHTW) GO TO 1100            ! fight?
       IF(OCAN(AXE)==TROLL) GO TO 10            ! got axe?  nothing.

@@ -12,10 +12,9 @@
 PROGRAM DUNGEO
 use state!,only: xnorth,xne,xeast,xse,xsouth,xsw,xwest,xnw,bkvw,
 !     & bkve, bktwi, bkvau
-use gamemod,only:game
+use gamemod,only:game,initfl
 implicit none
       
-LOGICAL INITFL
 integer i,j,x
 
 integer,parameter :: skolwl(*)=[BKVW,271,XEAST,BKVE,272,XWEST, BKTWI, 270, XSOUTH, BKVAU, 269, XNORTH]
