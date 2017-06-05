@@ -22,7 +22,7 @@ C Declarations
       module objapp
       implicit none
       
-      public:: oappli
+      public:: oappli,thiefp,cyclop
       
       contains
 
@@ -34,7 +34,7 @@ C Declarations
       LOGICAL SOBJS,NOBJS
       LOGICAL QOPEN,QON,LIT,WASLIT
       LOGICAL MOVETO,RMDESC,CLOCKD
-      LOGICAL THIEFP,CYCLOP,TROLLP,BALLOP
+      LOGICAL TROLLP,BALLOP
       LOGICAL QEMPTY,F,OPNCLS
       integer, PARAMETER :: MXSMP=99
       integer r,av,flobts,i,j,nloc,odi2,odo2
@@ -335,7 +335,7 @@ C
 C
 C O110--      Thief, processed externally.
 C
-25000      OAPPLI=THIEFP(ARG)
+25000      OAPPLI=THIEFP()
       GO TO 50                        ! go see if now dark.
 C
 C O111--      Window
@@ -1387,10 +1387,13 @@ C Declarations
 C
       LOGICAL FUNCTION NOBJS(RI,ARG)
       use state
+      logical,external :: QHERE
       integer,external :: mrhere,rnd
+
       integer,intent(in) :: RI,ARG
+
       LOGICAL QOPEN,MOVETO,F,RMDESC
-      LOGICAL QHERE,OPNCLS,MIRPAN, LIT,WASLIT,QEMPTY
+      LOGICAL OPNCLS,MIRPAN, LIT,WASLIT,QEMPTY
       integer r,av,i,j,k,nxt,obj,odi2,odo2,svflag,svhere,target,wl
 C
 C Functions and data
@@ -2413,9 +2416,9 @@ C
 
       LOGICAL FUNCTION TROLLP()
       use state
-      
+      logical, external :: QHERE
       integer i
-      LOGICAL QHERE,PROB
+      LOGICAL PROB
 C
       TROLLP=.TRUE.                        ! assume wins.
       IF(PRSA/=FIGHTW) GO TO 1100            ! fight?
@@ -2494,6 +2497,7 @@ C Declarations
 C
       LOGICAL FUNCTION CYCLOP()
       use state
+      use subr,only: rspeak,newsta
 
       integer i
 
@@ -2556,10 +2560,11 @@ C Declarations
 C
       LOGICAL FUNCTION THIEFP()
       use state
+      use subr,only: qhere,newsta,prob,qempty,rspeak,rspsub,princo
 
+  
       integer i,j
-      LOGICAL QHERE,PROB,QEMPTY
-C
+
       THIEFP=.TRUE.                        ! assume wins.
       IF(PRSA/=FIGHTW) GO TO 100            ! fight?
       IF(OCAN(STILL)==THIEF) GO TO 10      ! got stilletto?  f.

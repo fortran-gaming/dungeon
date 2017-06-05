@@ -23,6 +23,7 @@ C      CALL RSPEAK(MSGNUM)
       use,intrinsic:: iso_fortran_env, only: input_unit,output_unit
       implicit none
       
+      public:: rnd,rspeak,qhere,newsta,qempty
       contains
 
       SUBROUTINE RSPEAK(N)
@@ -175,9 +176,7 @@ C
       END SUBROUTINE NEWSTA
 
 C QHERE-- Test for object in room
-C
-C Declarations
-C
+
       pure LOGICAL FUNCTION QHERE(OBJ,RM)
       use state, only: oroom,r2lnt,r2,o2
       integer, intent(IN) :: OBJ,rm
@@ -193,9 +192,7 @@ C
       END FUNCTION QHERE
 
 C QEMPTY-- Test for object empty
-C
-C Declarations
-C
+
       LOGICAL FUNCTION QEMPTY(OBJ)
       use state, only: ocan,olnt
       integer, intent(in) :: obj
@@ -328,6 +325,7 @@ C Declarations
 C
       LOGICAL FUNCTION PROB(G,B)
       use state,only: badlkf
+      integer,external :: rnd
       integer, intent(in) :: G,B
 
         integer i
@@ -408,8 +406,7 @@ C
       integer, intent(in) :: FULL,RM
 
       integer i,j,k
-      LOGICAL QEMPTY,QHERE
-C
+
       J=329                              ! assume superbrief format.
       DO 500 I=1,OLNT                        ! loop on objects
         IF(.NOT.QHERE(I,RM).OR.(IAND(OFLAG1(I), VISIBT).EQ.0).OR.
@@ -464,8 +461,6 @@ C
 
       integer i,j
 
-      LOGICAL QEMPTY
-C
       I=575                              ! first line.
       IF(ADV.NE.PLAYER) I=576                  ! if not me.
       DO 10 J=1,OLNT                        ! loop
@@ -497,7 +492,7 @@ C PRINCO-      Print contents of object
       logical, intent(in) :: LDESCF
 
       integer i,j,x,y,also
-      LOGICAL QEMPTY,MOREF,QSEEIN,QUAL
+      LOGICAL MOREF,QSEEIN,QUAL
 C
 C Functions and data
 C

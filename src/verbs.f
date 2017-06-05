@@ -23,6 +23,9 @@ C Declarations
 C
       module verbs
       use state
+      use subr,only: rnd,fights
+      use timefnc,only: blow
+  
       use,intrinsic:: iso_fortran_env,only: output_unit
       implicit none
       contains
@@ -30,14 +33,17 @@ C
       LOGICAL FUNCTION VAPPLI(RI)
       use state
       integer,external :: rnd,blow,fights
-        integer,intent(in) :: ri
+      logical, external :: objact,OAPPLI
+      integer,intent(in) :: ri
+      
       integer,PARAMETER :: MXNOP=39,MXJOKE=64,MXSMP=99,NUMANS=16
-      LOGICAL LIT,OBJACT,WASLIT
+      
+      LOGICAL LIT,WASLIT
       LOGICAL QEMPTY,RMDESC,CLOCKD
       LOGICAL MOVETO,YESNO
       LOGICAL QOPEN,EDIBLE,DRKBLE
       LOGICAL TAKE,PUT,DROP,WALK
-      LOGICAL QHERE,FINDXT,OAPPLI,F
+      LOGICAL QHERE,FINDXT,F
       INTEGER,parameter::JOKES(*) = [4,5,3,304,305,306,307,308,309,310,
      & 311,312, 313,5314,5319,324,325,883,884,120,120,0,0,0,0]
       integer,parameter :: ANSWER(*)=[0,1,2,2,3,4,4,4,4,4,5,5,5,6,7,7]
