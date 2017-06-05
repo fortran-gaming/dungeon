@@ -26,14 +26,14 @@ C Declarations
       
       contains
       
-      C OBJACT-- Apply objects from parse vector
+! OBJACT-- Apply objects from parse vector
       LOGICAL FUNCTION OBJACT()
-       use state, only: prsi,prso
+       use state, only: prsi,prso,oactio
 
       OBJACT=.TRUE.                        ! assume wins.
       IF(PRSI.EQ.0) GO TO 100                  ! ind object?
       IF(OAPPLI(OACTIO(PRSI),0)) RETURN      ! yes, let it handle.
-C
+
 100      IF(PRSO.EQ.0) GO TO 200                  ! dir object?
       IF(OAPPLI(OACTIO(PRSO),0)) RETURN      ! yes, let it handle.
 C
@@ -45,7 +45,7 @@ C
       LOGICAL FUNCTION OAPPLI(RI,ARG)
       use state
       use subr
-      use timefnc,only: clockd
+      use rooms,only: clockd,rmdesc
 
       integer, intent(in) :: ri,arg
 
@@ -1404,7 +1404,10 @@ C Declarations
 C
       LOGICAL FUNCTION NOBJS(RI,ARG)
       use state
-      use subr!,only: qhere,rspeak,newsta,bug,rspsub,qempty
+      use subr,only: qhere,newsta,bug,qempty,lit,moveto,mrhere,rnd,
+     &  opncls
+      use io,only:rspsub,rspeak
+      use rooms,only: rmdesc
 
       integer,intent(in) :: RI,ARG
 
@@ -2513,7 +2516,8 @@ C Declarations
 C
       LOGICAL FUNCTION CYCLOP()
       use state
-      use subr,only: rspeak,newsta
+      use subr,only: newsta
+      use io,only: rspeak
 
       integer i
 
@@ -2576,7 +2580,8 @@ C Declarations
 C
       LOGICAL FUNCTION THIEFP()
       use state
-      use subr,only: qhere,newsta,prob,qempty,rspeak,rspsub,princo
+      use subr,only: qhere,newsta,prob,qempty,princo
+      use io,only: rspeak,rspsub
 
   
       integer i,j

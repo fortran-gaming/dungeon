@@ -34,7 +34,8 @@ C
       use objapp
       use subr,only:lit
       use io,only: savegm
-      use timefnc,only: clockd,fightd
+      use timefnc,only: fightd
+      use rooms,only: clockd
 
 
       integer,intent(in) :: ri

@@ -46,7 +46,7 @@ C Declarations
 C
       SUBROUTINE CEVAPP(RI)
       use state
-
+      use subr,only: lit,prob,moveto,mrhere,qhere,findxt
       integer,intent(in) :: ri
 
 
@@ -532,7 +532,7 @@ C
       END SUBROUTINE CEVAPP
 
 
-	C RMDESC-- Print room description
+	! RMDESC-- Print room description
 C
 C RMDESC prints a description of the current room.
 C It is also the processor for verbs 'LOOK' and 'EXAMINE'
@@ -540,6 +540,7 @@ C when there is no direct object.
 C
       LOGICAL FUNCTION RMDESC(FULL)
       use state
+      use subr,only: lit,prob
       use io,only: rspeak
       integer, intent(in) :: full
 
@@ -589,7 +590,7 @@ C
       CALL RAPPLI(RA)                        ! let room handle
       PRSA=FOOW
 
-      END subroutine rappli
+      END function rmdesc
 
       SUBROUTINE RAPPLI(RI)
       use state
@@ -1419,7 +1420,7 @@ C EWTELL--	Describe e/w narrow rooms
 C
       SUBROUTINE EWTELL(RM,ST)
       use state,only: mdir,mr1f,mr2f,mrae,mropnf
-      use subr,only: rspeak
+      use io,only: rspeak
 	  integer,intent(in) :: rm,st
     
       integer i
