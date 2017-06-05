@@ -19,12 +19,56 @@ C RDLINE-	Read input line
 C
 C Declarations
 C
+      module parser
+      use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
+      implicit none
+
+      integer,parameter :: WRDLNT=8                  ! word length size, char
+      integer,parameter :: PWMAX=20
+      integer,parameter :: TEXLNT=76 
+
+      ! Parser vocabularies
+      CHARACTER(WRDLNT) OWORD(OWMAX),VWORD(VWMAX)
+      integer OVOC(OVMAX),VVOC(VVMAX)
+
+    
+C Exit definitions
+C
+      integer,parameter :: XLFLAG=32768           ! last entry flag
+      integer,parameter :: XDMASK=31744           ! direction mask
+      integer,parameter :: XRMASK=255                 ! room mask
+      integer,parameter :: XFMASK=3                 ! type mask
+      integer,parameter :: XFSHFT=256
+      integer,parameter :: XASHFT=256
+      integer,parameter :: XNORM=1                 ! normal exit
+      integer,parameter :: XNO=2                 ! no exit
+      integer,parameter :: XCOND=3                 ! conditional exit
+      integer,parameter :: XDOOR=4                 ! door
+      integer,parameter :: XMIN=1024                 ! minimum direction
+      integer,parameter :: XMAX=16384                 ! maximum direction
+      integer,parameter :: XNORTH=1024
+      integer,parameter :: XNE=2048
+      integer,parameter :: XEAST=3072
+      integer,parameter :: XSE=4096
+      integer,parameter :: XSOUTH=5120
+      integer,parameter :: XSW=6144
+      integer,parameter :: XWEST=7168
+      integer,parameter :: XNW=8192
+      integer,parameter :: XUP=9216
+      integer,parameter :: XDOWN=10240
+      integer,parameter :: XLAUN=11264
+      integer,parameter :: XLAND=12288
+      integer,parameter :: XENTER=13312
+      integer,parameter :: XEXIT=14336
+      integer,parameter :: XCROSS=15360
+
+      contains
+
       SUBROUTINE RDLINE(INLINE,INLEN,WHO)
       use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
       IMPLICIT none
       integer,intent(in) :: who
       integer,intent(inout) :: inlen
-      integer,parameter :: TEXLNT=76 
       CHARACTER(TEXLNT), intent(inout) :: inline
 
       integer, parameter :: LUCVT=ICHAR('A')-ICHAR('a') ! case conversion factor.
@@ -67,8 +111,8 @@ C
 	use, intrinsic:: iso_fortran_env,only: output_unit
 	IMPLICIT INTEGER(A-Z)
 	INCLUDE 'dparam.for'
-	CHARACTER*(TEXLNT) INLINE
-	CHARACTER*(WRDLNT) OUTBUF(LEXMAX),BAKBUF(LEXMAX)
+	CHARACTER(TEXLNT) INLINE
+	CHARACTER(WRDLNT) OUTBUF(LEXMAX),BAKBUF(LEXMAX)
 	LOGICAL LEX,SYNMCH,DFLAG,VBFLAG
 	SAVE BAKBUF,BAKLEN
 	DATA BAKBUF(1)/'L'/,BAKLEN/1/
@@ -80,10 +124,10 @@ C
 	PRSO=0
 C
 	IF(.NOT.LEX(INLINE,INLEN,OUTBUF,OUTLEN,VBFLAG)) GO TO 1000
-	IF((OUTLEN.NE.1).OR.(OUTBUF(1).NE.'AGAIN')) GO TO 100
-	DO 50 I=1,LEXMAX			! use previous
-	  OUTBUF(I)=BAKBUF(I)
-50	CONTINUE
+	IF((OUTLEN /= 1).OR.(OUTBUF(1) /= 'AGAIN')) GO TO 100
+      DO I=1,LEXMAX			! use previous
+	    OUTBUF(I)=BAKBUF(I)
+      enddo
 	OUTLEN=BAKLEN				! buffer and length.
 100	IF(SPARSE(OUTBUF,OUTLEN,VBFLAG)) 1000,200,300	! do syn scan.
 C
@@ -210,15 +254,12 @@ C Declarations
 C
 C This routine details on bit 2 of PRSFLG
 C
-	INTEGER FUNCTION SPARSE(LBUF,LLNT,VBFLAG)
-	use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
-	IMPLICIT INTEGER(A-Z)
-	INCLUDE 'dparam.for'
-	CHARACTER*(WRDLNT) LBUF(LEXMAX),WORD,LCWORD,LCIFY
-	CHARACTER*(WRDLNT+2) LCWRD1
-	LOGICAL LIT,DFLAG,VBFLAG,ANDFLG,BUNFLG
-	INTEGER OBJVEC(2),PRPVEC(2)
-	EQUIVALENCE (OBJVEC(1),OBJ1),(PRPVEC(1),PREP1)
+      INTEGER FUNCTION SPARSE(LBUF,LLNT,VBFLAG)
+      CHARACTER(WRDLNT) LBUF(LEXMAX),WORD,LCWORD,LCIFY
+      CHARACTER(WRDLNT+2) LCWRD1
+      LOGICAL LIT,DFLAG,VBFLAG,ANDFLG,BUNFLG
+      INTEGER OBJVEC(2),PRPVEC(2)
+      EQUIVALENCE (OBJVEC(1),OBJ1),(PRPVEC(1),PREP1)
 
 C SPARSE, PAGE 2
 C
@@ -226,36 +267,30 @@ C Vocabularies
 C
 C Buzz words--	ignored in syntactic processing
 C
-	DATA BWORD/'BY','IS','A','AN','THE','AM','ARE',
-	1	'TODAY','MY','YOUR','OUR','HIS'/
+	  character,parameter:: BWORD(:)=[character(wrdlnt):: 'BY','IS',
+     & 'A','AN','THE','AM','ARE','TODAY','MY','YOUR','OUR','HIS']
 C
 C Prepositions--	maps prepositions to indices
 C
-	DATA PWORD/'OVER','WITH','USING','AT','TO',
-	1	'IN','INSIDE','INTO','DOWN','UP',
-	2	'UNDER','OF','ON','OFF','FOR',
-	3	'FROM','OUT','THROUGH',' ',' '/
-C
-	DATA PVOC/1,2,2,3,4,
-	1	5,5,5,6,7,
-	2	8,9,10,11,12,
-	3	13,13,14,0,0/
+      character,parameter :: PWORD(:)=[character(WRDLNT)::
+     &  'OVER','WITH',      
+     & 'USING', 'AT','TO', 'IN','INSIDE','INTO','DOWN','UP', 'UNDER', 
+     & 'OF','ON','OFF', 'FOR', 'FROM','OUT','THROUGH',' ',' ']
+
+      integer, parameter :: PVOC(:) = [1,2,2,3,4,5,5,5,6,7,8,9,10,11,
+     & 12,13,13,14,0,0]
 C
 C Directions--	maps directions to indices
 C
-	DATA DWORD/'N','NORTH','S','SOUTH',
-	1 'E','EAST','W','WEST',
-	2 'SE','SW','NE','NW',
-	4 'U','UP','D','DOWN',
-	5 'LAUNCH','LAND','EXIT','OUT',
-	6 'TRAVEL','IN','CROSS',' ',' '/
-C
-	DATA DVOC/XNORTH,XNORTH,XSOUTH,XSOUTH,
-	1 XEAST,XEAST,XWEST,XWEST,
-	2 XSE,XSW,XNE,XNW,
-	4 XUP,XUP,XDOWN,XDOWN,
-	5 XLAUN,XLAND,XEXIT,XEXIT,
-	6 XCROSS,XENTER,XCROSS,0,0/
+      character,parameter :: DWORD(:)=[character(wrdlnt) :: 
+     & 'N','NORTH','S','SOUTH', 'E','EAST','W','WEST',
+     & 'SE','SW','NE','NW','U','UP','D','DOWN',
+     & 'LAUNCH','LAND','EXIT','OUT','TRAVEL','IN','CROSS',' ',' ']
+
+      integer, parameter ::DVOC(:) =[XNORTH,XNORTH,XSOUTH,XSOUTH,
+     & XEAST,XEAST,XWEST,XWEST, XSE,XSW,XNE,XNW,
+     & XUP,XUP,XDOWN,XDOWN, XLAUN,XLAND,XEXIT,XEXIT,
+     & XCROSS,XENTER,XCROSS,0,0]
 
 C SPARSE, PAGE 3
 C
@@ -266,101 +301,50 @@ C object numbers in AVOC.  Object entries are delimited by the first
 C object being positive, and all subsequent objects in the same entry
 C being negative.
 C
-	DATA (AWORD(I),I=1,40) /
-	1 'BROWN','ELONGATE','HOT','PEPPER',
-	1 'VITREOUS','JADE','HUGE','ENORMOUS',
-	2 'TROPHY','CLEAR','LARGE','NASTY',
-	3 'ELVISH','BRASS','BROKEN','ORIENTAL',
-	4 'BLOODY','RUSTY','BURNED-O','DEAD',
-	5 'OLD','LEATHER','PLATINUM','PEARL',
-	6 'MOBY','CRYSTAL','GOLD','IVORY',
-	7 'SAPPHIRE','WOODEN','WOOD','STEEL',
-	8 'DENTED','FANCY','ANCIENT','SMALL',
-	9 'BLACK','TOUR','VISCOUS','VICIOUS'/
+      character,parameter :: AWORD(:) =[character(wrdlnt) ::
+     & 'BROWN','ELONGATE','HOT','PEPPER','VITREOUS','JADE','HUGE',
+     & 'ENORMOUS', 'TROPHY','CLEAR','LARGE','NASTY',
+     & 'ELVISH','BRASS','BROKEN','ORIENTAL', 'BLOODY','RUSTY',
+     & 'BURNED-O','DEAD', 'OLD','LEATHER','PLATINUM','PEARL',
+     & 'MOBY','CRYSTAL','GOLD','IVORY', 'SAPPHIRE','WOODEN','WOOD',
+     & 'STEEL','DENTED','FANCY','ANCIENT','SMALL','BLACK','TOUR',
+     & 'VISCOUS','VICIOUS', 'GLASS','TRAP','FRONT','STONE',
+     & 'MANGLED','RED','YELLOW','BLUE', 'VAMPIRE','MAGIC','SEAWORTH',
+     & 'TAN','SHARP','WICKER','CLOTH','BRAIDED','GAUDY','SQUARE','CLAY',
+     & 'SHINY','THIN','GREEN','PURPLE','WHITE','MARBLE','COKE','EMPTY',
+     & 'ROUND','TRIANGUL','RARE','OBLONG','EAT-ME','EATME','ORANGE',
+     & 'ECCH','ROCKY','SHEER','200','NEAT','SHIMMERI','ZURICH','BIRDS',
+     & 'ENCRUSTE','BEAUTIFU','CLOCKWOR','MECHANIC','MAHOGANY','PINE',
+     & 'LONG','CENTER','SHORT','T','COMPASS','BRONZE','CELL','LOCKED',
+     & 'SUN','BARE','SONG','NORTH','NORTHERN','SOUTH','SOUTHERN','EAST',
+     & 'EASTERN','WEST','WESTERN','DUNGEON','FREE','GRANITE','LOWERED',
+     & 'VOLCANO','MAN-SIZE','METAL','PLASTIC','SILVER', 'USED',
+     & 'USELESS','SEEING','ONE-EYED','HOLY','HAND-HEL','UNRUSTY',
+     & 'PLAIN','PRICELES','SANDY','GIGANTIC','LINE-PRI','FLATHEAD',
+     & 'FINE','SHADY','SUSPICIO','CROSS','TOOL','CONTROL','DON',
+     & 'WOODS','GOLDEN','OAK','BARRED', 'DUSTY','NARROW','IRON',
+     & 'WELCOME','RUBBER','SKELETON','ALL','ZORKMID',' ',' ',' ',' ',
+     & ' ',' ',' ',' ',' ',' ',' ',' ']
 C
-	DATA (AVOC(I),I=1,112) /
-	1 1,-81,-133,1,3,-190,3,
-	1 4,6,8,8,-122,
-	2 9,10,12,-26,-47,-95,-96,-123,-133,-135,-144,-145,
-	2	-150,-176,-191,13,-19,
-	3 14,15,-16,-46,-156,-190,16,-22,-38,-92,-113,-155,-158,17,
-	4 20,24,-205,22,22,
-	5 25,-41,-44,-45,-208,25,26,27,
-	6 31,32,-126,-206,-209,33,-85,-104,-157,-158,-188,34,
-	7 37,38,-67,-75,-93,-136,-137,-165,-173,-174,-175,-197,-204,
-	7	38,-67,-136,-137,-165,-173,-174,-175,
-	7	39,-105,-124,-125,-189,
-	8 39,40,41,-44,5,-46,-52,-53,-89,-102,-103,-153,-187,
-	9 47,-162,49,55,62/
-C
-	DATA (AWORD(I),I=41,80) /
-	1 'GLASS','TRAP','FRONT','STONE',
-	1 'MANGLED','RED','YELLOW','BLUE',
-	2 'VAMPIRE','MAGIC','SEAWORTH','TAN',
-	3 'SHARP','WICKER','CLOTH','BRAIDED',
-	4 'GAUDY','SQUARE','CLAY','SHINY',
-	5 'THIN','GREEN','PURPLE','WHITE',
-	6 'MARBLE','COKE','EMPTY','ROUND',
-	7 'TRIANGUL','RARE','OBLONG','EAT-ME',
-	8 'EATME','ORANGE','ECCH','ROCKY',
-	9 'SHEER','200','NEAT','SHIMMERI'/
-C
-	DATA (AVOC(I),I=113,179) /
-	1 10,-126,-132,-206,-209,66,68,69,-150,-278,
-	1 	72,-124,79,-94,-140,-161,-170,-171,-190,-209,
-	1	80,-159,82,-112,-114,-141,-206,
-	2 83,90,-281,90,91,
-	3 92,98,100,101,
-	4 108,109,-127,109,110,
-	5 110,77,-115,-143,116,117,-126,-147,-160,-266,
-	6 119,121,121,128,
-	7 129,134,135,138,
-	8 138,139,141,146,
-	9 146,148,148,151/
-C
-	DATA (AWORD(I),I=81,120) /
-	1 'ZURICH','BIRDS','ENCRUSTE','BEAUTIFU',
-	1 'CLOCKWOR','MECHANIC','MAHOGANY','PINE',
-	2 'LONG','CENTER','SHORT','T',
-	3 'COMPASS','BRONZE','CELL','LOCKED',
-	4 'SUN','BARE','SONG','NORTH',
-	5 'NORTHERN','SOUTH','SOUTHERN','EAST',
-	6 'EASTERN','WEST','WESTERN','DUNGEON',
-	7 'FREE','GRANITE','LOWERED','VOLCANO',
-	8 'MAN-SIZE','METAL','PLASTIC','SILVER',
-	9 'USED','USELESS','SEEING','ONE-EYED'/
-C
-	DATA (AVOC(I),I=180,238) /
-	1 152,153,-154,-155,154,-155,86,-156,
-	1 157,-158,157,-158,163,164,
-	2 166,166,167,168,
-	3 169,-275,172,174,-175,174,
-	4 177,259,267,269,
-	5 269,270,270,271,
-	6 271,67,-272,67,-272,279,
-	7 195,-262,265,36,111,
-	8 93,64,-99,-200,-201,77,-87,-88,-90,59,
-	9 22,22,126,-206,-209,58/
-C
-	DATA (AWORD(I),I=121,160) /
-	1 'HOLY','HAND-HEL','UNRUSTY','PLAIN',
-	1 'PRICELES','SANDY','GIGANTIC','LINE-PRI',
-	2 'FLATHEAD','FINE','SHADY','SUSPICIO',
-	3 'CROSS','TOOL','CONTROL','DON',
-	4 'WOODS','GOLDEN','OAK','BARRED',
-	5 'DUSTY','NARROW','IRON','WELCOME',
-	6 'RUBBER','SKELETON','ALL','ZORKMID',
-	7 12*' '/
-C
-	DATA (AVOC(I),I=239,282) /
-	1 43,89,13,13,
-	1 104,192,122,122,
-	2 118,91,61,61,
-	3 165,193,194,196,
-	4 196,157,-158,197,198,-210,
-	5 204,199,205,207,
-	6 207,23,253,-254,104,-148,
-	7 12*0/
+      integer,parameter:: AVOC(:) =[1,-81,-133,1,3,-190,3, 4,6,8,8,-122,
+     & 9,10,12,-26,-47,-95,-96,-123,-133,-135,-144,-145,-150,-176,-191,
+     & 13,-19, 14,15,-16,-46,-156,-190,16,-22,-38,-92,-113,-155,-158,17,
+     & 20,24,-205,22,22, 25,-41,-44,-45,-208,25,26,27, 31,32,-126,-206,
+     & -209,33,-85,-104,-157,-158,-188,34,37,38,-67,-75,-93,-136,-137,
+     & -165,-173,-174,-175,-197,-204,38,-67,-136,-137,-165,-173,-174,
+     & -175,39,-105,-124,-125,-189,39,40,41,-44,5,-46,-52,-53,-89,-102,
+     & -103,-153,-187,47,-162,49,55,62,10,-126,-132,-206,-209,66,68,69,
+     & -150,-278,72,-124,79,-94,-140,-161,-170,-171,-190,-209,80,-159,
+     & 82,-112,-114,-141,-206,83,90,-281,90,91,92,98,100,101,108,109,
+     & -127,109,110,110,77,-115,-143,116,117,-126,-147,-160,-266,119,
+     & 121,121,128,129,134,135,138,138,139,141,146,146,148,148,151,
+     & 152,153,-154,-155,154,-155,86,-156,157,-158,157,-158,163,164,
+     & 166,166,167,168,169,-275,172,174,-175,174,177,259,267,269,
+     & 269,270,270,271,271,67,-272,67,-272,279,195,-262,265,36,111,
+     & 93,64,-99,-200,-201,77,-87,-88,-90,59,22,22,126,-206,-209,58
+     & 43,89,13,13, 104,192,122,122,118,91,61,61,165,193,194,196,
+     &  196,157,-158,197,198,-210,204,199,205,207,207,23,253,-254,104,
+     & -148,0,0,0,0,0,0,0,0,0,0,0,0]
 
 C SPARSE, PAGE 4
 C
@@ -845,9 +829,9 @@ C
 C
 C Check for buzz word
 C
-	  DO 50 J=1,BWMAX
-	    IF(WORD.EQ.BWORD(J)) GO TO 1000	! if match, ignore.
-50	  CONTINUE
+	  DO J=1,BWMAX
+	    IF(WORD == BWORD(J)) GO TO 1000	! if match, ignore.
+      enddo
 C
 C Check for action or direction
 C
@@ -1061,7 +1045,7 @@ C 7000--	Unidentifiable object (index into OVOC is J)
 C
 7000	LCWORD=LCIFY(WORD,1)			! convert obj to lower case.
 	LCWRD1=' '				! assume no adjective
-	IF(ADJ.NE.0) LCWRD1=' '//LCIFY(AWORD(ADJPTR),1)//' '
+	IF(ADJ /= 0) LCWRD1=' '//LCIFY(AWORD(ADJPTR),1)//' '
 	IF(OBJ.LT.0) GO TO 7200			! ambiguous or unreachable?
 	IF(LIT(HERE)) GO TO 7100		! lit?
 	IF(VBFLAG) CALL RSPEAK(579)		! not lit, report.
@@ -1736,17 +1720,19 @@ C FINDPR-	Find preposition string corresponding to index.
 C
 C Declarations
 C
-	CHARACTER*(*) FUNCTION FINDPR(PREPNO)
-	IMPLICIT INTEGER(A-Z)
-	INCLUDE 'dparam.for'
-C
-	DO 100 I=1,PWMAX			! loop through prepositions.
-	  IF(PVOC(I).EQ.PREPNO) GO TO 200
-100	CONTINUE
-	FINDPR=' '
-	RETURN
-C
-200	FINDPR=PWORD(I)
-	RETURN
-C
-	END
+      CHARACTER(*) FUNCTION FINDPR(PREPNO)
+      IMPLICIT none
+      integer, intent(in) :: prepno
+
+      DO I=1,PWMAX			! loop through prepositions.
+        IF(PVOC(I) == PREPNO) then
+            FINDPR=PWORD(I)
+            return
+        endif
+      enddo 
+
+   	  FINDPR=' '
+    
+      END function findpr
+
+      end module

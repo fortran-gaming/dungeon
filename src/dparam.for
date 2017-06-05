@@ -93,36 +93,7 @@ C
       integer,parameter :: CEVXB=28                 ! exorcism bell timer
       integer,parameter :: CEVXC=29                 ! exorcism candle timer
       integer,parameter :: CEVXBH=30                 ! exorcism bell cooling
-C
-C Exit definitions
-C
-      integer,parameter :: XLFLAG=32768           ! last entry flag
-      integer,parameter :: XDMASK=31744           ! direction mask
-      integer,parameter :: XRMASK=255                 ! room mask
-      integer,parameter :: XFMASK=3                 ! type mask
-      integer,parameter :: XFSHFT=256
-      integer,parameter :: XASHFT=256
-      integer,parameter :: XNORM=1                 ! normal exit
-      integer,parameter :: XNO=2                 ! no exit
-      integer,parameter :: XCOND=3                 ! conditional exit
-      integer,parameter :: XDOOR=4                 ! door
-      integer,parameter :: XMIN=1024                 ! minimum direction
-      integer,parameter :: XMAX=16384                 ! maximum direction
-      integer,parameter :: XNORTH=1024
-      integer,parameter :: XNE=2048
-      integer,parameter :: XEAST=3072
-      integer,parameter :: XSE=4096
-      integer,parameter :: XSOUTH=5120
-      integer,parameter :: XSW=6144
-      integer,parameter :: XWEST=7168
-      integer,parameter :: XNW=8192
-      integer,parameter :: XUP=9216
-      integer,parameter :: XDOWN=10240
-      integer,parameter :: XLAUN=11264
-      integer,parameter :: XLAND=12288
-      integer,parameter :: XENTER=13312
-      integer,parameter :: XEXIT=14336
-      integer,parameter :: XCROSS=15360
+
 C
 C Actor indices
 C
@@ -562,16 +533,7 @@ C
      &      BUNLNT,BUNSUB,BUNVEC
       INTEGER SYN(11)
       EQUIVALENCE (SYN(1),VFLAG)
-C
-C Parser vocabularies
-C
-      CHARACTER*(WRDLNT) BWORD(BWMAX),PWORD(PWMAX),DWORD(DWMAX),
-     & AWORD(AWMAX),OWORD(OWMAX),VWORD(VWMAX)
-      integer PVOC(PWMAX),
-     &      DVOC(DWMAX),AVOC(AVMAX),OVOC(OVMAX),VVOC(VVMAX)
-      COMMON /VOCAB/ BWORD,PWORD,DWORD,
-     &      AWORD,OWORD,VWORD,PVOC,
-     &      DVOC,AVOC,OVOC,VVOC
+
 C
 C Game state
 C
