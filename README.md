@@ -10,9 +10,8 @@ The purpose of this update is to make DUNGEON compilable using gfortran, enablin
 
 ## COMPILATION
 
-    cd src
-    make
-    mv dungeon ..
+    (cd src; make && mv dungeon ..)
+
     ./dungeon
 
 `dungeon` executable *must* be run from the directory containing the `dindx` and `dtext` files. 
