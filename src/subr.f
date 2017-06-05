@@ -17,27 +17,27 @@ C Called by--
 C
 C	CALL RSPEAK(MSGNUM)
 C
-	SUBROUTINE RSPEAK(N)
-	IMPLICIT INTEGER (A-Z)
+      SUBROUTINE RSPEAK(N)
+      IMPLICIT none
+      integer, intent(in) :: n
 C
-	CALL RSPSB2(N,0,0)
-	RETURN
-C
-	END
+       CALL RSPSB2(N,0,0)
+
+       END SUBROUTINE RSPEAK
 C
 C RSPSUB-- Output random message with substitutable argument
 C
 C Called by--
 C
-C	CALL RSPSUB(MSGNUM,SUBNUM)
+C      CALL RSPSUB(MSGNUM,SUBNUM)
 C
-	SUBROUTINE RSPSUB(N,S1)
-	IMPLICIT INTEGER (A-Z)
+      SUBROUTINE RSPSUB(N,S1)
+      implicit none
+      integer, intent(in) :: n,s1
 C
-	CALL RSPSB2(N,S1,0)
-	RETURN
-C
-	END
+      CALL RSPSB2(N,S1,0)
+
+      END SUBROUTINE RSPSUB
 
 C RSPSB2-- Output random message with substitutable arguments
 C
@@ -49,7 +49,10 @@ C
 	use,intrinsic:: iso_fortran_env, only: output_unit
 	IMPLICIT INTEGER (A-Z)
 	INCLUDE 'dparam.for'
-	CHARACTER*(TEXLNT) B1,B2
+
+	integer, intent(in) :: a,b,c
+
+	CHARACTER(TEXLNT) B1,B2
 C
 C Convert all arguments from dictionary numbers (if positive)
 c to absolute record numbers.
@@ -57,13 +60,13 @@ C
 	X=A					! set up work variables.
 	Y=B
 	Z=C
-	IF(X.GT.0) X=RTEXT(X)			! if >0, look up in rtext.
-	IF(Y.GT.0) Y=RTEXT(Y)
-	IF(Z.GT.0) Z=RTEXT(Z)
+	IF(X > 0) X=RTEXT(X)			! if >0, look up in rtext.
+	IF(Y > 0) Y=RTEXT(Y)
+	IF(Z > 0) Z=RTEXT(Z)
 	X=IABS(X)				! take abs value.
 	Y=IABS(Y)
 	Z=IABS(Z)
-	IF(X.EQ.0) RETURN			! anything to do?
+	IF(X == 0) RETURN			! anything to do?
 	TELFLG=.TRUE.				! said something.
 C
 	READ(DBCH,REC=X) OLDREC,B1		! read first line.
@@ -104,9 +107,9 @@ C
 	Y=Z					! set up for next
 	Z=0					! substitution and
 	GO TO 200				! recheck line.
-C
-	END
 
+	END SUBROUTINE RSPSB2
+ 
 C OBJACT-- Apply objects from parse vector
 C
 C Declarations
@@ -124,9 +127,8 @@ C
 	IF(OAPPLI(OACTIO(PRSO),0)) RETURN	! yes, let it handle.
 C
 200	OBJACT=.FALSE.				! loses.
-	RETURN
-C
-	END
+
+	END FUNCTION OBJACT
 
 C BUG-- Report fatal system error
 C
@@ -156,17 +158,18 @@ C Called by--
 C
 C	CALL NEWSTA(OBJECT,STRING,NEWROOM,NEWCON,NEWADV)
 C
-	SUBROUTINE NEWSTA(O,R,RM,CN,AD)
-	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
-C
-	CALL RSPEAK(R)
-	OROOM(O)=RM
-	OCAN(O)=CN
-	OADV(O)=AD
-	RETURN
-C
-	END
+      SUBROUTINE NEWSTA(O,R,RM,CN,AD)
+      implicit None
+      INCLUDE 'dparam.for'
+    
+      integer, intent(in) :: o,r, rm, cn, ad
+
+      CALL RSPEAK(R)
+      OROOM(O)=RM
+      OCAN(O)=CN
+      OADV(O)=AD
+
+      END SUBROUTINE NEWSTA
 
 C QHERE-- Test for object in room
 C
