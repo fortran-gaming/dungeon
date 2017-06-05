@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.8.12)
 project(dungeon Fortran) 
 
-add_compile_options(-Wline-truncation)# -Wfatal-errors)
+add_compile_options(-Wline-truncation -Wfatal-errors)
 
 add_library(state state.f90)
 

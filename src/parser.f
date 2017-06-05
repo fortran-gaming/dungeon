@@ -1010,12 +1010,18 @@ C
 C Declarations
 C
       SUBROUTINE UNPACK(OLDJ,J)
-      IMPLICIT INTEGER(A-Z)
-      INCLUDE 'dparam.for'
-C
-      DO 10 I=1,11                        ! clear syntax.
+      use state,only: dfl1,dfl2,dfw1,dfw2
+      integer,intent(in) :: oldj
+      integer, intent(out) :: j
+
+
+
+
+      integer i
+
+      DO I=1,11                        ! clear syntax.
         SYN(I)=0
-10      CONTINUE
+      end do
 C
       VFLAG=VVOC(OLDJ)
       J=OLDJ+1

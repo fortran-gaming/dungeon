@@ -189,8 +189,8 @@ C
 	SCOLAC=0
 C
 	IF(INITFL(X)) CALL GAME			! if init files, play game.
-	CALL EXIT				! done
-	END
+	error stop
+	END program
 	
 C TXCRYP - Subroutine to encrypt/decrypt text strings.
 C
@@ -201,12 +201,12 @@ C It is located here, rather than in the SUBRoutine module, because
 C it is used by both the game and the separate data base compiler.
 C
 	SUBROUTINE TXCRYP(R,LINE)
-	IMPLICIT INTEGER (A-Z)
-	CHARACTER*(*) LINE
+    integer, intent(in) :: R
+	CHARACTER(*),intent(inout) :: LINE
 C
-	DO 100 I=1,LEN(LINE)
+	DO concurrent (I=1:LEN(LINE))
 	  X=IAND(R, 31)+I
 	  LINE(I:I)=CHAR(IEOR(ICHAR(LINE(I:I)), X))
-100	CONTINUE
-	RETURN
-	END
+    end do
+
+	END SUBROUTINE TXCRYP

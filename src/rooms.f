@@ -12,11 +12,18 @@ C
 C RAPPLI- Room routines
 C
 C Declarations
-C
-	SUBROUTINE RAPPLI(RI)
-    use parser, only: ctick
+	module rooms
+	implicit none
 
-	IMPLICIT INTEGER (A-Z)
+	contains
+
+      SUBROUTINE RAPPLI(RI)
+      use state
+      integer, external :: rnd
+	  integer, intent(in) :: RI
+    
+      
+      integer i,r,j
 
 	LOGICAL QOPEN,QON,QHERE,PROB,F
 	LOGICAL MOVETO,LIT,RMDESC,QEMPTY
@@ -801,10 +808,12 @@ C LOOKTO--	Describe view in mirror hallway
 C
 C Declarations
 C
-	SUBROUTINE LOOKTO(NRM,SRM,NT,ST,HT)
-	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
-C
+      SUBROUTINE LOOKTO(NRM,SRM,NT,ST,HT)
+      use state, only: here,mdir,mloc,mr1f,mr2f,mropnf
+      integer, intent(in) :: NRM,SRM,NT,ST,HT
+      integer, external :: mrhere
+      integer dir,i,m1,mrbf
+
 	CALL RSPEAK(HT)				! describe hall.
 	CALL RSPEAK(NT)				! describe north view.
 	CALL RSPEAK(ST)				! describe south view.
@@ -830,18 +839,18 @@ C
 	IF((ST.EQ.0).AND.((DIR.EQ.0).OR.(DIR.EQ.695))) I=853
 	IF((NT+ST+DIR).EQ.0) I=854
 	IF(HT.NE.0) CALL RSPEAK(I)		! describe halls.
-	RETURN
-C
-	END
+
+	END SUBROUTINE LOOKTO
 
 C EWTELL--	Describe e/w narrow rooms
 C
-C Declarations
-C
-	SUBROUTINE EWTELL(RM,ST)
-	IMPLICIT INTEGER (A-Z)
+      SUBROUTINE EWTELL(RM,ST)
+      use state,only: mdir,mr1f,mr2f,mrae,mropnf
+	  integer,intent(in) :: rm,st
+    
+      integer i
 
-	LOGICAL M1
+      LOGICAL M1
 C
 C Note that we are east or west of mirror, and
 C mirror must be n-s.
@@ -855,4 +864,6 @@ C
 	CALL RSPEAK(825)
 	CALL RSPEAK(ST)
 
-	END 	SUBROUTINE EWTELL
+	END SUBROUTINE EWTELL
+
+	end module
