@@ -24,16 +24,18 @@ C Declarations
       contains
 
       LOGICAL FUNCTION OAPPLI(RI,ARG)
+      use state
+      integer,external :: rnd,robadv,robrm
+      integer, intent(in) :: ri,arg
 
       LOGICAL SOBJS,NOBJS
       LOGICAL QOPEN,QON,LIT,WASLIT
       LOGICAL MOVETO,RMDESC,CLOCKD
       LOGICAL THIEFP,CYCLOP,TROLLP,BALLOP
       LOGICAL QEMPTY,F,OPNCLS
-      PARAMETER (MXSMP=99)
-C
-C Functions and data
-C
+      integer, PARAMETER :: MXSMP=99
+      integer r,av,flobts,i,j,nloc,odi2,odo2
+
       QOPEN(R)=IAND(OFLAG2(R), OPENBT).NE.0
       QON(R)=IAND(OFLAG1(R), ONBT).NE.0
 C
@@ -325,7 +327,7 @@ C
 C
 C O109--      Cyclops, processed externally.
 C
-22000      OAPPLI=CYCLOP(ARG)                  ! cyclops
+22000      OAPPLI=CYCLOP()                  ! cyclops
       GO TO 50                        ! go see if now dark.
 C
 C O110--      Thief, processed externally.
@@ -694,7 +696,7 @@ C
 60000      IF(PRSA.NE.TAKEW) GO TO 10            ! take five?
       CALL RSPEAK(419)                  ! time passes.
       DO 60100 I=1,3                        ! wait a while.
-        IF(CLOCKD(X)) RETURN
+        IF(CLOCKD()) RETURN
 60100      CONTINUE
       RETURN
 C
@@ -747,9 +749,13 @@ C
 C Declarations
 C
       LOGICAL FUNCTION SOBJS(RI,ARG)
+      use state
+      integer,external :: robadv,robrm,rnd
+      integer,intent(in) :: ri,arg
 
       LOGICAL MOVETO,OPNCLS,LIT,WASLIT
       LOGICAL F,QOPEN
+      integer r,av,i,mroom,odi2,odo2
 C
 C Functions and data
 C
@@ -1369,20 +1375,20 @@ C
 C
 56100      IF(PRSA.NE.FINDW) GO TO 10            ! find?
       CALL RSPEAK(289)
-      RETURN
-C
-      END
+
+      END function SOBJS
 
 C NOBJS-      New objects processor
 C
 C Declarations
 C
       LOGICAL FUNCTION NOBJS(RI,ARG)
-      IMPLICIT INTEGER (A-Z)
-      INCLUDE 'dparam.for'
+      use state
+      integer,external :: mrhere,rnd
+      integer,intent(in) :: RI,ARG
       LOGICAL QOPEN,MOVETO,F,RMDESC
-      LOGICAL QHERE,OPNCLS,MIRPAN
-      LOGICAL LIT,WASLIT,QEMPTY
+      LOGICAL QHERE,OPNCLS,MIRPAN, LIT,WASLIT,QEMPTY
+      integer r,av,i,j,k,nxt,obj,odi2,odo2,svflag,svhere,target,wl
 C
 C Functions and data
 C
@@ -2286,18 +2292,20 @@ C
 46200      IF(IAND(OFLAG1(PRSO), BURNBT).EQ.0) GO TO 10      ! burnable?
       CALL RSPSUB(974,ODO2)                  ! burns up.
       CALL NEWSTA(PRSO,0,0,0,0)            ! vanishes.
-      RETURN
-C
-      END
+
+      END FUNCTION NOBJS
 
 C MIRPAN--      Processor for global mirror/panel
 C
 C Declarations
 C
       LOGICAL FUNCTION MIRPAN(ST,PNF)
-      IMPLICIT INTEGER (A-Z)
-      INCLUDE 'dparam.for'
-      LOGICAL PNF
+      use state
+      integer,external :: mrhere
+      integer,intent(in) :: ST
+      LOGICAL,intent(in) :: PNF
+      
+      integer mrbf,num
 C
       MIRPAN=.TRUE.
       NUM=MRHERE(HERE)                  ! get mirror num.
@@ -2309,7 +2317,7 @@ C
       CALL RSPEAK(ST+1)                  ! cant open or move.
       RETURN
 C
-200      MRBF=0                              ! assume mirror ok.
+200   MRBF=0                              ! assume mirror ok.
       IF(((NUM.EQ.1).AND..NOT.MR1F).OR.
      &  ((NUM.EQ.2).AND..NOT.MR2F)) MRBF=1
       IF(PNF.OR.((PRSA.NE.LOOKIW).AND.(PRSA.NE.EXAMIW).AND.
@@ -2332,17 +2340,16 @@ C
       RETURN
 C
 600      MIRPAN=.FALSE.                        ! cant handle it.
-      RETURN
-C
-      END
+
+      END Function MIRPAN
 
 C BALLOP-      Balloon function
 C
 C Declarations
 C
       LOGICAL FUNCTION BALLOP(ARG)
-      IMPLICIT INTEGER (A-Z)
-      INCLUDE 'dparam.for'
+      use state
+      integer, intent(in) :: arg
       LOGICAL FINDXT,QEMPTY
 C
       BALLOP=.TRUE.                        ! assume wins.
@@ -2395,17 +2402,16 @@ C
       CFLAG(CEVBAL)=.TRUE.
       CTICK(CEVBAL)=3                        ! start countdown.
       CALL RSPEAK(551)
-      RETURN
-C
-      END
+
+      END FUnction BALLOP
 
 C TROLLP-      Troll function
 C
-C Declarations
-C
-      LOGICAL FUNCTION TROLLP(ARG)
-      IMPLICIT INTEGER (A-Z)
-      INCLUDE 'dparam.for'
+
+      LOGICAL FUNCTION TROLLP()
+      use state
+      
+      integer i
       LOGICAL QHERE,PROB
 C
       TROLLP=.TRUE.                        ! assume wins.
@@ -2476,18 +2482,18 @@ C
       RETURN
 C
 10      TROLLP=.FALSE.                        ! couldnt handle it.
-      RETURN
-C
-      END
+
+      END function trollp
 
 C CYCLOP-      Cyclops function
 C
 C Declarations
 C
-      LOGICAL FUNCTION CYCLOP(ARG)
-      IMPLICIT INTEGER (A-Z)
-      INCLUDE 'dparam.for'
-C
+      LOGICAL FUNCTION CYCLOP()
+      use state
+
+      integer i
+
       CYCLOP=.TRUE.                        ! assume wins.
       IF(.NOT.CYCLOF) GO TO 100            ! asleep?
       IF((PRSA.NE.ALARMW).AND.(PRSA.NE.MUNGW).AND.(PRSA.NE.KICKW).AND.
@@ -2538,17 +2544,17 @@ C
       I=203                              ! assume tie.
       IF(PRSA.EQ.TIEW) GO TO 450
       CYCLOP=.FALSE.
-      RETURN
-C
-      END
+
+      END function cyclop
 
 C THIEFP-      Thief function
 C
 C Declarations
 C
-      LOGICAL FUNCTION THIEFP(ARG)
-      IMPLICIT INTEGER (A-Z)
-      INCLUDE 'dparam.for'
+      LOGICAL FUNCTION THIEFP()
+      use state
+
+      integer i,j
       LOGICAL QHERE,PROB,QEMPTY
 C
       THIEFP=.TRUE.                        ! assume wins.
@@ -2663,6 +2669,6 @@ C
 C
 10      THIEFP=.FALSE.
 
-      END
+      END Function THIEFP
 
       end module
