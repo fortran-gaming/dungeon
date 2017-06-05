@@ -72,12 +72,13 @@ C
       integer, intent(in) :: inlen
       logical, intent(in) :: vbflag
     
-      CHARACTER(WRDLNT) OUTBUF(LEXMAX),BAKBUF(LEXMAX)
+      CHARACTER(WRDLNT) OUTBUF(LEXMAX)
       LOGICAL LEX,SYNMCH,DFLAG
       integer i,outlen
 
-      SAVE BAKBUF,BAKLEN
-      DATA BAKBUF(1)/'L'/,BAKLEN/1/
+      
+      character(wrdlnt),dimension(lexmax),save :: BAKBUF(1)='L'
+      integer,save ::  BAKLEN=1
 C
       DFLAG=IAND(PRSFLG, 1)/=0
       PARSE=.FALSE.                        ! assume fails.
@@ -183,7 +184,7 @@ C
       IF(PRSCON > INLEN) GO TO 3500            ! any more characters?
       IF(INLINE(PRSCON:PRSCON)==' ') GO TO 3100      ! skip blanks.
       K=INDEX(INLINE(PRSCON:INLEN),J)            ! find closing quote.
-      IF(K.LE.1) GO TO 3500                  ! none or empty?
+      IF(K<=1) GO TO 3500                  ! none or empty?
       SUBBUF=INLINE(PRSCON:PRSCON+K-2)      ! set up substring buffer,
       SUBLNT=K-1                        ! length.
       PRSCON=PRSCON+K                        ! skip over string.
@@ -221,7 +222,7 @@ C
 C This routine details on bit 2 of PRSFLG
 C
       INTEGER FUNCTION SPARSE(LBUF,LLNT,VBFLAG)
-
+      use state,only: vword,prep1,obj1
       character(*), intent(inout) :: LBUF(:)
       integer, intent(inout) :: llnt
       logical, intent(in) :: vbflag
@@ -231,7 +232,7 @@ C
       LOGICAL LIT,DFLAG,ANDFLG,BUNFLG
       INTEGER OBJVEC(2),PRPVEC(2),adj,adjptr,errvoc,i,j,k,lobj,obj,
      & pptr, prep
-      EQUIVALENCE (OBJVEC(1),OBJ1),(PRPVEC(1),PREP1)
+!      EQUIVALENCE (OBJVEC(1),OBJ1),(PRPVEC(1),PREP1)
 
 C SPARSE, PAGE 2
 C
@@ -257,186 +258,6 @@ C
 
 
 
-C SPARSE, PAGE 4
-C
-C OBJECTS--      Maps objects to object indices,
-C             same format as AVOC.
-C
-      character, parameter :: OWORD(*)= [character(wrdlnt):: 'BAG',
-     &'SACK','GARLIC','CLOVE','FOOD','SANDWICH','LUNCH','DINNER',
-     & 'GUNK','PIECE','SLAG','COAL',
-     3 'PILE','HEAP','FIGURINE','MACHINE',
-     4 'PDP10','VAX','DRYER','LID',
-     5 'DIAMOND','CASE','BOTTLE','CONTAINE',
-     6 'WATER','QUANTITY','LIQUID','H2O',
-     7 'ROPE','HEMP','COIL','KNIFE',
-     8 'BLADE','SWORD','ORCHRIST','GLAMDRIN',
-     9 'LAMP','LANTERN','RUG','CARPET', 
-     & 'LEAVES','LEAF','TROLL','AXE',
-     & 'PRAYER','KEYS','KEY','SET',
-     & 'BONES','SKELETON','BODY','COINS',
-     3 'BAR','NECKLACE','PEARLS','MIRROR',
-     4 'ICE','MASS','GLACIER','RUBY',
-     5 'TRIDENT','FORK','COFFIN','CASKET',
-     6 'TORCH','CAGE','DUMBWAIT','BASKET',
-     7 'BRACELET','JEWEL','TIMBER','BOX',
-     8 'STRADIVA','VIOLIN','ENGRAVIN','INSCRIPT',
-     9 'GHOST','SPIRIT','FIEND','GRAIL',
-     & 'TRUNK','CHEST','BELL','BOOK',
-     & 'BIBLE','GOODBOOK','CANDLES','PAIR',
-     & 'GUIDEBOO','GUIDE','PAPER','NEWSPAPE',
-     3 'ISSUE','REPORT','MAGAZINE','NEWS',
-     4 'MATCHBOO','MATCH','MATCHES','ADVERTIS',
-     5 'PAMPHLET','LEAFLET','BOOKLET','MAILBOX',
-     6 'TUBE','TOOTHPAS','PUTTY','MATERIAL',
-     7 'GLUE','WRENCH','SCREWDRI','CYCLOPS',
-     8 'MONSTER','CHALICE','CUP','GOBLET',
-     9 'PAINTING','ART','CANVAS','PICTURE',
-     & 'WORK','MASTERPI','THIEF','ROBBER',
-     & 'CRIMINAL','BANDIT','CROOK','GENT',
-     & 'GENTLEMA','MAN','INDIVIDU','BAGMAN',
-     3 'STILETTO','WINDOW','BOLT','NUT',
-     4 'GRATE','GRATING','DOOR','TRAP-DOO',
-     5 'SWITCH','HEAD','CORPSE','BODIES',
-     6 'DAM','GATES','GATE','FCD',
-     7 'RAIL','RAILING','BUTTON','BUBBLE',
-     8 'LEAK','DRIP','HOLE','BAT',
-     9 'RAINBOW','POT','STATUE','SCULPTUR',
-     & 'ROCK','BOAT','PLASTIC','PUMP',
-     & 'AIRPUMP','AIR-PUMP','LABEL','FINEPRIN',
-     & 'STICK','BARREL','BUOY','EMERALD',
-     3 'SHOVEL','GUANO','CRAP','SHIT',
-     4 'HUNK','BALLOON','RECEPTAC','WIRE',
-     5 'HOOK','ZORKMID','COIN','SAFE',
-     6 'CARD','NOTE','SLOT','CROWN',
-     7 'BRICK','FUSE','GNOME','STAMP',
-     8 'TOMB','CRYPT','GRAVE','HEADS',
-     9 'POLES','IMPLEMEN','LOSERS','COKES',
-     & 'LISTINGS','OUTPUT','PRINTOUT','SPHERE',
-     & 'BALL','ETCHING','WALLS','WALL',
-     & 'FLASK','POOL','SEWAGE','TIN',
-     3 'SAFFRON','SPICES','TABLE','POST',
-     4 'POSTS','BUCKET','CAKE','ICING',
-     5 'ROBOT','ROBBY','C3PO','R2D2',
-     6 'PANEL','POLE','TBAR','T-BAR',
-     7 'ARROW','POINT','BEAM','DIAL',
-     8 'SUNDIAL','1','ONE','2',
-     9 'TWO','3','THREE','4',
-     & 'FOUR','5','FIVE','6',
-     & 'SIX','7','SEVEN','8',
-     & 'EIGHT','WARNING','SLIT','IT',
-     3 'THAT','THIS','ME','MYSELF',
-     4 'CRETIN','ALL','EVERYTHI','TREASURE',
-     5 'VALUABLE','SAILOR','TEETH','GRUE',
-     6 'HAND','HANDS','LUNGS','AIR',
-     7 'AVIATOR','FLYER','TREE','CLIFF',
-     8 'LEDGE','PORTRAIT','STACK','BILLS',
-     9 'VAULT','CUBE','LETTERIN','CURTAIN',
-     & 'LIGHT','NEST','EGG','BAUBLE',
-     & 'CANARY','BIRD','SONGBIRD','GUARD',
-     & 'GUARDIAN','ROSE','STRUCTUR','CHANNEL',
-     3 'KEEPER','LADDER','BROCHURE','WISH',
-     4 'GROUND','EARTH','SAND','WELL',
-     5 'SLIDE','CHUTE','HOUSE','BOTTLES',
-     6 'BUNCH','PALANTIR','STONE','FLINT',
-     7 'POSSESSI','GOOP','BEACH','GRIP',
-     8 'HANDGRIP','PRINT','ETCHINGS','CRACK',
-     9 'KEYHOLE','MAT','STOVE','PLATINUM',
-     & 'HIM','SELF','GOLD','SAPPHIRE',
-     & 'IVORY','MASTER','CANDLE','JADE',
-     & 'SCREEN','BLESSING','GHOSTS','SPIRITS',
-     3 'CORPSES','JEWELS','CLIFFS','CHIMNEY',
-     4 ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
-     & ' ',' ',' ',' ',' ',' ',' ',' ',' ']
-C
-      integer,parameter:: OVOC(*)=[
-     & 1,-25,-100,1,2,2,
-     & 3,3,3,3,
-     & 4,-55,4,-143,-186,-282,4,5,
-     3 5,-18,-38,-72,-73,-87,-88,-122,-148,5,6,7,
-     4 7,7,7,7,-200,-201,
-     5 8,9,-123,10,-121,10,
-     6 11,-273,11,-273,11,-273,11,-273,
-     7 12,-101,-282,12,12,-110,13,-24,
-     8 13,-14,14,14,14,
-     9 15,-16,-22,15,-16,-22,17,17,
-     & 18,18,19,-111,20,
-     & 44,-47,23,23,-205,23,
-     & 21,21,21,-72,-73,25,
-     3 26,-165,-168,27,27,28,-29,-276,
-     4 30,30,30,31,
-     5 32,32,33,33,
-     6 34,35,-36,-124,-125,35,-36,35,-36,-98,-113,
-     7 37,37,38,39,-53,-105,
-     8 40,40,41,41,-44,
-     9 42,42,42,43,
-     & 45,45,-193,46,-190,47,-49,-114,-115,-116,-117,
-     & 47,47,48,48,
-     & 49,49,50,-122,-143,-186,50,
-     3 50,50,50,50,
-     4 51,51,51,52,
-     5 52,52,52,53,
-     6 54,54,55,55,
-     7 55,56,57,58,
-     8 58,59,59,59,
-     9 60,-149,60,-149,60,60,
-     & 60,60,61,61,
-     & 61,61,61,61,
-     & 61,61,61,61,
-     3 62,63,-198,-210,64,64,
-     4 65,65,66,-67,-68,-69,-119,-164,
-     4     -172,-173,-174,-175,-189,-197,66,
-     5 70,-79,-80,-81,-82,-170,71,-120,72,-73,72,-73,
-     6 74,74,-76,74,-76,74,
-     7 75,75,76,-79,-80,-81,-82,-127,-128,-129,-170,-176,77,
-     8 78,-191,78,78,-107,-202,-203,83,
-     9 84,85,86,86,
-     & 86,87,-88,-90,87,-88,-90,89,
-     & 89,89,91,-112,91,
-     & 92,93,94,95,
-     3 96,97,97,97,
-     4 97,98,-113,99,101,-110,
-     5 102,-103,104,-148,104,105,
-     6 106,-188,106,-186,107,-187,108,
-     7 109,110,111,-152,118,-196,
-     8 119,119,119,120,
-     9 120,120,120,121,
-     & 122,122,122,126,-206,-209,
-     & 126,130,-131,130,-131,-257,130,-131,-159,
-     &     -160,-161,-162,-163,-164,-257,-265,-269,-270,-271,-272,
-     & 132,133,133,134,
-     3 134,134,135,-204,136,-166,-167,
-     4 136,137,138,-139,-140,-141,139,-140,-141,
-     5 142,142,142,142,
-     6 159,-160,-161,-162,-163,-164,-194,-277,120,-166,-167,168,168,
-     7 169,169,171,177,
-     8 177,178,178,179,
-     9 179,180,180,181,
-     & 181,182,182,183,
-     & 183,184,184,185,
-     & 185,186,187,250,
-     3 250,250,251,251,
-     4 251,252,252,253,
-     5 253,255,256,258,
-     6 259,259,260,260,
-     7 261,261,144,-145,-268,146,-147,
-     8 146,149,122,-148,148,
-     9 150,150,67,-150,151,
-     & 15,-151,-171,153,154,-155,156,
-     & 157,-158,267,267,274,
-     & 274,275,276,278,
-     3 279,280,195,-262,263,
-     4 264,264,192,-264,281,
-     5 283,283,266,121,
-     6 121,126,-206,-209,126,-206,-209,51,
-     7 254,133,192,167,
-     8 167,91,-122,130,-131,199,
-     9 202,-203,207,208,26,
-     & 250,251,85,-104,37,
-     & 34,279,48,6,
-     & 151,263,42,42,
-     3 72,-73,37,-45,146,-147,211,
-     4 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
 C SPARSE, PAGE 5
 C
@@ -496,8 +317,10 @@ C
       PREP=0
       PPTR=0
       OBJ1=0
+      objvec(1)=0
       OBJ2=0
       PREP1=0
+      prpvec(1)=0
       PREP2=0
       LOBJ=0
       ANDFLG=.FALSE.
@@ -530,7 +353,7 @@ C
           IF(WORD==VWORD(K)) GO TO 2000      ! match to base word?
           J=J+VVOC(J)+1                  ! skip over syntax.
           GO TO 70
-65          IF(WORD==VWORD(K)(2:WRDLNT)) GO TO 2000 ! synonym match?
+65          IF(WORD==VWORD(K)(2:)) GO TO 2000 ! synonym match?
 70        CONTINUE
 C
 75        IF((ADJ/=0).OR.(PREP/=0).OR.(OBJ1/=0)) GO TO 200
@@ -583,7 +406,10 @@ C      4. orphan preposition
 C      5. dangling preposition
 C
       IF(ADJ /= 0) GO TO 4500                  ! dangling adjective?
-      IF(BUNFLG) OBJ1=BUNOBJ                  ! bunched object?
+      IF(BUNFLG) then 
+        OBJ1=BUNOBJ                  ! bunched object?
+        objvec(1) = obj1
+      endif
       IF(BUNFLG.AND.(BUNSUB /= 0).AND.(BUNLNT == 0))
      &      GO TO 13200                  ! except for nothing?
       IF(ACT==0) ACT=IAND(OFLAG, OACT)      ! if no action, take orphan.
@@ -611,6 +437,7 @@ C
 1200      SPARSE=0                        ! parse succeeds.
       IF(DFLAG) WRITE(output_unit,1310) ACT,OBJ1,OBJ2,PREP1,PREP2
 1310      FORMAT(' SPARSE RESULTS- ',5I7)
+      PREP1 = PRPVEC(1)
       RETURN
 
 C SPARSE, PAGE 10
@@ -694,11 +521,11 @@ C
 6000      OBJ=GETOBJ(J,ADJ,0)                  ! identify object.
       IF(DFLAG) WRITE(output_unit,6010) J,OBJ
 6010      FORMAT(' SPARSE- OBJ AT ',I6,'  OBJ= ',I6)
-      IF(OBJ.LE.0) GO TO 7000                  ! if le, couldnt.
+      IF(OBJ<=0) GO TO 7000                  ! if le, couldnt.
       IF(OBJ/=ITOBJ) GO TO 6100            ! "it"?
       IF(IAND(OFLAG, OOBJ1)/=0) LASTIT=IAND(OFLAG, OOBJ1)      ! orphan?
       OBJ=GETOBJ(0,0,LASTIT)                  ! find it.
-      IF(OBJ.LE.0) GO TO 7500                  ! if le, couldnt.
+      IF(OBJ<=0) GO TO 7500                  ! if le, couldnt.
 C
 6100      IF(PREP/=9) GO TO 6200            ! "of" obj?
       IF((LOBJ==OBJ).OR.(LOBJ==OCAN(OBJ))) GO TO 6500      ! same as prev?
@@ -725,7 +552,9 @@ C
 6500      PREP=0
       ADJ=0
       ANDFLG=.FALSE.                        ! no pending 'AND'.
-      LOBJ=OBJ                        ! record last object.
+      LOBJ=OBJ    
+      PREP1 = PRPVEC(1)  
+      OBJ1 = OBJVEC(1)                  ! record last object.
       GO TO 1000
 
 C SPARSE, PAGE 11
@@ -751,6 +580,8 @@ C
 C
 7300      IF(ACT==0) ACT=IAND(OFLAG, OACT)            ! if no act, get orphan.
       CALL ORPHAN(-1,ACT,PREP1,OBJ1,PREP,WORD,0,0)      ! orphan the world.
+      objvec(1) = obj1
+      prpvec(1) = prep1
       IF(VBFLAG) WRITE(output_unit,7310)
      &      LCWRD1(1:len_trim(LCWRD1)+1),LCWORD(1:len_trim(LCWORD))
 7310      FORMAT(' Which',A,A,' do you mean?')
@@ -781,6 +612,8 @@ C
 10000      IF(OBJ1==0) GO TO 10100            ! any direct object?
       IF(VBFLAG) CALL RSPSUB(621,ODESC2(OBJ1))      ! what to do?
       CALL ORPHAN(-1,0,PREP1,OBJ1,0,' ',0,0)
+      objvec(1) = obj1
+      prpvec(1) = prep1
       RETURN
 C
 10100      IF(VBFLAG) CALL RSPEAK(622)            ! huh?
@@ -790,13 +623,16 @@ C 11000--      Orphan preposition.  Conditions are
 C            OBJ1/=0, OBJ2=0, PREP=0, ACT=OACT
 C
 11000      IF(OOBJ1/=0) GO TO 11500            ! orphan object?
-      PREP1=OPREP                        ! no, just use prep.
+      PREP1=OPREP  
+      prpvec(1) = prep1                      ! no, just use prep.
       GO TO 1200
 C
 11500      OBJ2=OBJ1                        ! yes, use as direct obj.
       PREP2=OPREP
       OBJ1=OOBJ1
+      objvec(1) = obj1
       PREP1=OPREP1
+      prpvec(1) = prep1
       GO TO 1200
 C
 C 12000--      True hanging preposition, no objects yet.
@@ -968,10 +804,11 @@ C THISIT--      Validate object vs description
 C
 C Declarations
 C
-      LOGICAL FUNCTION THISIT(OIDX,AIDX,OBJ,SPCOBJ)
-      IMPLICIT INTEGER(A-Z)
-      INCLUDE 'dparam.for'
-C
+      elemental LOGICAL FUNCTION THISIT(OIDX,AIDX,OBJ,SPCOBJ)
+
+      integer, intent(in) :: oidx,aidx,obj,spcobj
+      integer i
+
       THISIT=.FALSE.                        ! assume no match.
       IF((SPCOBJ /= 0).AND.(OBJ == SPCOBJ)) GO TO 500
 C
@@ -1216,17 +1053,19 @@ C SYNEQL-      Test for syntax equality
 C
 C Declarations
 C
-      LOGICAL FUNCTION SYNEQL(PREP,OBJ,SPREP,SFL1,SFL2)
-      IMPLICIT INTEGER(A-Z)
-      INCLUDE 'dparam.for'
-C
-      IF(OBJ==0) GO TO 100                  ! any object?
+      elemental LOGICAL FUNCTION SYNEQL(PREP,OBJ,SPREP,SFL1,SFL2)
+
+      integer, intent(in) :: PREP,OBJ,SPREP,SFL1,SFL2
+
+      IF(OBJ==0) then
+         SYNEQL=(PREP==0).AND.(SFL1==0).AND.(SFL2==0)                ! any object?
+         return
+      endif 
+
       SYNEQL=(PREP==IAND(SPREP, VPMASK)).AND.
      &      (IOR(IAND(SFL1, OFLAG1(OBJ)),
      &        IAND(SFL2, OFLAG2(OBJ)))/=0)
-      RETURN
-C
-100      SYNEQL=(PREP==0).AND.(SFL1==0).AND.(SFL2==0)
+  
 
       END FUNCTION SYNEQL
 
@@ -1309,6 +1148,7 @@ C
       INTEGER FUNCTION GWIM(SFLAG,SFW1,SFW2)
 
       integer, intent(in) :: sflag,sfw1,sfw2
+      integer, external :: fwim
       integer av,robj
       LOGICAL TAKEIT,NOCARE,LIT
 C
@@ -1389,7 +1229,7 @@ C
 C Declarations
 C
       Pure CHARACTER(wrdlnt) FUNCTION FINDVB(SYNTAX)
-
+      use state, only: vword
       integer, intent(in) :: syntax
       integer j,k,newj
 
@@ -1404,7 +1244,7 @@ C
       RETURN
 C
 200   FINDVB=VWORD(K)                        ! return string
-      IF(index(VWORD(K),'*') == 1) FINDVB=VWORD(K)(2:WRDLNT)
+      IF(index(VWORD(K),'*') == 1) FINDVB=VWORD(K)(2:)
 
       END FUNCTION FINDVB
 
