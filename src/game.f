@@ -32,9 +32,9 @@ C Now loop, reading and executing commands.
 C
 100	WINNER=PLAYER				! player moving.
 	TELFLG=.FALSE.				! assume nothing told.
-	IF(PRSCON.LE.1) CALL RDLINE(INBUF,INLNT,1) ! read command.
+	IF(PRSCON <= 1) CALL RDLINE(INBUF,INLNT,1) ! read command.
 C
-	IF(INBUF(PRSCON:INLNT).NE.'GDT') GO TO 200	! call on gdt?
+	IF(INBUF(PRSCON:INLNT) /= 'GDT') GO TO 200	! call on gdt?
 	CALL GDT				! yes, invoke.
 	PRSCON=1				! force restart.
 	GO TO 100				! onward.

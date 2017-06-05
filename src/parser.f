@@ -19,30 +19,43 @@ C RDLINE-	Read input line
 C
 C Declarations
 C
-	SUBROUTINE RDLINE(INLINE,INLEN,WHO)
-	use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
-	IMPLICIT INTEGER(A-Z)
-	INCLUDE 'dparam.for'
-	CHARACTER*(TEXLNT) INLINE
-C
-	LUCVT=ICHAR('A')-ICHAR('a')		! case conversion factor.
-5	GO TO (90,10),WHO+1			! see who to prompt for.
-10	WRITE(output_unit,'(A)',advance='no') ' >'	! prompt for game.
-	flush(output_unit)
+      SUBROUTINE RDLINE(INLINE,INLEN,WHO)
+      use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
+      IMPLICIT none
+      integer,intent(in) :: who
+      integer,intent(inout) :: inlen
+      integer,parameter :: TEXLNT=76 
+      CHARACTER(TEXLNT), intent(inout) :: inline
+
+      integer, parameter :: LUCVT=ICHAR('A')-ICHAR('a') ! case conversion factor.
+      CHARACTER(TEXLNT) :: inbuf,SUBBUF
+      integer i, inlnt,sublnt
+      COMMON /INPUT/ INLNT,INBUF,SUBLNT,SUBBUF
+
+      LOGICAL PRSWON
+      integer  PRSA,PRSI,PRSO,PRSCON
+      COMMON /PRSVEC/ PRSA,PRSI,PRSO,PRSWON,PRSCON
+
+5     GO TO (90,10),WHO+1			! see who to prompt for.
+10    WRITE(output_unit,'(A)',advance='no') ' >'	! prompt for game.
+      flush(output_unit)
 
 C
-90	READ(input_unit,100,END=5) INLINE		! get input.
-100	FORMAT(A)
+90    READ(input_unit,100,END=5) INLINE		! get input.
+100   FORMAT(A)
 C
-	INLEN=NBLEN(INLINE)			! len w/o trailing blanks.
-	IF(INLEN.LE.0) GO TO 5			! anything left?
-	DO 400 I=1,INLEN			! convert to upper case.
-	  IF((INLINE(I:I).GE.'a').AND.(INLINE(I:I).LE.'z'))
-	1	INLINE(I:I)=CHAR(ICHAR(INLINE(I:I))+LUCVT)
-400	CONTINUE
-	PRSCON=1				! restart lex scan.
+      INLEN=len_trim(INLINE)			! len w/o trailing blanks.
+      IF(INLEN <= 0) GO TO 5			! anything left?
+      DO I=1,INLEN			! convert to upper case.
+        IF((INLINE(I:I) >= 'a').AND.(INLINE(I:I) <= 'z'))
+     &     INLINE(I:I)=CHAR(ICHAR(INLINE(I:I))+LUCVT)
+      enddo
+      PRSCON=1				! restart lex scan.
 
-	END SUBROUTINE RDLINE
+      inbuf = inline
+      inlnt = inlen
+
+      END SUBROUTINE RDLINE
 
 C PARSE-	Top level parse routine
 C
