@@ -17,6 +17,8 @@ C Declarations
       use,intrinsic:: iso_fortran_env, only: output_Unit
       implicit none
 
+
+      public:: protct
       contains
 
       SUBROUTINE GAME
@@ -183,7 +185,7 @@ C Declarations
 C
       LOGICAL FUNCTION XVEHIC(N)
       use state
-      LOGICAL,external :: OAPPLI
+      use objapp,only: oappli
       integer,intent(in) :: n
       integer av
 C
@@ -199,7 +201,7 @@ C Declarations
 C
       LOGICAL FUNCTION INITFL()
       use state
-      LOGICAL PROTCT
+      use subr
       CHARACTER(1) KEDIT
       integer :: u,i,j
 
@@ -260,13 +262,11 @@ C
 C The internal data base is now established.
 C Set up to play the game-- INITFL succeeds.
 C
-1025      CALL IDATE(DARRAY)      ! get date (and toss).
-      I=(DARRAY(1)*64)+(DARRAY(2)*8)+DARRAY(3)      ! first seed
-      CALL ITIME(TMARRAY)                  ! get time.
-      J=(TMARRAY(1)*64)+(TMARRAY(2)*8)+TMARRAY(3)      ! second seed
-      CALL INIRND(I,J)      ! init random number gen.
-      SHOUR=TMARRAY(1)      ! set start hour
-      SMIN=TMARRAY(2)            ! set start minute
+1025  CALL date_and_time(values=TMARRAY)                  ! get time.
+
+      CALL INIT_random_seed()      ! init random number gen.
+      SHOUR=TMARRAY(5)      ! set start hour
+      SMIN=TMARRAY(6)            ! set start minute
 C
       WINNER=PLAYER
       THFPOS=OROOM(THIEF)
@@ -282,7 +282,7 @@ C
 1900  WRITE(output_unit,910)                  ! dindx.dat open err
       WRITE(output_unit,980)
       RETURN
-1925      WRITE(output_unit,920) I,J,KEDIT,VMAJ,VMIN,VEDIT      ! wrong dindx.dat ver
+1925      WRITE(output_unit,920) KEDIT,VMAJ,VMIN,VEDIT      ! wrong dindx.dat ver
       WRITE(output_unit,980)
       RETURN
 1950      WRITE(output_unit,960)                  ! dtext.dat open err

@@ -22,7 +22,7 @@ C Declarations
       module objapp
       implicit none
       
-      public:: oappli,thiefp,cyclop
+      public:: oappli,thiefp,cyclop,nobjs,trollp
       
       contains
 
@@ -31,10 +31,10 @@ C Declarations
       integer,external :: rnd,robadv,robrm
       integer, intent(in) :: ri,arg
 
-      LOGICAL SOBJS,NOBJS
+      LOGICAL SOBJS
       LOGICAL QOPEN,QON,LIT,WASLIT
       LOGICAL MOVETO,RMDESC,CLOCKD
-      LOGICAL TROLLP,BALLOP
+      LOGICAL BALLOP
       LOGICAL QEMPTY,F,OPNCLS
       integer, PARAMETER :: MXSMP=99
       integer r,av,flobts,i,j,nloc,odi2,odo2
@@ -195,7 +195,7 @@ C
 C
 C O103--      Troll, done externally.
 C
-11000      OAPPLI=TROLLP(ARG)                  ! troll processor.
+11000      OAPPLI=TROLLP()                  ! troll processor.
       GO TO 50                        ! go see if now dark.
 C
 C O104--      Rusty knife.
@@ -1387,13 +1387,12 @@ C Declarations
 C
       LOGICAL FUNCTION NOBJS(RI,ARG)
       use state
-
-      integer,external :: mrhere,rnd
+      use subr!,only: qhere,rspeak,newsta,bug,rspsub,qempty
 
       integer,intent(in) :: RI,ARG
 
-      LOGICAL QOPEN,MOVETO,F,RMDESC
-      LOGICAL OPNCLS,MIRPAN, LIT,WASLIT,QEMPTY
+      LOGICAL QOPEN,F
+      LOGICAL MIRPAN, WASLIT
       integer r,av,i,j,k,nxt,obj,odi2,odo2,svflag,svhere,target,wl
 C
 C Functions and data
@@ -1620,7 +1619,7 @@ C
       CPVEC(NXT)=0                        ! vacate next state.
       CALL CPGOTO(NXT)                  ! onward.
       CALL CPINFO(I,NXT)                  ! describe.
-      CALL PRINCR(.TRUE.,HERE)            ! print rooms contents.
+      CALL PRINCR(1,HERE)            ! print rooms contents.
       RETURN
 C
 9500      IF(HERE/=SCOLAC) GO TO 9700            ! in scol active room?

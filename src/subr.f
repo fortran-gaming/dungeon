@@ -19,7 +19,6 @@ C      CALL RSPEAK(MSGNUM)
       module subr
       use state
       use io
-      use objapp,only: oappli
       use,intrinsic:: iso_fortran_env, only: input_unit,output_unit
       implicit none
       
