@@ -16,6 +16,7 @@ C CLOCKD- Intermove clock events demon
 C
 C Declarations
       module timefnc
+      use subr
       implicit none
       contains
 

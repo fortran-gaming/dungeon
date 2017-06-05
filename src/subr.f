@@ -17,6 +17,9 @@ C Called by--
 C
 C      CALL RSPEAK(MSGNUM)
       module subr
+      use state
+      use io
+      use objapp,only: oappli
       use,intrinsic:: iso_fortran_env, only: input_unit,output_unit
       implicit none
       
@@ -120,7 +123,7 @@ C
       LOGICAL FUNCTION OBJACT()
        use state!, only: prsi,prso
 
-      LOGICAL OAPPLI
+      LOGICAL,external:: OAPPLI
 C
       OBJACT=.TRUE.                        ! assume wins.
       IF(PRSI.EQ.0) GO TO 100                  ! ind object?

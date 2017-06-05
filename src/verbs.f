@@ -28,7 +28,7 @@ C
       contains
 
       LOGICAL FUNCTION VAPPLI(RI)
-       use state
+      use state
       integer,external :: rnd,blow,fights
         integer,intent(in) :: ri
       integer,PARAMETER :: MXNOP=39,MXJOKE=64,MXSMP=99,NUMANS=16
