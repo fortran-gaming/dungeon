@@ -49,12 +49,14 @@ C
 C      CALL RSPSB2(MSGNUM,S1,S2)
 C
       SUBROUTINE RSPSB2(A,B,C)
-      use state, only: texlnt
+      use state!, only: texlnt
 
       integer, intent(in) :: a,b,c
 
       CHARACTER(TEXLNT) B1,B2
-C
+
+      integer x,y,z,i,j,newrec,oldrec
+
 C Convert all arguments from dictionary numbers (if positive)
 c to absolute record numbers.
 C
@@ -77,7 +79,7 @@ C
       I=INDEX(B1,'#')                        ! look for #.
       IF(I>0) GO TO 1000                  ! found?
 C
-400   WRITE(output_unit,650) B1(1:MAX0(1,NBLEN(B1)))! output line.
+400   WRITE(output_unit,650) B1(1:MAX0(1,len_trim(B1)))! output line.
 650   FORMAT(1X,A)
       X=X+1                              ! on to next record.
       READ(DBCH,REC=X) NEWREC,B1            ! read next record.
@@ -102,7 +104,7 @@ C
 C
       READ(DBCH,REC=Y) J,B1(I:TEXLNT)            ! read sub record.
       CALL TXCRYP(Y,B1(I:TEXLNT))            ! decrypt sub record.
-      J=NBLEN(B1)                        ! backscan for blanks.
+      J=len_trim(B1)                        ! backscan for blanks.
       B1(J+1:TEXLNT)=B2(1:TEXLNT-J)
 C
       Y=Z                              ! set up for next
@@ -116,7 +118,7 @@ C
 C Declarations
 C
       LOGICAL FUNCTION OBJACT()
-       use state, only: prsi,prso
+       use state!, only: prsi,prso
 
       LOGICAL OAPPLI
 C
@@ -136,13 +138,13 @@ C
 C Declarations
 C
       SUBROUTINE BUG(A,B)
-
+      use state
       integer, intent(in) :: A,B
 
       WRITE(output_unit,100) A,B                  ! gonzo
       IF(DBGFLG/=0) RETURN
       SUBBUF='CRASH.DAT'                  ! set up crash save name.
-      SUBLNT=NBLEN(SUBBUF)
+      SUBLNT=len_trim(SUBBUF)
       CALL SAVEGM                        ! do final save.
       WRITE(output_unit,200)
       error stop ' abnormal termination'
@@ -159,7 +161,7 @@ C
 C      CALL NEWSTA(OBJECT,STRING,NEWROOM,NEWCON,NEWADV)
 C
       SUBROUTINE NEWSTA(O,R,RM,CN,AD)
-
+      use state, only: oroom,ocan,oadv
       integer, intent(in) :: o,r, rm, cn, ad
 
       CALL RSPEAK(R)
@@ -174,14 +176,15 @@ C
 C Declarations
 C
       pure LOGICAL FUNCTION QHERE(OBJ,RM)
-      use state, only: oroom
+      use state, only: oroom,r2lnt,r2,o2
       integer, intent(IN) :: OBJ,rm
     
+      integer i
       QHERE=.TRUE.
       IF(OROOM(OBJ).EQ.RM) RETURN            ! in room?
-      DO 100 I=1,R2LNT                  ! no, sch room2.
+      DO I=1,R2LNT                  ! no, sch room2.
         IF((O2(I).EQ.OBJ).AND.(R2(I).EQ.RM)) RETURN
-100      CONTINUE
+      enddo
       QHERE=.FALSE.                        ! not present.
 
       END FUNCTION QHERE
@@ -191,13 +194,15 @@ C
 C Declarations
 C
       LOGICAL FUNCTION QEMPTY(OBJ)
-      use state, only: ocan
+      use state, only: ocan,olnt
       integer, intent(in) :: obj
 
+      integer i
+
       QEMPTY=.FALSE.                        ! assume lose.
-      DO 100 I=1,OLNT
+      DO I=1,OLNT
         IF(OCAN(I).EQ.OBJ) RETURN            ! inside target?
-100      CONTINUE
+      enddo
       QEMPTY=.TRUE.
  
       END FUNCTION QEMPTY
@@ -207,13 +212,14 @@ C
 C Declarations
 C
       SUBROUTINE JIGSUP(DESC)
-       use state,only: KITCH,CLEAR,FORE3,FORE2,SHOUS,FORE2,KITCH,EHOUS,
-     & oflag2,oflag1,cflag
+       use state!,only: KITCH,CLEAR,FORE3,FORE2,SHOUS,FORE2,KITCH,EHOUS,
 
       integer, intent(in) :: desc
 
+      integer i,j,nonofl
       LOGICAL MOVETO,QHERE,F
-      INTEGER RLIST(8)=[KITCH,CLEAR,FORE3,FORE2,SHOUS,FORE2,KITCH,EHOUS]
+      INTEGER,parameter :: RLIST(*)=
+     & [KITCH,CLEAR,FORE3,FORE2,SHOUS,FORE2,KITCH,EHOUS]
 
       CALL RSPEAK(DESC)                  ! describe sad state.
       PRSCON=0                        ! stop parser.
@@ -302,7 +308,7 @@ C
 C Declarations
 C
       INTEGER FUNCTION OACTOR(OBJ)
-      use state,only: aobj
+      use state,only: aobj,alnt
       integer, intent(in) :: obj
 
       DO OACTOR=1,ALNT                  ! loop thru actors.
@@ -317,8 +323,11 @@ C PROB-            Compute probability
 C
 C Declarations
 C
-      pure LOGICAL FUNCTION PROB(G,B)
+      LOGICAL FUNCTION PROB(G,B)
+      use state,only: badlkf
       integer, intent(in) :: G,B
+
+        integer i
 
       I=G                              ! assume good luck.
       IF(BADLKF) I=B                        ! if bad, too bad.
@@ -333,7 +342,10 @@ C It is also the processor for verbs 'LOOK' and 'EXAMINE'
 C when there is no direct object.
 C
       LOGICAL FUNCTION RMDESC(FULL)
+      use state
       integer, intent(in) :: full
+
+      integer i,ra
 C FULL=      0/1/2/3=      full/obj/room/full but no applicable
 C
 C Declarations
@@ -389,9 +401,10 @@ C
 C Declarations
 C
       SUBROUTINE PRINCR(FULL,RM)
-    
+       use state
       integer, intent(in) :: FULL,RM
 
+      integer i,j,k
       LOGICAL QEMPTY,QHERE
 C
       J=329                              ! assume superbrief format.
@@ -443,8 +456,10 @@ C
 C Declarations
 C
       SUBROUTINE INVENT(ADV)
-
+      use state
       integer, intent(in) :: adv
+
+      integer i,j
 
       LOGICAL QEMPTY
 C
@@ -472,14 +487,13 @@ C
       END SUBROUTINE INVENT
 
 C PRINCO-      Print contents of object
-C
-C Declarations
-C
+
       SUBROUTINE PRINCO(OBJ,DESC,LDESCF)
       use state
       integer, intent(in) :: obj,desc
       logical, intent(in) :: LDESCF
 
+      integer i,j,x,y,also
       LOGICAL QEMPTY,MOREF,QSEEIN,QUAL
 C
 C Functions and data
@@ -529,8 +543,10 @@ C
 C Declarations
 C
       LOGICAL FUNCTION MOVETO(NR,WHO)
-      use state, only: rflag,avehic
+      use state
       integer, intent(in) :: nr,who
+
+      integer j,bits
 
       LOGICAL NLV,LHR,LNR
 C
@@ -575,10 +591,12 @@ C
 C Declarations
 C
       SUBROUTINE SCORE(FLG)
-
+      use state
       LOGICAL,intent(in) :: FLG
-      INTEGER :: RANK(*)=[20,19,18,16,12,8,4,2,1,0],
+      INTEGER,parameter :: RANK(*)=[20,19,18,16,12,8,4,2,1,0],
      & ERANK(*) = [20,15,10,5,0]
+
+      integer as,i
 
 
       AS=ASCORE(WINNER)
@@ -642,12 +660,14 @@ C
 C Declarations
 C
       LOGICAL FUNCTION FINDXT(DIR,RM)
-      use state, only: rexit
+      use state
       integer, intent(in):: dir,rm
+
+      integer i,xi
 
       FINDXT=.TRUE.                        ! assume wins.
       XI=REXIT(RM)                        ! find first entry.
-      IF(XI.EQ.0) GO TO 1000                  ! no exits?
+      IF(XI==0) GO TO 1000                  ! no exits?
 C
 100      I=TRAVEL(XI)                        ! get entry.
       XROOM1=IAND(I, XRMASK)                  ! isolate room.
@@ -670,10 +690,12 @@ C
 C Declarations
 C
       INTEGER FUNCTION FWIM(F1,F2,RM,CON,ADV,NOCARE)
-      
+      use state
       integer, intent(in) :: F1,F2,RM,CON,ADV
       LOGICAL, intent(in) :: NOCARE
       Logical QHERE
+
+        integer i,j
 C
       FWIM=0                              ! assume nothing.
       DO 1000 I=1,OLNT                  ! loop
@@ -766,6 +788,8 @@ C
       use state,
         integer, intent(in) :: ADV,NR,NC,NA
 
+      integer i
+
       ROBADV=0                        ! count objects
       DO 100 I=1,OLNT
         IF((OADV(I).NE.ADV).OR.(OTVAL(I).LE.0).OR.
@@ -783,6 +807,8 @@ C
       INTEGER FUNCTION ROBRM(RM,PR,NR,NC,NA)
        use state
       integer, intent(in) :: RM,PR,NR,NC,NA
+
+        integer i
 
       LOGICAL PROB,QHERE
 C
@@ -810,7 +836,7 @@ C
       use state
       integer, intent(in):: vl, hr
 
-        integer ps
+        integer ps,vs
 
       LOGICAL PROB
 C
@@ -874,7 +900,7 @@ C
 C Declarations
 C
       SUBROUTINE GTTIME(T)
-      USE state,only: shour, smin,pltime
+      USE state,only: shour, smin,pltime,tmarray
       integer, intent(out) :: t
       integer h,m,s
     
@@ -1179,7 +1205,7 @@ C
 C Declarations
 C
       SUBROUTINE CPINFO(RMK,ST)
-       use state,only: cpoutf
+       use state,only: cpoutf,cpvec
       integer, intent(in) :: rmk, st
 
       INTEGER :: DGMOFT(8)=[-9,-8,-7,-1,1,7,8,9]
