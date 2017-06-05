@@ -12,6 +12,7 @@
 PROGRAM DUNGEO
 use state!,only: xnorth,xne,xeast,xse,xsouth,xsw,xwest,xnw,bkvw,
 !     & bkve, bktwi, bkvau
+use gamemod,only:game
 implicit none
       
 LOGICAL INITFL
