@@ -64,7 +64,7 @@ C
 C Here to get next command.
 C
 2000	WRITE(output_unit,'(A)',advance='no') ' GDT> ' ! output prompt.
-    flush(output_unit)
+	flush(output_unit)
 	READ(input_unit,210,ERR=2200,END=31000) CMD	! get command.
 	IF(CMD.EQ.'  ') GO TO 2000		! ignore blanks.
 	DO 2100 I=1,DBGMAX			! look it up.
