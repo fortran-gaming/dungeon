@@ -13,7 +13,8 @@ C 01-Jul-92      RMS      Removed extraneous function from CEVAPP.
 C 30-Jun-92      RMS      Changed file names to lower case.
 C
       module timefnc
-        use subr,only: newsta,rspeak,rspsub,qhere
+        use subr,only: newsta,qhere
+        use io,only: rspeak,rspsub
       implicit none
       contains
 C LITINT-      Light interrupt processor
@@ -129,7 +130,7 @@ C
       INTEGER FUNCTION BLOW(H,V,RMK,HFLG,OUT)
       use state
       use objapp,only: oappli
-      use subr
+      use subr,only: fights,fwim,prob,rnd,vilstr
 
       integer, intent(in) :: H,V,RMK,OUT
       LOGICAL,intent(in) :: HFLG
@@ -349,7 +350,8 @@ C
 C Declarations
 C
       pure LOGICAL FUNCTION INFEST(R)
-      use state
+      use state,only: oroom,troll,thief,cyclo,thfact,endgmf,inmir,mloc,
+     & mrg,mrge,mrgw
       integer, intent(in) :: r
 C
       IF(.NOT.ENDGMF) INFEST=(OROOM(CYCLO)==R).OR.
@@ -358,8 +360,8 @@ C
       IF(ENDGMF) INFEST=(R==MRG).OR.(R==MRGE).OR.
      &      (R==MRGW).OR.
      &      ((R==INMIR).AND.(MLOC==MRG))
-      RETURN
-      END
+
+      END FUNCTION INFEST
 
 C AAPPLI- Applicables for adventurers
 C
@@ -367,7 +369,7 @@ C Declarations
 C
       LOGICAL FUNCTION AAPPLI(RI)
       use state
-      use subr,only: qhere,moveto,findxt,rspeak,bug,newsta
+      use subr,only: qhere,moveto,findxt,bug,newsta
       integer,intent(in) :: ri
       integer i,j
 
