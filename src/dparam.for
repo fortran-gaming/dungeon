@@ -13,37 +13,7 @@ C                  FORE2, DIGBT.  Deleted SLEPBT.  Modified GLOBAL.
 C 01-Feb-94      RMS      Aligned vocabulary COMMON.
 C 25-Jan-94      RMS      Added sandy beach room.
 
-C
-C Array size parameters
-C
 
-      integer,PARAMETER :: MMAX=1500                  ! message
-      integer,PARAMETER :: RMAX=200                  ! rooms
-      integer,PARAMETER :: XXMAX=1000                  ! exits
-      integer,PARAMETER :: OMAX=300                  ! objects
-      integer,PARAMETER :: R2MAX=20                  ! multiroom objects
-      integer,PARAMETER :: CMAX=30                  ! clock events
-      integer,PARAMETER :: VMAX=4                  ! villains
-      integer,PARAMETER :: AMAX=4                  ! actors
-      integer,PARAMETER :: FMAX=56                  ! flags
-      integer,parameter :: SMAX=24                  ! switches
-      integer,parameter :: BWMAX=12                  ! buzzword vocabulary
-      integer,parameter :: DWMAX=25                  ! direction vocabulary
-      integer,parameter :: PWMAX=20                  ! preposition vocabulary
-      integer,parameter :: AWMAX=160                  ! adjective vocabularly
-      integer,parameter :: AVMAX=300                  ! string to obj index
-      integer,parameter :: OWMAX=360                  ! object vocabularly
-      integer,parameter :: OVMAX=550                  ! string to obj index
-      integer,parameter :: VWMAX=240                  ! verb vocabularly
-      integer,parameter :: VVMAX=750                  ! verb syntaxes
-
-C Other parameters
-C
-      integer,parameter :: RECLNT=80                  ! DTEXT.DAT record size, bytes
-      integer,parameter :: TEXLNT=76                  ! text buffer size, char
-      integer,parameter :: WRDLNT=8                  ! word length size, char
-      integer,parameter :: BUNMAX=10                  ! bunched objects
-      integer,parameter :: LEXMAX=20                  ! lexical tokens
 C
 C Syntax definitions
 C 
@@ -534,16 +504,6 @@ C
       INTEGER SYN(11)
       EQUIVALENCE (SYN(1),VFLAG)
 
-C
-C Game state
-C
-      LOGICAL TELFLG
-      integer WINNER,HERE,
-     &      MOVES,DEATHS,RWSCOR,MXSCOR,MXLOAD,
-     &      LTSHFT,BLOC,MUNGRM,HS,EGSCOR,EGMXSC
-      COMMON /PLAY/ WINNER,HERE,TELFLG,
-     &      MOVES,DEATHS,RWSCOR,MXSCOR,MXLOAD,
-     &      LTSHFT,BLOC,MUNGRM,HS,EGSCOR,EGMXSC
 C
 C Screen of light state
 
