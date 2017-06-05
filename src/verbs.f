@@ -1280,7 +1280,7 @@ C
 	IF(IAND(RFLAG(TSTRS), RSEEN).EQ.0) GO TO 95575	! really in end game?
 	SPELLF=.TRUE.				! tell him.
 	TELFLG=.TRUE.
-	WRITE(OUTCH,95510) PW(1)(1:NBLEN(PW(1))),CH
+	WRITE(OUTCH,95510) PW(1)(1:len_trim(PW(1))),CH
 95510	FORMAT(' A hollow voice replies: "',A,1X,A,'".')
 	RETURN
 C
@@ -1324,13 +1324,13 @@ C
 	RETURN
 C
 96200	DO 96300 J=1,NUMANS			! check answers.
-	  IF(QUESNO.NE.ANSWER(J)) GO TO 96300	! only check proper ans.
-	  IF(SUBBUF.EQ.ANSSTR(J)(1:NBLEN(ANSSTR(J)))) GO TO 96500
+	  IF(QUESNO /= ANSWER(J)) cycle	! only check proper ans.
+	  IF(SUBBUF == ANSSTR(J)(1:len_trim(ANSSTR(J)))) GO TO 96500
 96300	CONTINUE
 C
 	PRSCON=0				! kill cmd stream.
 	NQATT=NQATT+1				! wrong, cretin.
-	IF(NQATT.GE.5) GO TO 96400		! too many wrong?
+	IF(NQATT >= 5) GO TO 96400		! too many wrong?
 	CALL RSPEAK(800+NQATT)			! no, try again.
 	RETURN
 C
@@ -1340,7 +1340,7 @@ C
 C
 96500	CORRCT=CORRCT+1				! got it right.
 	CALL RSPEAK(800)			! hooray.
-	IF(CORRCT.GE.3) GO TO 96600		! won totally?
+	IF(CORRCT >= 3) GO TO 96600		! won totally?
 	CFLAG(CEVINQ)=.TRUE.
 	CTICK(CEVINQ)=2				! no, start again.
 	QUESNO=MOD(QUESNO+3,8)
