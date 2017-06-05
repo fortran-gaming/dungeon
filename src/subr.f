@@ -378,7 +378,7 @@ C
 	GO TO 500
 C
 400	CALL RSPEAK(I)				! output description.
-500	IF(AVEHIC(WINNER).NE.0) CALL RSPSUB(431,ODESC2(AVEHIC(WINNER)))
+500	IF(AVEHIC(WINNER) /= 0) CALL RSPSUB(431,ODESC2(AVEHIC(WINNER)))
 	RFLAG(HERE)=IOR(RFLAG(HERE), RSEEN)	! indicate room seen.
 C
 600	IF(LIT(HERE)) GO TO 700			! if lit, do objects
@@ -685,8 +685,7 @@ C
 C Declarations
 C
 	INTEGER FUNCTION FWIM(F1,F2,RM,CON,ADV,NOCARE)
-	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL NOCARE,QHERE
 C
 	FWIM=0					! assume nothing.
@@ -700,8 +699,8 @@ C Object is on list... is it a match?
 C
 	  IF(IAND(OFLAG1(I), VISIBT).EQ.0) GO TO 1000
 	  IF((.NOT.NOCARE .AND.(IAND(OFLAG1(I), TAKEBT).EQ.0)) .OR.
-	1	((IAND(OFLAG1(I), F1).EQ.0).AND.
-	2	 (IAND(OFLAG2(I), F2).EQ.0))) GO TO 500
+	1	((IAND(OFLAG1(I), F1)==0).AND.
+	2	 (IAND(OFLAG2(I), F2)==0))) GO TO 500
 	  IF(FWIM.EQ.0) GO TO 400		! already got something?
 	  FWIM=-FWIM				! yes, ambiguous.
 	  RETURN
@@ -711,28 +710,26 @@ C
 C Does object contain a match?
 C
 500	  IF(IAND(OFLAG2(I), OPENBT).EQ.0) GO TO 1000 ! closed?
-	  DO 700 J=1,OLNT			! no, search contents.
-	    IF((OCAN(J).NE.I).OR.(IAND(OFLAG1(J), VISIBT).EQ.0) .OR.
-	1	((IAND(OFLAG1(J), F1).EQ.0).AND.
-	2	 (IAND(OFLAG2(J), F2).EQ.0))) GO TO 700
-	    IF(FWIM.EQ.0) GO TO 600
+	  DO J=1,OLNT			! no, search contents.
+	    IF((OCAN(J)/=I).OR.(IAND(OFLAG1(J), VISIBT)==0) .OR.
+     & ((IAND(OFLAG1(J), F1).EQ.0).AND.
+     &  (IAND(OFLAG2(J), F2).EQ.0))) cycle
+	    IF(FWIM==0) GO TO 600
 	    FWIM=-FWIM
 	    RETURN
 C
 600	    FWIM=J
-700	  CONTINUE
+      enddo
 1000	CONTINUE
-	RETURN
-C
-	END
+	
+	END FUNCTION FWIM
 
 C ORPHAN- Set up orphans for parser
 C
 C Declarations
 C
 	SUBROUTINE ORPHAN(OR1,OR2,OR3,OR4,OR5,OR6,OR7,OR8)
-	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	CHARACTER*(*) OR6
 C
 	OFLAG=OR1

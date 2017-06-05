@@ -14,17 +14,19 @@ C
 C Declarations
 C
 	SUBROUTINE RAPPLI(RI)
+    use parser, only: ctick
+
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL QOPEN,QON,QHERE,PROB,F
 	LOGICAL MOVETO,LIT,RMDESC,QEMPTY
 C
 C Functions and data
 C
-	QOPEN(R)=IAND(OFLAG2(R), OPENBT).NE.0
-	QON(R)=IAND(OFLAG1(R), ONBT).NE.0
+	QOPEN(R)=IAND(OFLAG2(R), OPENBT)/=0
+	QON(R)=IAND(OFLAG1(R), ONBT) /= 0
 C
-	IF(RI.EQ.0) RETURN			! return if naught.
+	IF(RI==0) RETURN			! return if naught.
 	GO TO (  1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
 	1 10000,11000,12000,13000,14000,15000,16000,17000,18000,19000,
 	2 20000,21000,22000,23000,24000,25000,26000,27000,28000,29000,
@@ -792,9 +794,8 @@ C
 	I=1068					! not blocked.
 	IF(CPVEC(10).NE.0) I=1069		! blocked.
 	CALL RSPEAK(I)				! describe.
-	RETURN
-C
-	END
+
+	END SUBROUTINE RAPPLI
 
 C LOOKTO--	Describe view in mirror hallway
 C
@@ -839,13 +840,13 @@ C Declarations
 C
 	SUBROUTINE EWTELL(RM,ST)
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL M1
 C
 C Note that we are east or west of mirror, and
 C mirror must be n-s.
 C
-	M1=(MDIR+(MOD(RM-MRAE,2)*180)).EQ.180
+	M1=(MDIR+(MOD(RM-MRAE,2)*180)) == 180
 	I=MOD(RM-MRAE,2)			! get basic e/w flag.
 	IF((M1.AND..NOT.MR1F).OR.(.NOT.M1.AND..NOT.MR2F))
 	1	I=I+2				! mirror broken?
@@ -853,6 +854,5 @@ C
 	IF(M1.AND.MROPNF) CALL RSPEAK(823+(I/2))
 	CALL RSPEAK(825)
 	CALL RSPEAK(ST)
-	RETURN
-C
-	END
+
+	END 	SUBROUTINE EWTELL

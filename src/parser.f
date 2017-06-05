@@ -22,165 +22,22 @@ C
       module parser
       use, intrinsic:: iso_fortran_env, only: input_unit,output_unit,
      & int64
+      use state
       implicit none
-
-C Exit definitions
-C
-      integer,parameter :: XLFLAG=32768           ! last entry flag
-      integer,parameter :: XDMASK=31744           ! direction mask
-      integer,parameter :: XRMASK=255                 ! room mask
-      integer,parameter :: XFMASK=3                 ! type mask
-      integer,parameter :: XFSHFT=256
-      integer,parameter :: XASHFT=256
-      integer,parameter :: XNORM=1                 ! normal exit
-      integer,parameter :: XNO=2                 ! no exit
-      integer,parameter :: XCOND=3                 ! conditional exit
-      integer,parameter :: XDOOR=4                 ! door
-      integer,parameter :: XMIN=1024                 ! minimum direction
-      integer,parameter :: XMAX=16384                 ! maximum direction
-      integer,parameter :: XNORTH=1024
-      integer,parameter :: XNE=2048
-      integer,parameter :: XEAST=3072
-      integer,parameter :: XSE=4096
-      integer,parameter :: XSOUTH=5120
-      integer,parameter :: XSW=6144
-      integer,parameter :: XWEST=7168
-      integer,parameter :: XNW=8192
-      integer,parameter :: XUP=9216
-      integer,parameter :: XDOWN=10240
-      integer,parameter :: XLAUN=11264
-      integer,parameter :: XLAND=12288
-      integer,parameter :: XENTER=13312
-      integer,parameter :: XEXIT=14336
-      integer,parameter :: XCROSS=15360
-
-C Array size parameters
-C
-
-      integer,PARAMETER :: MMAX=1500                  ! message
-      integer,PARAMETER :: RMAX=200                  ! rooms
-      integer,PARAMETER :: XXMAX=1000                  ! exits
-      integer,PARAMETER :: OMAX=300                  ! objects
-      integer,PARAMETER :: R2MAX=20                  ! multiroom objects
-      integer,PARAMETER :: CMAX=30                  ! clock events
-      integer,PARAMETER :: VMAX=4                  ! villains
-      integer,PARAMETER :: AMAX=4                  ! actors
-      integer,PARAMETER :: FMAX=56                  ! flags
-      integer,parameter :: SMAX=24                  ! switches
-      integer,parameter :: BWMAX=12                  ! buzzword vocabulary
-      integer,parameter :: DWMAX=25                  ! direction vocabulary
-      integer,parameter :: PWMAX=20                  ! preposition vocabulary
-      integer,parameter :: AWMAX=160                  ! adjective vocabularly
-      integer,parameter :: AVMAX=300                  ! string to obj index
-      integer,parameter :: OWMAX=360                  ! object vocabularly
-      integer,parameter :: OVMAX=550                  ! string to obj index
-      integer,parameter :: VWMAX=240                  ! verb vocabularly
-      integer,parameter :: VVMAX=750                  ! verb syntaxes
-
-C Other parameters
-C
-      integer,parameter :: RECLNT=80                  ! DTEXT.DAT record size, bytes
-      integer,parameter :: TEXLNT=76                  ! text buffer size, char
-      integer,parameter :: WRDLNT=8                  ! word length size, char
-      integer,parameter :: BUNMAX=10                  ! bunched objects
-      integer,parameter :: LEXMAX=20                  ! lexical tokens
-
-C
-C Game state
-C
-      LOGICAL TELFLG
-      integer WINNER,HERE,
-     &      MOVES,DEATHS,RWSCOR,MXSCOR,MXLOAD,
-     &      LTSHFT,BLOC,MUNGRM,HS,EGSCOR,EGMXSC
-
-
-C
-C Prepositions--      maps prepositions to indices
-C
-      character,parameter :: PWORD(:)=[character(WRDLNT)::
-     &  'OVER','WITH',      
-     & 'USING', 'AT','TO', 'IN','INSIDE','INTO','DOWN','UP', 'UNDER', 
-     & 'OF','ON','OFF', 'FOR', 'FROM','OUT','THROUGH',' ',' ']
-
-      integer, parameter :: PVOC(:) = [1,2,2,3,4,5,5,5,6,7,8,9,10,11,
-     & 12,13,13,14,0,0]
-
-
-      character,parameter :: VWORD(:)=[character(wrdlnt)::
-     & 'BRIEF','VERBOSE','SUPERBRI','STAY',
-     & 'VERSION','*SWIM','*BATHE','WADE',
-     & 'GERONIMO','*ULYSSES','ODYSSEUS','*PLUGH','XYZZY',
-     3 'PRAY','TREASURE','TEMPLE','BLAST',
-     4 'SCORE','*QUIT','*GOODBYE','*Q','BYE','HELP',
-     5 'INFO','*HISTORY','UPDATE','BACK',
-     6 '*MUMBLE','SIGH','*CHOMP','*LOSE',
-     7 'BARF','DUNGEON','FROBOZZ','*FOO',
-     8 '*BLETCH','BAR','REPENT','*HOURS',
-     9 'SCHEDULE','WIN','*YELL','*SCREAM',
-     & 'SHOUT','*HOP','SKIP','*CURSE',
-     & '*SHIT','*DAMN','FUCK','ZORK',
-     & 'WISH','SAVE','RESTORE','TIME',
-     3 'DIAGNOSE','EXORCISE','*LIST','*I','INVENTOR',
-     4 'WAIT','INCANT','*ANSWER','RESPOND','AGAIN',
-     5 'NOOBJ','*BUG','*GRIPE','COMPLAIN',
-     6 '*FEATURE','*COMMENT','*IDEA','SUGGESTI',
-     7 'ROOM','*OBJECTS','OBJ','RNAME','DEFLATE',
-     8 '*EXAMINE','*WHAT','DESCRIBE','FILL',
-     9 '*FIND','*SEEK','*WHERE','SEE',
-     & 'FOLLOW','*KICK','*BITE','TAUNT',
-     & 'LOWER','*PUSH','PRESS','*RING',
-     & 'PEAL','*RUB','*FEEL','*CARESS','*TOUCH',
-     3 'FONDLE','SHAKE','SPIN','*UNTIE',
-     4 'FREE','*WALK','*RUN','*PROCEED','GO','*ATTACK','*FIGHT',
-     5 '*INJURE','*HIT','HURT','BOARD',
-     6 '*BRUSH','CLEAN','*BURN','*IGNITE',
-     7 'INCINERA','CLIMB','CLOSE','DIG',
-     8 'DISEMBAR','*DRINK','*IMBIBE','SWALLOW',
-     9 '*DROP','RELEASE','*EAT','*GOBBLE','*CONSUME',
-     & '*MUNCH','TASTE','*DOUSE','EXTINGUI',
-     & '*GIVE','*HAND','DONATE','*HELLO',
-     & 'HI','BLOW','INFLATE','*JUMP',
-     3 'LEAP','*KILL','*MURDER','*SLAY',
-     4 '*STAB','DISPATCH','*KNOCK','RAP',
-     5 'LIGHT','LOCK','*LOOK','*L','*STARE',
-     6 'GAZE','*MELT','LIQUIFY','MOVE',
-     7 '*PULL','TUG','*DESTROY','*MUNG',
-     8 '*BREAK','DAMAGE','OPEN','PICK',
-     9 '*PLUG','*GLUE','PATCH','*POKE',
-     & '*BLIND','JAB','*POUR','SPILL',
-     & 'PUMP','*PUT','*INSERT','*STUFF',
-     & 'PLACE','*RAISE','LIFT','*READ',
-     3 '*PERUSE','SKIM','STRIKE','*SWING',
-     4 'THRUST','*TAKE','*HOLD','*CARRY',
-     5 'REMOVE','*TELL','*COMMAND','REQUEST',
-     6 '*THROW','*HURL','CHUCK','*TIE',
-     7 'FASTEN','*TURN','SET','UNLOCK',
-     8 '*WAKE','*ALARM','*STARTLE','SURPRISE',
-     9 '*WAVE','*FLAUNT','BRANDISH','WIND',
-     & 'ENTER','LEAVE','*MAKE','BUILD',
-     & '*OIL','*GREASE','LUBRICAT','PLAY',
-     & 'SEND','SLIDE','*SMELL','SNIFF',
-     3 'SQUEEZE','GET','COUNT',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
-     &  ' ',' ',' ']
-
 
       contains
 
       SUBROUTINE RDLINE(INLINE,INLEN,WHO)
-      use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
-      IMPLICIT none
+      use state,only: prsa,inbuf,inlnt
       integer,intent(in) :: who
       integer,intent(inout) :: inlen
       CHARACTER(TEXLNT), intent(inout) :: inline
 
       integer, parameter :: LUCVT=ICHAR('A')-ICHAR('a') ! case conversion factor.
-      CHARACTER(TEXLNT) :: inbuf,SUBBUF
-      integer i, inlnt,sublnt
-      COMMON /INPUT/ INLNT,INBUF,SUBLNT,SUBBUF
+      integer i
 
       LOGICAL PRSWON
-      integer  PRSA,PRSI,PRSO,PRSCON
-      COMMON /PRSVEC/ PRSA,PRSI,PRSO,PRSWON,PRSCON
+      
 
 5     GO TO (90,10),WHO+1                  ! see who to prompt for.
 10    WRITE(output_unit,'(A)',advance='no') ' >'      ! prompt for game.
@@ -384,7 +241,7 @@ C
      & 'SE','SW','NE','NW','U','UP','D','DOWN',
      & 'LAUNCH','LAND','EXIT','OUT','TRAVEL','IN','CROSS',' ',' ']
 
-      integer, parameter ::DVOC(:) =[XNORTH,XNORTH,XSOUTH,XSOUTH,
+      integer, parameter ::DVOC(*) =[XNORTH,XNORTH,XSOUTH,XSOUTH,
      & XEAST,XEAST,XWEST,XWEST, XSE,XSW,XNE,XNW,
      & XUP,XUP,XDOWN,XDOWN, XLAUN,XLAND,XEXIT,XEXIT,
      & XCROSS,XENTER,XCROSS,0,0]
@@ -398,7 +255,7 @@ C object numbers in AVOC.  Object entries are delimited by the first
 C object being positive, and all subsequent objects in the same entry
 C being negative.
 C
-      character,parameter :: AWORD(:) =[character(wrdlnt) ::
+      character,parameter :: AWORD(*) =[character(wrdlnt) ::
      & 'BROWN','ELONGATE','HOT','PEPPER','VITREOUS','JADE','HUGE',
      & 'ENORMOUS', 'TROPHY','CLEAR','LARGE','NASTY',
      & 'ELVISH','BRASS','BROKEN','ORIENTAL', 'BLOODY','RUSTY',
@@ -423,7 +280,7 @@ C
      & 'WELCOME','RUBBER','SKELETON','ALL','ZORKMID',' ',' ',' ',' ',
      & ' ',' ',' ',' ',' ',' ',' ',' ']
 C
-      integer,parameter:: AVOC(:) =[1,-81,-133,1,3,-190,3, 4,6,8,8,-122,
+      integer,parameter:: AVOC(*) =[1,-81,-133,1,3,-190,3, 4,6,8,8,-122,
      & 9,10,12,-26,-47,-95,-96,-123,-133,-135,-144,-145,-150,-176,-191,
      & 13,-19, 14,15,-16,-46,-156,-190,16,-22,-38,-92,-113,-155,-158,17,
      & 20,24,-205,22,22, 25,-41,-44,-45,-208,25,26,27, 31,32,-126,-206,
@@ -673,7 +530,7 @@ C
 C SPARSE, PAGE 6
 C
       
-       integer, parameter :: vvoc(:)=[integer:: 1,70,1,71,1,72,1,73,
+       integer, parameter :: vvoc(*)=[integer:: 1,70,1,71,1,72,1,73,
      & 1,74,1,75, 1,76,1,77,1,56,1,79,1,80,1,81,1,82, 1,83,1,84,1,40,
      5 1,41,1,42,1,43, 1,44, 1,45,1,46,1,47, 1,48,1,49, 1,50,1,51,
      & 1,52,1,53, 1,54,1,55, 1,169,1,149,1,150,1,90, 1,94,1,105,1,133,
@@ -849,7 +706,7 @@ C Not recognizable
 C
         IF(.NOT.VBFLAG) RETURN            ! if mute, return
         LCWORD=LCIFY(WORD,1)                  ! convert to lower case
-        WRITE(output_unit,600) LCWORD(1:NBLEN(LCWORD)) ! don't recognize
+        WRITE(output_unit,600) LCWORD(1:len_trim(LCWORD)) ! don't recognize
 600        FORMAT(' I don''t understand "',A,'".')
         CALL RSPEAK(ERRVOC)                  ! if extra verb, say so
 800        TELFLG=.TRUE.                        ! something said.
@@ -1026,7 +883,7 @@ C
       GO TO 800                        ! go clean up state.
 C
 7100      IF(VBFLAG) WRITE(output_unit,7110)
-     &      LCWRD1(1:NBLEN(LCWRD1)+1),LCWORD(1:NBLEN(LCWORD))
+     &      LCWRD1(1:len_trim(LCWRD1)+1),LCWORD(1:len_trim(LCWORD))
 7110      FORMAT(' I can''t see any',A,A,' here.')
       GO TO 800                        ! go clean up state.
 C
@@ -1037,7 +894,7 @@ C
 7300      IF(ACT.EQ.0) ACT=IAND(OFLAG, OACT)            ! if no act, get orphan.
       CALL ORPHAN(-1,ACT,PREP1,OBJ1,PREP,WORD,0,0)      ! orphan the world.
       IF(VBFLAG) WRITE(output_unit,7310)
-     &      LCWRD1(1:NBLEN(LCWRD1)+1),LCWORD(1:NBLEN(LCWORD))
+     &      LCWRD1(1:len_trim(LCWRD1)+1),LCWORD(1:len_trim(LCWORD))
 7310      FORMAT(' Which',A,A,' do you mean?')
       GO TO 800                        ! go clean up state.
 C
@@ -1092,12 +949,12 @@ C
 C 13000--      EXCEPT/BUT errors.
 C
 13000      LCWORD=LCIFY(WORD,1)
-      IF(VBFLAG) WRITE(output_unit,13010) LCWORD(1:NBLEN(LCWORD))      ! wrong place.
+      IF(VBFLAG) WRITE(output_unit,13010) LCWORD(1:len_trim(LCWORD))      ! wrong place.
 13010      FORMAT(' Misplaced "',A,'".')
       GO TO 800                        ! go clean up state.
 C
 13100      LCWORD=LCIFY(WORD,2)                        ! wrong case.
-      IF(VBFLAG) WRITE(output_unit,13110) LCWORD(1:NBLEN(LCWORD))      ! not coll.
+      IF(VBFLAG) WRITE(output_unit,13110) LCWORD(1:len_trim(LCWORD))      ! not coll.
 13110      FORMAT(' "',A,'" can only be used with "everything",',
      & ' "valuables", or "possessions".')
       GO TO 800                        ! go clean up state.
@@ -1373,7 +1230,7 @@ C
       BUNSUB=0                        ! no EXCEPT clause.
       IF(OBJ2.GT.0) GO TO 3800            ! if iobj, go print.
 3700      WRITE(output_unit,3750)
-     &      LCWORD(1:NBLEN(LCWORD)),LCPRP1(1:NBLEN(LCPRP1)+1)
+     &      LCWORD(1:len_trim(LCWORD)),LCPRP1(1:len_trim(LCPRP1)+1)
 3750      FORMAT(1X,A,A,'what?')
       TELFLG=.TRUE.
       RETURN
@@ -1381,9 +1238,9 @@ C
 3800      X=ABS(ODESC2(OBJ2))                  ! get iobj description.
       READ(DBCH,REC=X) J,STR                  ! read data base.
       CALL TXCRYP(X,STR)                  ! decrypt the line.
-      WRITE(output_unit,3880) LCWORD(1:NBLEN(LCWORD)),
-     &      LCPRP1(1:NBLEN(LCPRP1)+1),
-     &      LCPRP2(1:NBLEN(LCPRP2)+1),STR(1:NBLEN(STR))
+      WRITE(output_unit,3880) LCWORD(1:len_trim(LCWORD)),
+     &      LCPRP1(1:len_trim(LCPRP1)+1),
+     &      LCPRP2(1:len_trim(LCPRP2)+1),STR(1:len_trim(STR))
 3880      FORMAT(1X,A,A,'what',A,'the ',A,'?')
       TELFLG=.TRUE.
       RETURN
@@ -1414,9 +1271,9 @@ C
       X=IABS(ODESC2(OBJ1))                  ! get dobj description.
       READ(DBCH,REC=X) J,STR                  ! read data base.
       CALL TXCRYP(X,STR)                  ! decrypt the line.
-      WRITE(output_unit,4660) LCWORD(1:NBLEN(LCWORD)),
-     &      LCPRP1(1:NBLEN(LCPRP1)+1),
-     &      STR(1:NBLEN(STR)),LCPRP2(1:NBLEN(LCPRP2)+1)
+      WRITE(output_unit,4660) LCWORD(1:len_trim(LCWORD)),
+     &      LCPRP1(1:len_trim(LCPRP1)+1),
+     &      STR(1:len_trim(STR)),LCPRP2(1:len_trim(LCPRP2)+1)
 4660      FORMAT(1X,A,A,'the ',A,A,'what?')
       TELFLG=.TRUE.
       RETURN
@@ -1516,44 +1373,46 @@ C
 C Declarations
 C
       LOGICAL FUNCTION TAKEIT(OBJ,SFLAG)
-      IMPLICIT INTEGER(A-Z)
-      INCLUDE 'dparam.for'
+      use state, only: odesc2
+
+      integer, intent(in) :: obj,sflag
       LOGICAL TAKE,LIT
+      integer i,odo2
 C
       TAKEIT=.FALSE.                        ! assume loses.
-      IF((OBJ.EQ.0).OR.(OBJ.GT.STRBIT).OR.DEADF)
+      IF((OBJ==0).OR.(OBJ > STRBIT).OR.DEADF)
      &      GO TO 4000                  ! null/stars/dead win.
       ODO2=ODESC2(OBJ)                  ! get desc.
       X=OCAN(OBJ)                        ! get container.
-      IF((X.EQ.0).OR.(IAND(SFLAG, VFBIT).EQ.0)) GO TO 500
-      IF(IAND(OFLAG2(X), OPENBT).NE.0) GO TO 500
+      IF((X==0).OR.(IAND(SFLAG, VFBIT)==0)) GO TO 500
+      IF(IAND(OFLAG2(X), OPENBT) /= 0) GO TO 500
       CALL RSPSUB(566,ODO2)                  ! cant reach.
       RETURN
 C
-500      IF(IAND(SFLAG, VRBIT).EQ.0) GO TO 1000      ! shld be in room?
-      IF(IAND(SFLAG, VTBIT).EQ.0) GO TO 2000      ! can be taken?
+500      IF(IAND(SFLAG, VRBIT)== 0) GO TO 1000      ! shld be in room?
+      IF(IAND(SFLAG, VTBIT) ==0) GO TO 2000      ! can be taken?
 C
 C Should be in room (VRBIT NE 0) and can be taken (VTBIT NE 0)
 C
-      IF(SCHLST(0,0,HERE,0,0,OBJ).LE.0) GO TO 4000 ! if not, ok.
+      IF(SCHLST(0,0,HERE,0,0,OBJ)<=0) GO TO 4000 ! if not, ok.
 C
 C Its in the room and can be taken.
 C
-      IF(IAND(OFLAG1(OBJ), TAKEBT).NE.0) GO TO 3000
+      IF(IAND(OFLAG1(OBJ), TAKEBT)/=0) GO TO 3000
 C
 C Not takeable.  If we care, fail.
 C
-      IF(IAND(SFLAG, VCBIT).EQ.0) GO TO 4000      ! if no care, return.
+      IF(IAND(SFLAG, VCBIT)==0) GO TO 4000      ! if no care, return.
       CALL RSPSUB(445,ODO2)
       RETURN
 C
 C 1000--      It should not be in the room.
 C 2000--      It cant be taken.
 C
-2000      IF(IAND(SFLAG, VCBIT).EQ.0) GO TO 4000      ! if no care, return
-1000      IF(SCHLST(0,0,HERE,0,0,OBJ).LE.0) GO TO 4000
+2000      IF(IAND(SFLAG, VCBIT)==0) GO TO 4000      ! if no care, return
+1000      IF(SCHLST(0,0,HERE,0,0,OBJ)<=0) GO TO 4000
       I=665                              ! assume player.
-      IF(WINNER.NE.PLAYER) I=1082
+      IF(WINNER /= PLAYER) I=1082
       CALL RSPSUB(I,ODO2)                  ! doesn't have it.
       RETURN
 C
@@ -1579,21 +1438,22 @@ C 4000--      Win on general principles.
 C
 4000      TAKEIT=.TRUE.
 
-      END
+      END FUNCTION TAKEIT
 
 C GWIM- Get what I mean in ambiguous situations
 C
 C Declarations
 C
       INTEGER FUNCTION GWIM(SFLAG,SFW1,SFW2)
-      IMPLICIT INTEGER(A-Z)
-      INCLUDE 'dparam.for'
+
+      integer, intent(in) :: sflag,sfw1,sfw2
+      integer av,robj
       LOGICAL TAKEIT,NOCARE,LIT
 C
       GWIM=0                              ! no result.
       IF(DEADF) RETURN                  ! dead? gwim disabled.
-      AV=AVEHIC(WINNER)
-      NOCARE=IAND(SFLAG, VCBIT).EQ.0
+      AV = AVEHIC(WINNER)
+      NOCARE=IAND(SFLAG, VCBIT)==0
 C
 C First search adventurer
 C
@@ -1609,9 +1469,9 @@ C ROBJ > 0: if prev object, fail
 C
 200      IF((AV==0).OR.(ROBJ==AV).OR.
      &      (IAND(OFLAG2(ROBJ), FINDBT)/=0)) GO TO 300
-      IF(OCAN(ROBJ).NE.AV) RETURN            ! unreachable? use prev obj.
+      IF(OCAN(ROBJ) /= AV) RETURN            ! unreachable? use prev obj.
 C
-300      IF(GWIM.EQ.0) GO TO 400                  ! prev obj?
+300      IF(GWIM == 0) GO TO 400                  ! prev obj?
       GWIM=-GWIM                        ! yes, ambiguous.
       RETURN
 C
@@ -1628,6 +1488,8 @@ C
       Pure LOGICAL FUNCTION NOADJS(OBJ)
       integer, intent(in) :: obj    
     
+      integer i
+
       NOADJS=.FALSE.                        ! assume false.
       DO I=1,AVMAX                  ! search adj.
         IF(ABS(AVOC(I)) == OBJ) RETURN      ! found adjective?
@@ -1646,6 +1508,8 @@ C
       integer, intent(in) :: start
       CHARACTER(*), intent(in) :: STRING
       integer,parameter :: ULCVT=ICHAR('a')-ICHAR('A')  ! conversion factor
+      
+      integer i,k
 C
       LCIFY=STRING                        ! assume input = output.
       K=LEN(STRING)                        ! get input length.
@@ -1662,10 +1526,10 @@ C FINDVB-      Find verb string corresponding to syntax.
 C
 C Declarations
 C
-      CHARACTER(wrdlnt) FUNCTION FINDVB(SYNTAX)
+      Pure CHARACTER(wrdlnt) FUNCTION FINDVB(SYNTAX)
 
       integer, intent(in) :: syntax
-      integer j,k
+      integer j,k,newj
 
 
       J=1
@@ -1686,8 +1550,10 @@ C FINDPR-      Find preposition string corresponding to index.
 C
 C Declarations
 C
-      CHARACTER(wrdlnt) FUNCTION FINDPR(PREPNO)
+      pure CHARACTER(wrdlnt) FUNCTION FINDPR(PREPNO)
       integer, intent(in) :: prepno
+
+      integer i
 
       DO I=1,PWMAX                  ! loop through prepositions.
         IF(PVOC(I) == PREPNO) then
