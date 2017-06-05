@@ -3,9 +3,9 @@ project(dungeon Fortran)
 
 add_compile_options(-Wline-truncation)# -Wfatal-errors)
 
-add_library(state verbs.f subr.f state.f90 io.f90)
+add_library(state subr.f state.f90 io.f90)
 
-add_executable(dungeon dungeon.f90 game.f objects.f parser.f rooms.f timefnc.f)
+add_executable(dungeon dungeon.f90 game.f objects.f parser.f rooms.f timefnc.f verbs.f)
 target_link_libraries(dungeon state)
 
 #gdt.f

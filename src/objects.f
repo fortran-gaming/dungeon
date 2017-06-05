@@ -25,6 +25,22 @@ C Declarations
       public:: oappli,thiefp,cyclop,nobjs,trollp,mirpan
       
       contains
+      
+      C OBJACT-- Apply objects from parse vector
+      LOGICAL FUNCTION OBJACT()
+       use state, only: prsi,prso
+
+      OBJACT=.TRUE.                        ! assume wins.
+      IF(PRSI.EQ.0) GO TO 100                  ! ind object?
+      IF(OAPPLI(OACTIO(PRSI),0)) RETURN      ! yes, let it handle.
+C
+100      IF(PRSO.EQ.0) GO TO 200                  ! dir object?
+      IF(OAPPLI(OACTIO(PRSO),0)) RETURN      ! yes, let it handle.
+C
+200      OBJACT=.FALSE.                        ! loses.
+
+      END FUNCTION OBJACT
+      
 
       LOGICAL FUNCTION OAPPLI(RI,ARG)
       use state

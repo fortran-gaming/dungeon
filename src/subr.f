@@ -18,24 +18,6 @@ C 29-Jun-92      RMS      Removed extraneous declaration in RMDESC.
       public:: rnd,qhere,newsta,qempty
       contains
 
-
-C OBJACT-- Apply objects from parse vector
-      LOGICAL FUNCTION OBJACT()
-       use state!, only: prsi,prso
-      use objapp,only: oappli
-
-
-      OBJACT=.TRUE.                        ! assume wins.
-      IF(PRSI.EQ.0) GO TO 100                  ! ind object?
-      IF(OAPPLI(OACTIO(PRSI),0)) RETURN      ! yes, let it handle.
-C
-100      IF(PRSO.EQ.0) GO TO 200                  ! dir object?
-      IF(OAPPLI(OACTIO(PRSO),0)) RETURN      ! yes, let it handle.
-C
-200      OBJACT=.FALSE.                        ! loses.
-
-      END FUNCTION OBJACT
-
 C BUG-- Report fatal system error
 C
 C Declarations
@@ -237,66 +219,6 @@ C
       PROB=RND(100)<I                  ! compute.
 
       END function prob
-
-C RMDESC-- Print room description
-C
-C RMDESC prints a description of the current room.
-C It is also the processor for verbs 'LOOK' and 'EXAMINE'
-C when there is no direct object.
-C
-      LOGICAL FUNCTION RMDESC(FULL)
-      use state
-      use rooms,only: rappli
-      use io,only: rspeak
-      integer, intent(in) :: full
-
-      integer i,ra
-C FULL=      0/1/2/3=      full/obj/room/full but no applicable
-
-
-      RMDESC=.TRUE.                        ! assume wins.
-      RA=RACTIO(HERE)                        ! get room action.
-      IF(PRSO.LT.XMIN) GO TO 50            ! if direction,
-      FROMDR=PRSO                        ! save and
-      PRSO=0                              ! clear.
-50      IF(FULL.EQ.1) GO TO 600                  ! objects only?
-      IF(HERE.EQ.AROOM(PLAYER)) GO TO 100      ! player just move?
-      CALL RSPEAK(2)                        ! no, just say done.
-      PRSA=WALKIW                        ! set up walk in action.
-      RETURN
-C
-100      IF(LIT(HERE)) GO TO 300                  ! lit?
-      CALL RSPEAK(430)                  ! warn of grue.
-      RMDESC=.FALSE.
-      RETURN
-C
-300      I=RDESC2-HERE                        ! assume short desc.
-      IF((FULL.EQ.0)
-     &     .AND. (SUPERF.OR.((IAND(RFLAG(HERE), RSEEN).NE.0)
-     &     .AND. (BRIEFF.OR.PROB(80,80))))) GO TO 400
-      I=RDESC1(HERE)                        ! use long.
-      IF((I.NE.0).OR.(RA.EQ.0)) GO TO 400      ! if got desc, skip.
-      PRSA=LOOKW                        ! pretend look around.
-      PRSO=0                              ! no object referenced.
-      CALL RAPPLI(RA)                        ! let room handle.
-      PRSA=FOOW                        ! nop parser.
-      GO TO 500
-C
-400      CALL RSPEAK(I)                        ! output description.
-500      IF(AVEHIC(WINNER) /= 0) CALL RSPSUB(431,ODESC2(AVEHIC(WINNER)))
-      RFLAG(HERE)=IOR(RFLAG(HERE), RSEEN)      ! indicate room seen.
-C
-600      IF(LIT(HERE)) GO TO 700                  ! if lit, do objects
-      CALL RSPEAK(1036)                  ! can't see anything
-      RETURN
-C
-700      IF(FULL.NE.2) CALL PRINCR(FULL,HERE)      ! print room contents
-      IF((FULL.NE.0).OR.(RA.EQ.0)) RETURN      ! anything more?
-      PRSA=WALKIW                        ! give him a surpise.
-      CALL RAPPLI(RA)                        ! let room handle
-      PRSA=FOOW
-
-      END
 
 C PRINCR- Print contents of room
 C
