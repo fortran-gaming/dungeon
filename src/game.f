@@ -15,6 +15,7 @@ C
 C Declarations
 C
 	SUBROUTINE GAME
+	use,intrinsic:: iso_fortran_env, only: output_Unit
 	IMPLICIT INTEGER (A-Z)
 	INCLUDE 'dparam.for'
 	LOGICAL RMDESC,VAPPLI,AAPPLI,OBJACT
@@ -92,7 +93,7 @@ C
 	1	GO TO 1400			! walk?
 	IF(FINDXT(PRSO,HERE)) GO TO 300		! valid exit?
 C
-1400	WRITE(OUTCH,1410) INBUF(1:INLNT)	! echo input.
+1400	WRITE(output_unit,1410) INBUF(1:INLNT)	! echo input.
 1410	FORMAT(1X,A)
 	TELFLG=.TRUE.				! indicate output.
 	GO TO 1000		! more echo room.
@@ -107,7 +108,7 @@ C
 	GO TO 2150				! done.
 C
 2050	IF(PRSO.NE.OPLAY) GO TO 2100		! to self?
-	WRITE(OUTCH,2060) SUBBUF(1:SUBLNT)	! ok, tell it.
+	WRITE(output_unit,2060) SUBBUF(1:SUBLNT)	! ok, tell it.
 2060	FORMAT(' Ok: "',A,'".')
 	TELFLG=.TRUE.
 	GO TO 2150
@@ -149,8 +150,8 @@ C
 C
 2900	CALL VALUAC(PRSO)			! collective object.
 	GO TO 2350
-C
-	END
+
+	END SUBROUTINE GAME
 	
 C XENDMV-	Execute end of move functions.
 C
@@ -167,8 +168,8 @@ C
 	IF(SWDACT) CALL SWORDD			! sword demon.
 	IF(PRSWON) F=CLOCKD(X)			! clock demon.
 	IF(PRSWON) F=XVEHIC(2)			! vehicle readout.
-	RETURN
-	END
+
+	END SUBROUTINE XENDMV
 	
 C XVEHIC- Execute vehicle function
 C
@@ -181,27 +182,29 @@ C
 C
 	XVEHIC=.FALSE.				! assume loses.
 	AV=AVEHIC(WINNER)			! get vehicle.
-	IF(AV.NE.0) XVEHIC=OAPPLI(OACTIO(AV),N)
-	RETURN
-	END
+	IF(AV /= 0) XVEHIC=OAPPLI(OACTIO(AV),N)
+
+	END FUNCTION XVEHIC
 	
 C INITFL-- DUNGEON file initialization subroutine
 C
 C Declarations
 C
 	LOGICAL FUNCTION INITFL(X)
+	use, intrinsic:: iso_fortran_env, only: output_unit
 	IMPLICIT INTEGER (A-Z)
 	INCLUDE 'dparam.for'
 	LOGICAL PROTCT
-	CHARACTER*1 KEDIT
+	CHARACTER(1) KEDIT
+	integer :: u   
 	
 C INITFL, PAGE 2
 C
 C First check for protection violation.
 C
 	INITFL=.FALSE.				! assume init fails.
-	IF(PROTCT(X)) GO TO 10000		! protection violation?
-	WRITE(OUTCH,10100)			! yes, throw him off.
+	IF(PROTCT()) GO TO 10000		! protection violation?
+	WRITE(output_unit,10100)			! yes, throw him off.
 10100	FORMAT(
 	1 ' There appears before you a threatening figure clad all'/
 	1 ' over in heavy black armor.  His legs seem like the massive'/
@@ -217,30 +220,30 @@ C
 C
 C Now restore from existing index file.
 C
-10000	OPEN (UNIT=1,FILE='dindx',STATUS='OLD',
+10000	OPEN (newUNIT=u,FILE='dindx',STATUS='OLD',
 	1	FORM='FORMATTED',ACCESS='SEQUENTIAL',ERR=1900)
-	READ(1,130) I,J				! get version.
-	READ(1,125) KEDIT			! get minor edit.
-	IF((I.NE.VMAJ).OR.(J.NE.VMIN))
+	READ(u,130) I,J				! get version.
+	READ(u,125) KEDIT			! get minor edit.
+	IF((I /= VMAJ).OR.(J /= VMIN))
 	1	GO TO 1925			! match to ours?
 C
 	OPEN (UNIT=DBCH,FILE='dtext',STATUS='OLD',
 	1	FORM='UNFORMATTED',ACCESS='DIRECT',
 	2	RECL=RECLNT,ERR=1950)
 C
-	READ(1,130) MXSCOR,STRBIT,EGMXSC
-	READ(1,130) RLNT,RDESC2,RDESC1,REXIT,RACTIO,RVAL,RFLAG
-	READ(1,130) XLNT,TRAVEL
-	READ(1,130) OLNT,ODESC1,ODESC2,ODESCO,OACTIO,OFLAG1,OFLAG2,
+	READ(u,130) MXSCOR,STRBIT,EGMXSC
+	READ(u,130) RLNT,RDESC2,RDESC1,REXIT,RACTIO,RVAL,RFLAG
+	READ(u,130) XLNT,TRAVEL
+	READ(u,130) OLNT,ODESC1,ODESC2,ODESCO,OACTIO,OFLAG1,OFLAG2,
 	1	OFVAL,OTVAL,OSIZE,OCAPAC,OROOM,OADV,OCAN,OREAD
-	READ(1,130) R2LNT,O2,R2
-	READ(1,130) CLNT,CTICK,CACTIO
-	READ(1,135) CFLAG,CCNCEL
-	READ(1,130) VLNT,VILLNS,VPROB,VOPPS,VBEST,VMELEE
-	READ(1,130) ALNT,AROOM,ASCORE,AVEHIC,AOBJ,AACTIO,ASTREN,AFLAG
-	READ(1,130) MBASE,MLNT,RTEXT
+	READ(u,130) R2LNT,O2,R2
+	READ(u,130) CLNT,CTICK,CACTIO
+	READ(U,135) CFLAG,CCNCEL
+	READ(u,130) VLNT,VILLNS,VPROB,VOPPS,VBEST,VMELEE
+	READ(u,130) ALNT,AROOM,ASCORE,AVEHIC,AOBJ,AACTIO,ASTREN,AFLAG
+	READ(U,130) MBASE,MLNT,RTEXT
 C
-	CLOSE (UNIT=1)
+	CLOSE(u)
 	GO TO 1025				! init done.
 C
 125	FORMAT(A)
@@ -271,14 +274,14 @@ C
 C
 C Errors-- INITFL fails.
 C
-1900	WRITE(OUTCH,910)			! dindx.dat open err
-	WRITE(OUTCH,980)
+1900	WRITE(output_unit,910)			! dindx.dat open err
+	WRITE(output_unit,980)
 	RETURN
-1925	WRITE(OUTCH,920) I,J,KEDIT,VMAJ,VMIN,VEDIT	! wrong dindx.dat ver
-	WRITE(OUTCH,980)
+1925	WRITE(output_unit,920) I,J,KEDIT,VMAJ,VMIN,VEDIT	! wrong dindx.dat ver
+	WRITE(output_unit,980)
 	RETURN
-1950	WRITE(OUTCH,960)			! dtext.dat open err
-	WRITE(OUTCH,980)
+1950	WRITE(output_unit,960)			! dtext.dat open err
+	WRITE(output_unit,980)
 	RETURN
 910	FORMAT(' I can''t open "DINDX.DAT".')
 920	FORMAT(' "DINDX.DAT" is version ',I1,'.',I1,A,'.'/
@@ -294,7 +297,7 @@ C
 	6 ' lettered sign reading:'//20X,'INITIALIZATION FAILURE'//
 	7 ' The darkness becomes all encompassing, and your vision fails.')
 C
-	END
+	END  Function INITFL
 	
 C PROTCT-- Check for user violation
 C
@@ -303,9 +306,7 @@ c dependant protection against abuse.
 C
 C At the moment, play is permitted under all circumstances.
 C
-	LOGICAL FUNCTION PROTCT(X)
-	IMPLICIT INTEGER (A-Z)
-C
-	PROTCT=.TRUE.
-	RETURN
-	END
+      LOGICAL FUNCTION PROTCT()
+      implicit none
+      protct=.TRUE.
+      END FUNCTION PROTCT

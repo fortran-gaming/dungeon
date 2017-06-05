@@ -46,6 +46,7 @@ C
 C	CALL RSPSB2(MSGNUM,S1,S2)
 C
 	SUBROUTINE RSPSB2(A,B,C)
+	use,intrinsic:: iso_fortran_env, only: output_unit
 	IMPLICIT INTEGER (A-Z)
 	INCLUDE 'dparam.for'
 	CHARACTER*(TEXLNT) B1,B2
@@ -72,7 +73,7 @@ C
 	I=INDEX(B1,'#')				! look for #.
 	IF(I.GT.0) GO TO 1000			! found?
 C
-400	WRITE(OUTCH,650) B1(1:MAX0(1,NBLEN(B1)))! output line.
+400	WRITE(output_unit,650) B1(1:MAX0(1,NBLEN(B1)))! output line.
 650	FORMAT(1X,A)
 	X=X+1					! on to next record.
 	READ(DBCH,REC=X) NEWREC,B1		! read next record.
@@ -132,21 +133,22 @@ C
 C Declarations
 C
 	SUBROUTINE BUG(A,B)
+	use,intrinsic:: iso_fortran_env, only: output_unit
 	IMPLICIT INTEGER (A-Z)
 	INCLUDE 'dparam.for'
 C
-	WRITE(OUTCH,100) A,B			! gonzo
+	WRITE(output_unit,100) A,B			! gonzo
 	IF(DBGFLG.NE.0) RETURN
 	SUBBUF='CRASH.DAT'			! set up crash save name.
 	SUBLNT=NBLEN(SUBBUF)
 	CALL SAVEGM				! do final save.
-	WRITE(OUTCH,200)
-	CALL EXIT
+	WRITE(output_unit,200)
+	error stop ' abnormal termination'
 C
 100	FORMAT(' Program error ',I2,', parameter =',I6)
 200	FORMAT(' Game state saved in "CRASH.DAT".')
 C
-	END
+	END subroutine BUG
 
 C NEWSTA-- Set new status for object
 C
@@ -570,15 +572,15 @@ C
 	RETURN
 C
 800	CALL RSPSUB(428,ODESC2(J))		! wrong vehicle.
-	RETURN
-C
-	END
+
+	END FUNCTION MOVETO
 
 C SCORE-- Print out current score
 C
 C Declarations
 C
 	SUBROUTINE SCORE(FLG)
+	use,intrinsic:: iso_fortran_env, only: output_unit
 	IMPLICIT INTEGER (A-Z)
 	INCLUDE 'dparam.for'
 	LOGICAL FLG
@@ -591,10 +593,10 @@ C
 C
 	AS=ASCORE(WINNER)
 	IF(ENDGMF) GO TO 60			! endgame?
-	IF(FLG) WRITE(OUTCH,100)
-	IF(.NOT.FLG) WRITE(OUTCH,110)
-	IF(MOVES.NE.1) WRITE(OUTCH,120) AS,MXSCOR,MOVES
-	IF(MOVES.EQ.1) WRITE(OUTCH,130) AS,MXSCOR,MOVES
+	IF(FLG) WRITE(output_unit,100)
+	IF(.NOT.FLG) WRITE(output_unit,110)
+	IF(MOVES.NE.1) WRITE(output_unit,120) AS,MXSCOR,MOVES
+	IF(MOVES.EQ.1) WRITE(output_unit,130) AS,MXSCOR,MOVES
 	IF(AS.LT.0) GO TO 50			! negative score?
 	DO 10 I=1,10				! find rank.
 	  IF((AS*20/MXSCOR).GE.RANK(I)) GO TO 20
@@ -606,9 +608,9 @@ C
 50	CALL RSPEAK(886)			! negative score.
 	RETURN
 C
-60	IF(FLG) WRITE(OUTCH,140)
-	IF(.NOT.FLG) WRITE(OUTCH,150)
-	WRITE(OUTCH,120) EGSCOR,EGMXSC,MOVES
+60	IF(FLG) WRITE(output_unit,140)
+	IF(.NOT.FLG) WRITE(output_unit,150)
+	WRITE(output_unit,120) EGSCOR,EGMXSC,MOVES
 	DO 70 I=1,5
 	  IF((EGSCOR*20/EGMXSC).GE.ERANK(I)) GO TO 80
 70	CONTINUE
@@ -622,8 +624,8 @@ C
 130	FORMAT('+',I4,' [total of',I4,' points], in',I5,' move.')
 140	FORMAT(' Your score in the endgame would be',$)
 150	FORMAT(' Your score in the endgame is',$)
-C
-	END
+
+	END SUBROUTINE SCORE
 
 C SCRUPD- Update winner's score
 C
@@ -749,12 +751,13 @@ C
 C	YES-IS-TRUE=YESNO(QUESTION,YES-STRING,NO-STRING)
 C
 	LOGICAL FUNCTION YESNO(Q,Y,N)
+	use, intrinsic:: iso_fortran_env,only: input_unit
 	IMPLICIT INTEGER (A-Z)
 	INCLUDE 'dparam.for'
 	CHARACTER*1 ANS
 C
 100	CALL RSPEAK(Q)				! ask
-	READ(INPCH,110,END=120) ANS		! get answer
+	READ(input_unit,110,END=120) ANS		! get answer
 110	FORMAT(A)
 	IF((ANS.EQ.'Y').OR.(ANS.EQ.'y')) GO TO 200
 	IF((ANS.EQ.'N').OR.(ANS.EQ.'n')) GO TO 300
@@ -767,9 +770,8 @@ C
 C
 300	YESNO=.FALSE.				! no,
 	CALL RSPEAK(N)				! likewise.
-	RETURN
-C
-	END
+
+	END Function YesNo
 
 C ROBADV-- Steal winner's valuables
 C
@@ -1158,9 +1160,8 @@ C
 	  IF(J.GT.26) J=MOD(J,26)
 	  OUTW(I:I)=CHAR(MAX0(1,J)+ICHARA)
 200	CONTINUE
-	RETURN
-C
-	END
+
+	END SUBROUTINE ENCRYP
 
 C CPGOTO--	Move to next state in puzzle room
 C
@@ -1179,15 +1180,15 @@ C
 	1	CALL NEWSTA(I,0,CPUZZ,0,0)
 100	CONTINUE
 	CPHERE=ST
-	RETURN
-C
-	END
+
+	END SUBROUTINE CPGOTO
 
 C CPINFO--	Describe puzzle room
 C
 C Declarations
 C
 	SUBROUTINE CPINFO(RMK,ST)
+	use,intrinsic:: iso_fortran_env,only: output_unit
 	IMPLICIT INTEGER (A-Z)
 	INCLUDE 'dparam.for'
 	INTEGER DGMOFT(8)
@@ -1210,7 +1211,7 @@ C
 	  IF((CPVEC(ST+K).NE.0).AND.(CPVEC(ST+L).NE.0))
 	1	DGM(I)=QMK
 100	CONTINUE
-	WRITE(OUTCH,10) DGM
+	WRITE(output_unit,10) DGM
 C
 	IF(ST.EQ.10) CALL RSPEAK(870)		! at hole?
 	IF(ST.EQ.37) CALL RSPEAK(871)		! at niche?
@@ -1225,7 +1226,7 @@ C
 	1' West  |',A,' .. ',A,'|  East'/,
 	2'       |',A,1X,A,1X,A,'|')
 C
-	END
+	END SUBROUTINE CPINFO
 
 C NBLEN-	Compute string length without trailing blanks
 C

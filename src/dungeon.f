@@ -90,8 +90,6 @@ C
 	SWDSTA=0				! sword is off.
 C
 	MBASE=0					! init melee base.
-	INPCH=5					! tty input
-	OUTCH=6					! tty output.
 	DBCH=2			! data base.
 	
 C DUNGEON, PAGE 3

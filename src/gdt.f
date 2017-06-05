@@ -9,6 +9,7 @@ C
 C Declarations
 C
 	SUBROUTINE GDT
+	use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
 	IMPLICIT INTEGER (A-Z)
 	INCLUDE 'dparam.for'
 	PARAMETER (DBGMAX=38)			! number of debug commands
@@ -53,7 +54,7 @@ C
 C First, validate that the caller is an implementer.
 C
 	IF(GDTFLG.NE.0) GO TO 2000		! if ok, skip.
-	WRITE(OUTCH,100)			! not an implementer.
+	WRITE(output_unit,100)			! not an implementer.
 	RETURN					! boot him off
 C
 100	FORMAT(' You are not an authorized user.')
@@ -62,16 +63,16 @@ c GDT, PAGE 2A
 C
 C Here to get next command.
 C
-2000	WRITE(OUTCH,200)			! output prompt.
-	READ(INPCH,210,ERR=2200,END=31000) CMD	! get command.
+2000	WRITE(output_unit,'(A)',advance='no') ' GDT> ' ! output prompt.
+    flush(output_unit)
+	READ(input_unit,210,ERR=2200,END=31000) CMD	! get command.
 	IF(CMD.EQ.'  ') GO TO 2000		! ignore blanks.
 	DO 2100 I=1,DBGMAX			! look it up.
-	  IF((CMD.EQ.DBGCMD(I)).OR.(CMD.EQ.DBGSML(I))) GO TO 2300
+	  IF((CMD == DBGCMD(I)).OR.(CMD == DBGSML(I))) GO TO 2300
 2100	CONTINUE				! found?
-2200	WRITE(OUTCH,220)			! no, lose.
+2200	WRITE(output_unit,220)			! no, lose.
 	GO TO 2000
 C
-200	FORMAT(' GDT> ',$)
 210	FORMAT(A2)
 220	FORMAT(' ?')
 230	FORMAT(2I6)
@@ -83,17 +84,17 @@ c
 2300	GO TO (2400,2500,2600,2700),ARGTYP(I)+1	! branch on arg type.
 	GO TO 2200				! illegal type.
 C
-2700	WRITE(OUTCH,245)			! type 3, request array coords.
-	READ(INPCH,230,ERR=2200,END=2000) J,K
+2700	WRITE(output_unit,245)			! type 3, request array coords.
+	READ(input_unit,230,ERR=2200,END=2000) J,K
 	GO TO 2400
 C
-2600	WRITE(OUTCH,225)			! type 2, read bounds.
-	READ(INPCH,230,ERR=2200,END=2000) J,K
+2600	WRITE(output_unit,225)			! type 2, read bounds.
+	READ(input_unit,230,ERR=2200,END=2000) J,K
 	IF(K.EQ.0) K=J
 	GO TO 2400
 C
-2500	WRITE(OUTCH,235)			! type 1, read entry no.
-	READ(INPCH,240,ERR=2200,END=2000) J
+2500	WRITE(output_unit,235)			! type 1, read entry no.
+	READ(input_unit,240,ERR=2200,END=2000) J
 2400	GO TO (10000,11000,12000,13000,14000,15000,16000,17000,18000,
 	1 19000,20000,21000,22000,23000,24000,25000,26000,27000,28000,
 	2 29000,30000,31000,32000,33000,34000,35000,36000,37000,38000,
@@ -105,9 +106,9 @@ C
 C DR-- Display Rooms
 C
 10000	IF(.NOT.VALID2(J,K,RLNT)) GO TO 2200	! args valid?
-	WRITE(OUTCH,300)			! col hdrs.
+	WRITE(output_unit,300)			! col hdrs.
 	DO 10100 I=J,K
-	  WRITE(OUTCH,310) I,(EQR(I,L),L=1,5)
+	  WRITE(output_unit,310) I,(EQR(I,L),L=1,5)
 10100	CONTINUE
 	GO TO 2000
 C
@@ -117,9 +118,9 @@ C
 C DO-- Display Objects
 C
 11000	IF(.NOT.VALID2(J,K,OLNT)) GO TO 2200	! args valid?
-	WRITE(OUTCH,320)			! col hdrs
+	WRITE(output_unit,320)			! col hdrs
 	DO 11100 I=J,K
-	  WRITE(OUTCH,330) I,(EQO(I,L),L=1,14)
+	  WRITE(output_unit,330) I,(EQO(I,L),L=1,14)
 11100	CONTINUE
 	GO TO 2000
 C
@@ -130,9 +131,9 @@ C
 C DA-- Display Adventurers
 C
 12000	IF(.NOT.VALID2(J,K,ALNT)) GO TO 2200	! args valid?
-	WRITE(OUTCH,340)
+	WRITE(output_unit,340)
 	DO 12100 I=J,K
-	  WRITE(OUTCH,350) I,(EQA(I,L),L=1,7)
+	  WRITE(output_unit,350) I,(EQA(I,L),L=1,7)
 12100	CONTINUE
 	GO TO 2000
 C
@@ -142,9 +143,9 @@ C
 C DC-- Display Clock Events
 C
 13000	IF(.NOT.VALID2(J,K,CLNT)) GO TO 2200	! args valid?
-	WRITE(OUTCH,360)
+	WRITE(output_unit,360)
 	DO 13100 I=J,K
-	  WRITE(OUTCH,370) I,(EQC(I,L),L=1,2),CFLAG(I),CCNCEL(I)
+	  WRITE(output_unit,370) I,(EQC(I,L),L=1,2),CFLAG(I),CCNCEL(I)
 13100	CONTINUE
 	GO TO 2000
 C
@@ -154,15 +155,15 @@ C
 C DX-- Display Exits
 C
 14000	IF(.NOT.VALID2(J,K,XLNT)) GO TO 2200	! args valid?
-	WRITE(OUTCH,380)			! col hdrs.
+	WRITE(output_unit,380)			! col hdrs.
 	DO 14100 I=J,K,10			! ten per line.
 	  L=MIN0(I+9,K)				! compute end of line.
-	  WRITE(OUTCH,390) I,L
+	  WRITE(output_unit,390) I,L
 	  DO 14050 L1=I,L			! loop through data
-	    IF(TRAVEL(L1).GE.0) WRITE(OUTCH,391) TRAVEL(L1)
-	    IF(TRAVEL(L1).LT.0) WRITE(OUTCH,392) TRAVEL(L1)
+	    IF(TRAVEL(L1).GE.0) WRITE(output_unit,391) TRAVEL(L1)
+	    IF(TRAVEL(L1).LT.0) WRITE(output_unit,392) TRAVEL(L1)
 14050	  CONTINUE
-	WRITE(OUTCH,393)
+	WRITE(output_unit,393)
 14100	CONTINUE
 	GO TO 2000
 C
@@ -174,7 +175,7 @@ C
 C
 C DH-- Display Hacks
 C
-15000	WRITE(OUTCH,400) THFPOS,THFFLG,THFACT,SWDACT,SWDSTA
+15000	WRITE(output_unit,400) THFPOS,THFFLG,THFACT,SWDACT,SWDSTA
 	GO TO 2000
 C
 400	FORMAT(' THFPOS=',I6,', THFFLG=',L2,', THFACT=',L2/
@@ -182,7 +183,7 @@ C
 C
 C DL-- Display Lengths
 C
-16000	WRITE(OUTCH,410) RLNT,XLNT,OLNT,CLNT,VLNT,ALNT,MLNT,R2LNT,
+16000	WRITE(output_unit,410) RLNT,XLNT,OLNT,CLNT,VLNT,ALNT,MLNT,R2LNT,
 	1	MBASE,STRBIT
 	GO TO 2000
 C
@@ -193,9 +194,9 @@ C
 C DV-- Display Villains
 C
 17000	IF(.NOT.VALID2(J,K,VLNT)) GO TO 2200	! args valid?
-	WRITE(OUTCH,420)			! col hdrs
+	WRITE(output_unit,420)			! col hdrs
 	DO 17100 I=J,K
-	  WRITE(OUTCH,430) I,(EQV(I,L),L=1,5)
+	  WRITE(output_unit,430) I,(EQV(I,L),L=1,5)
 17100	CONTINUE
 	GO TO 2000
 C
@@ -206,7 +207,7 @@ C DF-- Display Flags
 C
 18000	IF(.NOT.VALID2(J,K,FMAX)) GO TO 2200	! args valid?
 	DO 18100 I=J,K
-	  WRITE(OUTCH,440) I,FLAGS(I)
+	  WRITE(output_unit,440) I,FLAGS(I)
 18100	CONTINUE
 	GO TO 2000
 C
@@ -214,11 +215,11 @@ C
 C
 C DS-- Display State
 C
-19000	WRITE(OUTCH,450) PRSA,PRSO,PRSI,PRSWON,PRSCON
-	WRITE(OUTCH,460) WINNER,HERE,TELFLG
-	WRITE(OUTCH,470) MOVES,DEATHS,RWSCOR,MXSCOR,MXLOAD,LTSHFT,BLOC,
-	1	MUNGRM,HS,EGSCOR,EGMXSC
-	WRITE(OUTCH,475) FROMDR,SCOLRM,SCOLAC
+19000	WRITE(output_unit,450) PRSA,PRSO,PRSI,PRSWON,PRSCON
+	WRITE(output_unit,460) WINNER,HERE,TELFLG
+	WRITE(output_unit,470) MOVES,DEATHS,RWSCOR,MXSCOR,MXLOAD,
+     & LTSHFT,BLOC,	MUNGRM,HS,EGSCOR,EGMXSC
+	WRITE(output_unit,475) FROMDR,SCOLRM,SCOLAC
 	GO TO 2000
 C
 450	FORMAT(' Parse vector=',3(1X,I6),1X,L6,1X,I6)
@@ -231,8 +232,8 @@ C
 C AF-- Alter Flags
 C
 20000	IF(.NOT.VALID1(J,FMAX)) GO TO 2200	! entry no valid?
-	WRITE(OUTCH,480) FLAGS(J)		! type old, get new.
-	READ(INPCH,490,ERR=2200,END=2000) FLAGS(J)
+	WRITE(output_unit,480) FLAGS(J)		! type old, get new.
+	READ(input_unit,490,ERR=2200,END=2000) FLAGS(J)
 	GO TO 2000
 C
 480	FORMAT(' Old=',L2,6X,'New= ',$)
@@ -240,7 +241,7 @@ C
 C
 C 21000-- Help
 C
-21000	WRITE(OUTCH,900)
+21000	WRITE(output_unit,900)
 	GO TO 2000
 C
 900	FORMAT(' Valid commands are:'/' AA- Alter ADVS'/
@@ -265,7 +266,7 @@ C
 22000	THFFLG=.FALSE.				! disable robber.
 	THFACT=.FALSE.
 	CALL NEWSTA(THIEF,0,0,0,0)		! vanish thief.
-	WRITE(OUTCH,500)
+	WRITE(output_unit,500)
 	GO TO 2000
 C
 500	FORMAT(' No robber.')
@@ -274,7 +275,7 @@ C NT-- No Troll
 C
 23000	TROLLF=.TRUE.
 	CALL NEWSTA(TROLL,0,0,0,0)
-	WRITE(OUTCH,510)
+	WRITE(output_unit,510)
 	GO TO 2000
 C
 510	FORMAT(' No troll.')
@@ -283,7 +284,7 @@ C NC-- No Cyclops
 C
 24000	CYCLOF=.TRUE.
 	CALL NEWSTA(CYCLO,0,0,0,0)
-	WRITE(OUTCH,520)
+	WRITE(output_unit,520)
 	GO TO 2000
 C
 520	FORMAT(' No cyclops.')
@@ -291,7 +292,7 @@ C
 C ND-- Immortality Mode
 C
 25000	DBGFLG=1
-	WRITE(OUTCH,530)
+	WRITE(output_unit,530)
 	GO TO 2000
 C
 530	FORMAT(' No deaths.')
@@ -299,7 +300,7 @@ C
 C RR-- Restore Robber
 C
 26000	THFACT=.TRUE.
-	WRITE(OUTCH,540)
+	WRITE(output_unit,540)
 	GO TO 2000
 C
 540	FORMAT(' Restored robber.')
@@ -308,7 +309,7 @@ C RT-- Restore Troll
 C
 27000	TROLLF=.FALSE.
 	CALL NEWSTA(TROLL,0,MTROL,0,0)
-	WRITE(OUTCH,550)
+	WRITE(output_unit,550)
 	GO TO 2000
 C
 550	FORMAT(' Restored troll.')
@@ -318,7 +319,7 @@ C
 28000	CYCLOF=.FALSE.
 	MAGICF=.FALSE.
 	CALL NEWSTA(CYCLO,0,MCYCL,0,0)
-	WRITE(OUTCH,560)
+	WRITE(output_unit,560)
 	GO TO 2000
 C
 560	FORMAT(' Restored cyclops.')
@@ -326,7 +327,7 @@ C
 C RD-- Mortal Mode
 C
 29000	DBGFLG=0
-	WRITE(OUTCH,570)
+	WRITE(output_unit,570)
 	GO TO 2000
 C
 570	FORMAT(' Restored deaths.')
@@ -337,7 +338,7 @@ C TK-- Take
 C
 30000	IF(.NOT.VALID1(J,OLNT)) GO TO 2200	! valid object?
 	CALL NEWSTA(J,0,0,0,WINNER)		! yes, take object.
-	WRITE(OUTCH,580)			! tell.
+	WRITE(output_unit,580)			! tell.
 	GO TO 2000
 C
 580	FORMAT(' Taken.')
@@ -349,8 +350,8 @@ C
 C AR-- Alter Room Entry
 C
 32000	IF(.NOT.VALID3(J,RLNT,K,5)) GO TO 2200	! indices valid?
-	WRITE(OUTCH,590) EQR(J,K)		! type old, get new.
-	READ(INPCH,600,ERR=2200,END=2000) EQR(J,K)
+	WRITE(output_unit,590) EQR(J,K)		! type old, get new.
+	READ(input_unit,600,ERR=2200,END=2000) EQR(J,K)
 	GO TO 2000
 C
 590	FORMAT(' Old= ',I6,6X,'New= ',$)
@@ -359,15 +360,15 @@ C
 C AO-- Alter Object Entry
 C
 33000	IF(.NOT.VALID3(J,OLNT,K,14)) GO TO 2200	! indices valid?
-	WRITE(OUTCH,590) EQO(J,K)
-	READ(INPCH,600,ERR=2200,END=2000) EQO(J,K)
+	WRITE(output_unit,590) EQO(J,K)
+	READ(input_unit,600,ERR=2200,END=2000) EQO(J,K)
 	GO TO 2000
 C
 C AA-- Alter Advs Entry
 C
 34000	IF(.NOT.VALID3(J,ALNT,K,7)) GO TO 2200	! indices valid?
-	WRITE(OUTCH,590) EQA(J,K)
-	READ(INPCH,600,ERR=2200,END=2000) EQA(J,K)
+	WRITE(output_unit,590) EQA(J,K)
+	READ(input_unit,600,ERR=2200,END=2000) EQA(J,K)
 	GO TO 2000
 C
 C AC-- Alter Clock Events
@@ -375,16 +376,16 @@ C
 35000	IF(.NOT.VALID3(J,CLNT,K,4)) GO TO 2200	! indices valid?
 	IF(K.EQ.3) GO TO 35500			! flags entry?
 	IF(K.EQ.4) GO TO 35600			! cancel entry?
-	WRITE(OUTCH,590) EQC(J,K)
-	READ(INPCH,600,ERR=2200,END=2000) EQC(J,K)
+	WRITE(output_unit,590) EQC(J,K)
+	READ(input_unit,600,ERR=2200,END=2000) EQC(J,K)
 	GO TO 2000
 C
-35500	WRITE(OUTCH,480) CFLAG(J)
-	READ(INPCH,490,ERR=2200,END=2000) CFLAG(J)
+35500	WRITE(output_unit,480) CFLAG(J)
+	READ(input_unit,490,ERR=2200,END=2000) CFLAG(J)
 	GO TO 2000
 C
-35600	WRITE(OUTCH,480) CCNCEL(J)
-	READ(INPCH,490,ERR=2200,END=2000) CCNCEL(J)
+35600	WRITE(output_unit,480) CCNCEL(J)
+	READ(input_unit,490,ERR=2200,END=2000) CCNCEL(J)
 	GO TO 2000
 
 C GDT, PAGE 6
@@ -393,12 +394,12 @@ C AX-- Alter Exits
 C
 36000	IF(.NOT.VALID1(J,XLNT)) GO TO 2200	! entry no valid?
 	IF(TRAVEL(J).LT.0) GO TO 36100		! string entry?
-	WRITE(OUTCH,610) TRAVEL(J)
-	READ(INPCH,620,ERR=2200,END=2000) TRAVEL(J)
+	WRITE(output_unit,610) TRAVEL(J)
+	READ(input_unit,620,ERR=2200,END=2000) TRAVEL(J)
 	GO TO 2000
 C
-36100	WRITE(OUTCH,590) TRAVEL(J)
-	READ(INPCH,600,ERR=2200,END=2000) TRAVEL(J)
+36100	WRITE(output_unit,590) TRAVEL(J)
+	READ(input_unit,600,ERR=2200,END=2000) TRAVEL(J)
 	GO TO 2000
 C
 610	FORMAT(' Old= ',O6,6X,'New= ',$)
@@ -407,15 +408,15 @@ C
 C AV-- Alter Villains
 C
 37000	IF(.NOT.VALID3(J,VLNT,K,5)) GO TO 2200	! indices valid?
-	WRITE(OUTCH,590) EQV(J,K)
-	READ(INPCH,600,ERR=2200,END=2000) EQV(J,K)
+	WRITE(output_unit,590) EQV(J,K)
+	READ(input_unit,600,ERR=2200,END=2000) EQV(J,K)
 	GO TO 2000
 C
 C D2-- Display Room2 List
 C
 38000	IF(.NOT.VALID2(J,K,R2LNT)) GO TO 2200
 	DO 38100 I=J,K
-	  WRITE(OUTCH,630) I,R2(I),O2(I)
+	  WRITE(output_unit,630) I,R2(I),O2(I)
 38100	CONTINUE
 	GO TO 2000
 C
@@ -425,7 +426,7 @@ C DN-- Display Switches
 C
 39000	IF(.NOT.VALID2(J,K,SMAX)) GO TO 2200	! valid?
 	DO 39100 I=J,K
-	  WRITE(OUTCH,640) I,SWITCH(I)
+	  WRITE(output_unit,640) I,SWITCH(I)
 39100	CONTINUE
 	GO TO 2000
 C
@@ -434,17 +435,17 @@ C
 C AN-- Alter Switches
 C
 40000	IF(.NOT.VALID1(J,SMAX)) GO TO 2200	! valid entry?
-	WRITE(OUTCH,590) SWITCH(J)
-	READ(INPCH,600,ERR=2200,END=2000) SWITCH(J)
+	WRITE(output_unit,590) SWITCH(J)
+	READ(input_unit,600,ERR=2200,END=2000) SWITCH(J)
 	GO TO 2000
 C
 C DM-- Display Messages
 C
 41000	IF(.NOT.VALID2(J,K,MLNT)) GO TO 2200	! valid limits?
-	WRITE(OUTCH,380)
+	WRITE(output_unit,380)
 	DO 41100 I=J,K,10
 	  L=MIN0(I+9,K)
-	  WRITE(OUTCH,650) I,L,(RTEXT(L1),L1=I,L)
+	  WRITE(output_unit,650) I,L,(RTEXT(L1),L1=I,L)
 41100	CONTINUE
 	GO TO 2000
 C
@@ -457,14 +458,14 @@ C
 C
 C AH-- Alter Here
 C
-43000	WRITE(OUTCH,590) HERE
-	READ(INPCH,600,ERR=2200,END=2000) HERE
+43000	WRITE(output_unit,590) HERE
+	READ(input_unit,600,ERR=2200,END=2000) HERE
 	AROOM(PLAYER)=HERE
 	GO TO 2000
 C
 C DP-- Display Parser State
 C
-44000	WRITE(OUTCH,660)
+44000	WRITE(output_unit,660)
 	1	OFLAG,OACT,OPREP1,OOBJ1,OPREP,ONAME,OPREP2,OOBJ2,
 	2	LASTIT,ACT,OBJ1,OBJ2,PREP1,PREP2,SYN,
 	3	BUNLNT,BUNSUB,BUNVEC
@@ -476,14 +477,14 @@ C
 C
 C PD-- Program Detail
 C
-45000	WRITE(OUTCH,610) PRSFLG			! type old, get new.
-	READ(INPCH,620,ERR=2200,END=2000) PRSFLG
+45000	WRITE(output_unit,610) PRSFLG			! type old, get new.
+	READ(input_unit,620,ERR=2200,END=2000) PRSFLG
 	GO TO 2000
 C
 C DZ-- Display Puzzle Room
 C
 46000	DO 46100 I=1,64,8			! display puzzle
-	  WRITE(OUTCH,670) (CPVEC(J),J=I,I+7)
+	  WRITE(output_unit,670) (CPVEC(J),J=I,I+7)
 46100	CONTINUE
 	GO TO 2000
 C
@@ -492,8 +493,8 @@ C
 C AZ-- Alter Puzzle Room
 C
 47000	IF(.NOT.VALID1(J,64)) GO TO 2200	! valid entry?
-	WRITE(OUTCH,590) CPVEC(J)		! output old,
-	READ(OUTCH,600) CPVEC(J)		! get new.
+	WRITE(output_unit,590) CPVEC(J)		! output old,
+	READ(output_unit,600) CPVEC(J)		! get new.
 	GO TO 2000
 C
-	END
+	END subroutine GDT
