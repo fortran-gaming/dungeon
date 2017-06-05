@@ -49,10 +49,10 @@ C
       WASLIT=LIT(HERE)
 C
       GO TO (2000,5000,10000,11000,12000,15000,18000,
-      1 19000,20000,22000,25000,26000,32000,35000,39000,40000,
-      2 45000,47000,48000,49000,50000,51000,52000,54000,55000,
-      3 56000,57000,58000,59000,60000,61000,62000),
-      3      (RI-MXSMP)
+     & 19000,20000,22000,25000,26000,32000,35000,39000,40000,
+     & 45000,47000,48000,49000,50000,51000,52000,54000,55000,
+     & 56000,57000,58000,59000,60000,61000,62000),
+     &      (RI-MXSMP)
       CALL BUG(6,RI)
 C
 C Return here to declare false result.
@@ -92,7 +92,7 @@ C
 5100      IF(PRSA.NE.TAKEW) GO TO 5400            ! take water?
       IF(PRSI.NE.0) GO TO 5200            ! from x?
       IF((OADV(BOTTL).EQ.WINNER).AND.(OCAN(PRSO).NE.BOTTL))
-      1      GO TO 5500                  ! take, have bottle -> put.
+     &      GO TO 5500                  ! take, have bottle -> put.
       IF(OCAN(PRSO).NE.BOTTL) GO TO 5150      ! water in bottle?
       IF(OADV(BOTTL).NE.WINNER) GO TO 5125      ! already have bottle?
       CALL RSPEAK(103)                  ! yes, already have water.
@@ -122,7 +122,7 @@ C
 5400      IF(PRSA.NE.PUTW) GO TO 5700            ! put water in x?
       IF(PRSI.EQ.BOTTL) GO TO 5500            ! in bottle?
       IF((IAND(OFLAG2(PRSI), VEHBT).NE.0).OR.
-      1  ((AV.NE.0).AND.(PRSI.EQ.AV))) GO TO 5450      ! in veh?
+     &  ((AV.NE.0).AND.(PRSI.EQ.AV))) GO TO 5450      ! in veh?
       CALL RSPSUB(297,ODI2)                  ! wont go elsewhere.
       CALL NEWSTA(PRSO,0,0,0,0)            ! vanish water.
       RETURN
@@ -143,7 +143,7 @@ C
       RETURN
 C
 5700      IF((PRSA.NE.DROPW).AND.(PRSA.NE.POURW))
-      1      GO TO 5900                  ! drop, pour?
+     &      GO TO 5900                  ! drop, pour?
       IF(AV.NE.0) GO TO 5800                  ! into vehicle?
       CALL NEWSTA(PRSO,133,0,0,0)            ! no, vanishes.
       RETURN
@@ -200,9 +200,9 @@ C
       GO TO 10
 C
 12100      IF((((PRSA.NE.ATTACW).AND.(PRSA.NE.KILLW)).OR.
-      1      (PRSI.NE.RKNIF)).AND.
-      2  (((PRSA.NE.SWINGW).AND.(PRSA.NE.THROWW)).OR.
-      3      (PRSO.NE.RKNIF))) GO TO 10
+     &      (PRSI.NE.RKNIF)).AND.
+     &  (((PRSA.NE.SWINGW).AND.(PRSA.NE.THROWW)).OR.
+     &      (PRSO.NE.RKNIF))) GO TO 10
       CALL NEWSTA(RKNIF,0,0,0,0)            ! kill knife.
       CALL JIGSUP(161)                  ! kill him.
       RETURN
@@ -317,7 +317,7 @@ C
       RETURN
 C
 20500      IF((PRSA.NE.TRNOFW).OR.(IAND(OFLAG1(MATCH), ONBT).EQ.0))
-      1      GO TO 10                  ! extinguish?
+     &      GO TO 10                  ! extinguish?
       OFLAG1(MATCH)=IAND(OFLAG1(MATCH), NOT(FLOBTS))
       CTICK(CEVMAT)=0
       CALL RSPEAK(185)
@@ -392,9 +392,9 @@ C
       RETURN
 C
 45100      IF((PRSA.NE.KILLW).AND.(PRSA.NE.MUNGW).AND.
-      1  (PRSA.NE.RUBW).AND.(PRSA.NE.OPENW).AND.
-      2  (PRSA.NE.TAKEW).AND.(PRSA.NE.BURNW).AND.(PRSA.NE.SPINW).AND.
-      3  (PRSA.NE.ATTACW).AND.(PRSA.NE.KICKW)) GO TO 10
+     &  (PRSA.NE.RUBW).AND.(PRSA.NE.OPENW).AND.
+     &  (PRSA.NE.TAKEW).AND.(PRSA.NE.BURNW).AND.(PRSA.NE.SPINW).AND.
+     &  (PRSA.NE.ATTACW).AND.(PRSA.NE.KICKW)) GO TO 10
       CALL RSPEAK(260)                  ! bad news for player
       I=ROBADV(WINNER,0,LCASE,0)+ROBRM(HERE,100,0,LCASE,0)
       IF(I.NE.0) CALL NEWSTA(LCASE,0,LROOM,0,0) ! if robbed, make large case.
@@ -505,12 +505,12 @@ C
 C O121--      Eatme cake
 C
 51000      IF((PRSA.NE.EATW).OR.(PRSO.NE.ECAKE).OR.
-      1      (HERE.NE.ALICE)) GO TO 10      ! eat cake in aliceroom?
+     &      (HERE.NE.ALICE)) GO TO 10      ! eat cake in aliceroom?
       CALL NEWSTA(ECAKE,273,0,0,0)            ! vanish cake.
       OFLAG1(ROBOT)=IAND(OFLAG1(ROBOT), NOT(VISIBT))      ! vanish robot.
       DO 51100 I=1,OLNT                  ! make objects big.
         IF((OROOM(I).NE.ALICE).OR.(OSIZE(I).EQ.10000))
-      1      GO TO 51100
+     &      GO TO 51100
         OSIZE(I)=OSIZE(I)*64
         OROOM(I)=ALISM
 51100      CONTINUE
@@ -528,15 +528,15 @@ C
       RETURN
 C
 52200      IF((PRSA.NE.THROWW).OR.(PRSO.NE.RDICE).OR.(PRSI.NE.POOL))
-      1      GO TO 52300                  ! throw rdice at pool?
+     &      GO TO 52300                  ! throw rdice at pool?
       CALL NEWSTA(POOL,280,0,0,0)            ! vanish pool.
       OFLAG1(SAFFR)=IOR(OFLAG1(SAFFR), VISIBT)      ! materialize spices.
       RETURN
 C
 52300      IF((HERE.NE.ALICE).AND.(HERE.NE.ALISM).AND.(HERE.NE.ALITR))
-      1      GO TO 10                  ! in wonderland?
+     &      GO TO 10                  ! in wonderland?
       IF(((PRSA.NE.EATW).AND.(PRSA.NE.THROWW)).OR.
-      1      (PRSO.NE.ORICE)) GO TO 52400      ! throw orange ice?
+     &      (PRSO.NE.ORICE)) GO TO 52400      ! throw orange ice?
       CALL NEWSTA(ORICE,0,0,0,0)            ! vanish orange ice.
       RFLAG(HERE)=IOR(RFLAG(HERE), RMUNG)      ! vanish room.
       RDESC1(HERE)=281
@@ -544,13 +544,13 @@ C
       RETURN
 C
 52400      IF((PRSA.NE.EATW).OR.(PRSO.NE.BLICE))
-      1      GO TO 10                  ! eat blue ice?
+     &      GO TO 10                  ! eat blue ice?
       CALL NEWSTA(BLICE,283,0,0,0)            ! vanish blue ice.
       IF(HERE.NE.ALISM) GO TO 52500            ! in reduced room?
       OFLAG1(ROBOT)=IOR(OFLAG1(ROBOT), VISIBT)      ! materialize robot.
       DO 52450 I=1,OLNT                  ! enlarge world.
         IF((OROOM(I).NE.HERE).OR.(OSIZE(I).EQ.10000))
-      1      GO TO 52450
+     &      GO TO 52450
         OROOM(I)=ALICE
         OSIZE(I)=OSIZE(I)/64
 52450      CONTINUE
@@ -570,7 +570,7 @@ C
 C O124--      Myself
 C
 55000      IF((PRSA.NE.GIVEW).OR.
-      1 (IAND(OFLAG2(PRSO), NOCHBT).NE.0)) GO TO 55100      ! give?
+     & (IAND(OFLAG2(PRSO), NOCHBT).NE.0)) GO TO 55100      ! give?
       IF(PRSO.NE.WATER) GO TO 55050            ! water?
       CALL NEWSTA(WATER,615,0,0,0)            ! slips through fingers.
       RETURN
@@ -583,7 +583,7 @@ C
       RETURN
 C
 55200      IF(((PRSA.NE.KILLW).AND.(PRSA.NE.MUNGW))
-      1      .OR.(PRSO.NE.OPLAY)) GO TO 10
+     &      .OR.(PRSO.NE.OPLAY)) GO TO 10
       WINNER=PLAYER                        ! can't kill someone else.
       CALL JIGSUP(287)                  ! kill, no joke.
       RETURN
@@ -622,8 +622,8 @@ C
 C
 57100      IF(PRSO.NE.PINDR) GO TO 57300            ! push pine wall?
       IF(((MLOC.EQ.MRC).AND.(MDIR.EQ.180)).OR.
-      1  ((MLOC.EQ.MRD).AND.(MDIR.EQ.0)).OR.
-      2   (MLOC.EQ.MRG)) GO TO 57200            ! in view of gdn?
+     &  ((MLOC.EQ.MRD).AND.(MDIR.EQ.0)).OR.
+     &   (MLOC.EQ.MRG)) GO TO 57200            ! in view of gdn?
       CALL RSPEAK(736)                  ! no, opens.
       WDOPNF=.TRUE.                        ! indicate open.
       CFLAG(CEVPIN)=.TRUE.                  ! time opening.
@@ -668,7 +668,7 @@ C
 C O127--      Global guardians
 C
 58000      IF((PRSA.NE.ATTACW).AND.(PRSA.NE.KILLW).AND.
-      1  (PRSA.NE.MUNGW)) GO TO 58100            ! aggressive?
+     &  (PRSA.NE.MUNGW)) GO TO 58100            ! aggressive?
       CALL JIGSUP(745)                  ! lose.
       RETURN
 C
@@ -679,8 +679,8 @@ C
 C O128--      Global master
 C
 59000      IF(((PRSA.NE.ATTACW).AND.(PRSA.NE.KILLW).AND.(PRSA.NE.MUNGW))
-      1      .OR.(PRSO.NE.MASTER).OR.(PRSI.EQ.MASTER))
-      2      GO TO 59100                  ! kill master?
+     &      .OR.(PRSO.NE.MASTER).OR.(PRSI.EQ.MASTER))
+     &      GO TO 59100                  ! kill master?
       WINNER=PLAYER                        ! rebounds on player.
       CALL JIGSUP(747)                  ! bad idea.
       RETURN
@@ -723,7 +723,7 @@ C
 C O131--      Global ladder
 C
 62000      IF((CPVEC(CPHERE+1).EQ.-2).OR.(CPVEC(CPHERE-1).EQ.-3))
-      1      GO TO 62100                  ! ladder here?
+     &      GO TO 62100                  ! ladder here?
       CALL RSPEAK(865)                  ! no, lose.
       RETURN
 C
@@ -732,7 +732,7 @@ C
       RETURN
 C
 62200      IF((CPHERE.EQ.10).AND.(CPVEC(CPHERE+1).EQ.-2))
-      1      GO TO 62300                  ! at exit?
+     &      GO TO 62300                  ! at exit?
       CALL RSPEAK(867)                  ! no, hit your head.
       RETURN
 C
@@ -747,8 +747,7 @@ C
 C Declarations
 C
       LOGICAL FUNCTION SOBJS(RI,ARG)
-      IMPLICIT INTEGER (A-Z)
-      INCLUDE 'dparam.for'
+
       LOGICAL MOVETO,OPNCLS,LIT,WASLIT
       LOGICAL F,QOPEN
 C
@@ -765,12 +764,12 @@ C
       WASLIT=LIT(HERE)
 C
       GO TO (1000,3000,4000,6000,7000,8000,9000,
-      1 13000,14000,16000,17000,
-      2 21000,23000,24000,27000,28000,29000,30000,
-      3 31000,33000,34000,36000,37000,38000,
-      4 41000,42000,43000,44000,46000,
-      5 53000,56000)
-      6      RI
+     & 13000,14000,16000,17000,
+     & 21000,23000,24000,27000,28000,29000,30000,
+     & 31000,33000,34000,36000,37000,38000,
+     & 41000,42000,43000,44000,46000,
+     & 53000,56000)
+     &      RI
       CALL BUG(6,RI)
 C
 C Return here to declare false result.
@@ -812,7 +811,7 @@ C
 C O4--      Rope
 C
 6000      IF((HERE.EQ.DOME).OR.(HERE.EQ.SLIDE).OR.(PRSI.EQ.0).OR.
-      1  (PRSI.EQ.TIMBE).OR.(PRSI.EQ.COFFI)) GO TO 6100
+     &  (PRSI.EQ.TIMBE).OR.(PRSI.EQ.COFFI)) GO TO 6100
       IF(PRSA.EQ.TIEW) CALL RSPEAK(135)      ! tie, cant do it.
 6050      DOMEF=.FALSE.                        ! not tied in dome.
       TTIE=0                              ! not tied to timber.
@@ -872,7 +871,7 @@ C
       RETURN
 C
 6600      IF(DOMEF.OR.(PRSA.NE.DROPW).OR.
-      1      (HERE.NE.DOME)) GO TO 6700      ! drop & untied from dome?
+     &      (HERE.NE.DOME)) GO TO 6700      ! drop & untied from dome?
       CALL NEWSTA(ROPE,140,MTORC,0,0)            ! yes, drop.
       RETURN
 C
@@ -887,7 +886,7 @@ C
 C O5--      Sword
 C
 7000      IF((PRSA.EQ.TAKEW).AND.(WINNER.EQ.PLAYER))
-      1      SWDACT=.TRUE.                  ! turn on demon.
+     &      SWDACT=.TRUE.                  ! turn on demon.
       GO TO 10
 C
 C O6--      Lantern
@@ -921,7 +920,7 @@ C
       RETURN
 C
 9300      IF((PRSA.NE.LOOKUW).OR.(ORRUG.NE.0).OR.
-      1      QOPEN(DOOR)) GO TO 10            ! look under rug?
+     &      QOPEN(DOOR)) GO TO 10            ! look under rug?
       CALL RSPEAK(345)
       RETURN
 
@@ -947,7 +946,7 @@ C
       RETURN
 C
 14500      IF((PRSA.NE.LOOKW).AND.(PRSA.NE.LOOKIW).AND.
-      1      (PRSA.NE.EXAMIW)) GO TO 14600
+     &      (PRSA.NE.EXAMIW)) GO TO 14600
       I=164                              ! mirror ok.
       IF(MIRRMF) I=165                  ! mirror dead.
       CALL RSPEAK(I)
@@ -1030,9 +1029,9 @@ C
 C O13--      Chalice
 C
 23000      IF((PRSA.NE.TAKEW).OR.(OCAN(PRSO).NE.0).OR.
-      1      (OROOM(PRSO).NE.TREAS).OR.(OROOM(THIEF).NE.TREAS).OR.
-      2      (IAND(OFLAG2(THIEF), FITEBT).EQ.0).OR.
-      3      .NOT. THFACT) GO TO 10
+     &      (OROOM(PRSO).NE.TREAS).OR.(OROOM(THIEF).NE.TREAS).OR.
+     &      (IAND(OFLAG2(THIEF), FITEBT).EQ.0).OR.
+     &      .NOT. THFACT) GO TO 10
       CALL RSPEAK(204)                  ! cant take.
       RETURN
 C
@@ -1062,13 +1061,13 @@ C
       OFLAG2(COFFI)=IAND(OFLAG2(COFFI), NOT(SCRDBT))
       OFLAG1(TRUNK)=IOR(OFLAG1(TRUNK), VISIBT)      ! materialize trunk.
       RFLAG(RESER)=IAND(IOR(RFLAG(RESER), RLAND),
-      1      NOT(RWATER+RSEEN))      ! keep thief away.
+     &      NOT(RWATER+RSEEN))      ! keep thief away.
       RETURN
 C
 27200      LWTIDF=.FALSE.                        ! yes, fill dam.
       CALL RSPEAK(212)
       IF(OROOM(TRUNK).EQ.RESER) OFLAG1(TRUNK)=IAND(OFLAG1(TRUNK),
-      1      NOT(VISIBT))
+     &      NOT(VISIBT))
       RFLAG(RESER)=IAND(IOR(RFLAG(RESER), RWATER), NOT(RLAND))
       RETURN
 C
@@ -1149,7 +1148,7 @@ C
 C O20--      Leak
 C
 33000      IF((PRSO.NE.LEAK).OR.(PRSA.NE.PLUGW).OR.(RVMNT.LE.0))
-      1      GO TO 10                  ! plug active leak?
+     &      GO TO 10                  ! plug active leak?
       IF(PRSI.NE.PUTTY) GO TO 33100            ! with putty?
       RVMNT=-1                        ! disable leak.
       CTICK(CEVMNT)=0
@@ -1257,8 +1256,8 @@ C
 C O25--      Braided rope (also balloon receptacle, cloth bag)
 C
 41000      IF((PRSA.NE.TIEW).OR.(PRSO.NE.BROPE).OR.
-      1      ((PRSI.NE.HOOK1).AND.(PRSI.NE.HOOK2)))
-      2      GO TO 41100                  ! tie to hook?
+     &      ((PRSI.NE.HOOK1).AND.(PRSI.NE.HOOK2)))
+     &      GO TO 41100                  ! tie to hook?
       BTIEF=PRSI                        ! record location.
       ODESC1(BTIEF)=1072                  ! change description.
       CFLAG(CEVBAL)=.FALSE.                  ! stall ascent.
@@ -1317,7 +1316,7 @@ C
       GO TO 50                        ! go see if now dark.
 C
 44100      IF((PRSO.NE.BRICK).OR.(OCAN(FUSE).NE.BRICK).OR.
-      1      (CTICK(CEVFUS).EQ.0)) GO TO 44200 ! a bomb?
+     &      (CTICK(CEVFUS).EQ.0)) GO TO 44200 ! a bomb?
       CALL NEWSTA(GNOME,927,0,0,0)            ! gnome leaves.
       CALL NEWSTA(BRICK,0,HERE,0,0)            ! brick on floor.
       CFLAG(CEVVLG)=.FALSE.                  ! turn off gnome clocks.
@@ -1358,7 +1357,7 @@ C
       RETURN
 C
 53200      IF(((PRSA.NE.MUNGW).AND.(PRSA.NE.THROWW)).OR.
-      1  ((PRSO.NE.ROBOT).AND.(PRSI.NE.ROBOT))) GO TO 10
+     &  ((PRSO.NE.ROBOT).AND.(PRSI.NE.ROBOT))) GO TO 10
       CALL NEWSTA(ROBOT,285,0,0,0)            ! kill robot.
       GO TO 50                        ! go see if now dark.
 C
@@ -1398,12 +1397,12 @@ C
       WASLIT=LIT(HERE)
 C
       GO TO (1000,2000,3000,4000,5000,6000,7000,8000,9000,
-      1 10000,11000,12000,13000,14000,15000,16000,17000,
-      2 18000,19000,20000,21000,22000,23000,24000,25000,
-      3 26000,27000,28000,29000,30000,31000,32000,33000,
-      4 34000,35000,36000,37000,38000,39000,40000,41000,
-      5 42000,43000,44000,45000,46000),
-      6      (RI-31)
+     & 10000,11000,12000,13000,14000,15000,16000,17000,
+     & 18000,19000,20000,21000,22000,23000,24000,25000,
+     & 26000,27000,28000,29000,30000,31000,32000,33000,
+     & 34000,35000,36000,37000,38000,39000,40000,41000,
+     & 42000,43000,44000,45000,46000),
+     &      (RI-31)
       CALL BUG(6,RI)
 C
 C Return here to declare false result.
@@ -1432,12 +1431,12 @@ C
 2000      TARGET=SCOL                        ! target is scol.
 2100      IF(PRSO.NE.TARGET) GO TO 2400            ! prso eq target?
       IF((PRSA.NE.PUSHW).AND.(PRSA.NE.MOVEW).AND.
-      1      (PRSA.NE.TAKEW).AND.(PRSA.NE.RUBW)) GO TO 2200
+     &      (PRSA.NE.TAKEW).AND.(PRSA.NE.RUBW)) GO TO 2200
       CALL RSPEAK(673)                  ! hand passes thru.
       RETURN
 C
 2200      IF((PRSA.NE.KILLW).AND.(PRSA.NE.ATTACW).AND.
-      1      (PRSA.NE.MUNGW)) GO TO 2400      ! aggressive?
+     &      (PRSA.NE.MUNGW)) GO TO 2400      ! aggressive?
       CALL RSPSUB(674,ODI2)                  ! passes thru.
       RETURN
 C
@@ -1466,7 +1465,7 @@ C
 3000      IF((PRSA.NE.GIVEW).AND.(PRSA.NE.THROWW)) GO TO 3200
       IF(OTVAL(PRSO).NE.0) GO TO 3100            ! throw a treasure?
       IF((PRSO.NE.BRICK).OR.(OCAN(FUSE).NE.BRICK).OR.
-      1      (CTICK(CEVFUS).EQ.0)) GO TO 3050 ! a bomb?
+     &      (CTICK(CEVFUS).EQ.0)) GO TO 3050 ! a bomb?
       CALL NEWSTA(ZGNOM,931,0,0,0)            ! gnome leaves.
       CALL NEWSTA(BRICK,0,HERE,0,0)            ! brick on floor.
       CFLAG(CEVZGO)=.FALSE.                  ! stop gnome timers.
@@ -1484,7 +1483,7 @@ C
       RETURN
 C
 3200      IF((PRSA.NE.ATTACW).AND.(PRSA.NE.KILLW).AND.
-      1      (PRSA.NE.MUNGW)) GO TO 3300      ! aggressive?
+     &      (PRSA.NE.MUNGW)) GO TO 3300      ! aggressive?
       CALL NEWSTA(ZGNOM,643,0,0,0)            ! vanish gnome.
       CFLAG(CEVZGO)=.FALSE.                  ! cancel exit.
       RETURN
@@ -1509,7 +1508,7 @@ C
 C
 4300      I=652                              ! mung message.
       IF((IAND(OFLAG1(PRSI), TOOLBT).NE.0).OR.
-      1      (IAND(OFLAG2(PRSI), WEAPBT).NE.0)) GO TO 4600
+     &      (IAND(OFLAG2(PRSI), WEAPBT).NE.0)) GO TO 4600
       I=653                              ! novelty 1.
       IF(IAND(OFLAG2(PRSO), FITEBT).NE.0) I=654 ! novelty 2.
       OFLAG2(PRSO)=IOR(OFLAG2(PRSO), FITEBT)
@@ -1540,8 +1539,8 @@ C
       RETURN
 C
 5100      IF(.NOT.SINGSF.AND.((HERE.EQ.MTREE).OR.
-      1      ((HERE.GE.FORE1).AND.(HERE.LT.CLEAR))))
-      2      GO TO 5200                  ! first song in for?
+     &      ((HERE.GE.FORE1).AND.(HERE.LT.CLEAR))))
+     &      GO TO 5200                  ! first song in for?
       CALL RSPEAK(646)                  ! no, mediocre news.
       RETURN
 C
@@ -1553,14 +1552,14 @@ C
 C O37--      White cliffs
 C
 6000      IF((PRSA.NE.CLMBW).AND.(PRSA.NE.CLMBUW).AND.
-      1      (PRSA.NE.CLMBDW)) GO TO 10      ! climb?
+     &      (PRSA.NE.CLMBDW)) GO TO 10      ! climb?
       CALL RSPEAK(648)                  ! oh yeah?
       RETURN
 C
 C O38--      Wall
 C
 7000      IF((IABS(HERE-MLOC).NE.1).OR.(MRHERE(HERE).NE.0).OR.
-      1      .NOT.ENDGMF) GO TO 7100            ! mirror wall in endgame?
+     &      .NOT.ENDGMF) GO TO 7100            ! mirror wall in endgame?
       IF(PRSA.NE.PUSHW) GO TO 10            ! pushed?
       CALL RSPEAK(860)                  ! pushed mirror wall.
       RETURN
@@ -1683,7 +1682,7 @@ C
 12100      I=PRSO                              ! assume blk with dirobj.
       IF((PRSA.EQ.PUTW).AND.(PRSI.EQ.RBEAM)) GO TO 12200
       IF((PRSA.NE.MUNGW).OR.(PRSO.NE.RBEAM).OR.
-      1      (PRSI.EQ.0)) GO TO 10            ! break beam with x?
+     &      (PRSI.EQ.0)) GO TO 10            ! break beam with x?
       I=PRSI
 12200      IF(OADV(I).NE.WINNER) GO TO 12300      ! carrying?
       CALL NEWSTA(I,0,HERE,0,0)            ! drop obj.
@@ -1698,14 +1697,14 @@ C
 C O44--      Bronze door
 C
 13000      IF((HERE.EQ.NCELL).OR.((LCELL.EQ.4).AND.
-      1      ((HERE.EQ.CELL).OR.(HERE.EQ.SCORR))))
-      2      GO TO 13100
+     &      ((HERE.EQ.CELL).OR.(HERE.EQ.SCORR))))
+     &      GO TO 13100
       CALL RSPEAK(763)                  ! door not there.
       RETURN
 C
 13100      IF(.NOT.OPNCLS(ODOOR,764,765)) GO TO 10      ! open/close?
       IF((HERE.EQ.NCELL).AND.QOPEN(ODOOR))
-      1      CALL RSPEAK(766)            ! descr view.
+     &      CALL RSPEAK(766)            ! descr view.
       RETURN
 C
 C O45--      Quiz door
@@ -1754,9 +1753,9 @@ C
 C
       DO 17100 I=1,OLNT                  ! relocate old to hyper.
         IF((OROOM(I).EQ.CELL).AND.(IAND(OFLAG1(I), DOORBT).EQ.0))
-      1      CALL NEWSTA(I,0,LCELL*HFACTR,0,0)
+     &      CALL NEWSTA(I,0,LCELL*HFACTR,0,0)
         IF(OROOM(I).EQ.(PNUMB*HFACTR))
-      1      CALL NEWSTA(I,0,CELL,0,0)      ! move in new hyper.
+     &      CALL NEWSTA(I,0,CELL,0,0)      ! move in new hyper.
 17100      CONTINUE
 C
       OFLAG1(ODOOR)=IAND(OFLAG1(ODOOR), NOT(VISIBT))
@@ -1782,7 +1781,7 @@ C
       RETURN
 C
 18100      IF((PRSA.NE.MOVEW).AND.(PRSA.NE.PUTW).AND.
-      1      (PRSA.NE.TRNTOW)) GO TO 10
+     &      (PRSA.NE.TRNTOW)) GO TO 10
       IF(PRSI.NE.0) GO TO 18200            ! turn dial to x?
       CALL RSPEAK(806)                  ! must specify.
       RETURN
@@ -1819,7 +1818,7 @@ C
       RETURN
 C
 21100      IF((IAND(OFLAG1(PRSO), VICTBT).EQ.0).AND.
-      1  (IAND(OFLAG2(PRSO), VILLBT).EQ.0)) GO TO 21200
+     &  (IAND(OFLAG2(PRSO), VILLBT).EQ.0)) GO TO 21200
       CALL RSPEAK(552+RND(6))                  ! joke for vill, vict.
       RETURN
 C
@@ -1836,8 +1835,8 @@ C
       GO TO 10                        ! do normal take.
 C
 22100      IF((PRSO.NE.BROCH).OR.
-      1  ((PRSA.NE.EXAMIW).AND.(PRSA.NE.READW)))
-      2  GO TO 22200                        ! examine brochure?
+     &  ((PRSA.NE.EXAMIW).AND.(PRSA.NE.READW)))
+     &  GO TO 22200                        ! examine brochure?
       CALL RSPEAK(942)                  ! describe.
       IF(OCAN(STAMP).EQ.BROCH) CALL RSPEAK(943)
       RETURN
@@ -1916,7 +1915,7 @@ C
 C O57--      Barred window in white house
 C
 26000      IF((PRSA.NE.OPENW).AND.(PRSA.NE.LOOKIW).AND.
-      1  (PRSA.NE.GTHROW)) GO TO 26100      ! open, look in, enter?
+     &  (PRSA.NE.GTHROW)) GO TO 26100      ! open, look in, enter?
       CALL RSPEAK(1039)                  ! window barred.
       RETURN
 C
@@ -1929,8 +1928,8 @@ C
 C O58--      Global well
 C
 27000      IF((IAND(OFLAG1(PRSO), TAKEBT).EQ.0).OR.(PRSO.EQ.WATER).OR.
-      1  ((PRSA.NE.THROWW).AND.(PRSA.NE.PUTW).AND.(PRSA.NE.DROPW)))
-      2  GO TO 10                        ! throw, put, drop x in well?
+     &  ((PRSA.NE.THROWW).AND.(PRSA.NE.PUTW).AND.(PRSA.NE.DROPW)))
+     &  GO TO 10                        ! throw, put, drop x in well?
       CALL RSPSUB(939,ODO2)
       CALL NEWSTA(PRSO,0,BWELL,0,0)            ! put in well bottom.
       GO TO 50                        ! go see if now dark.
@@ -1948,14 +1947,14 @@ C
       RETURN
 C
 28300      IF((PRSA.EQ.CLMBW).OR.(PRSA.EQ.CLMBUW).OR.
-      1  (PRSA.EQ.CLMBDW)) GO TO 10            ! normal climb.
+     &  (PRSA.EQ.CLMBDW)) GO TO 10            ! normal climb.
       CALL RSPEAK(1008)                  ! not a good idea.
       RETURN
 C
 C O60--      Global slide
 C
 29000      IF((PRSA.NE.GTHROW).AND.
-      1 ((PRSA.NE.PUTW).OR.(PRSO.NE.AOBJ(PLAYER)))) GO TO 29100
+     & ((PRSA.NE.PUTW).OR.(PRSO.NE.AOBJ(PLAYER)))) GO TO 29100
       CALL RSPEAK(1010)                  ! down the slide.
       GO TO 28200
 C
@@ -2076,7 +2075,7 @@ C
 C
 36500      RVSND=0                              ! 5, sand collapses.
       IF(OROOM(STATU).EQ.HERE)
-      1      OFLAG1(STATU)=IAND(OFLAG1(STATU), NOT(VISIBT))
+     &      OFLAG1(STATU)=IAND(OFLAG1(STATU), NOT(VISIBT))
       CALL JIGSUP(90)                        ! gonzo.
       RETURN
 C
@@ -2107,7 +2106,7 @@ C
 39100      IF(PRSA.NE.UNLOKW) GO TO 39500            ! unlock?
       IF(PRSI.NE.PKEY) GO TO 39400            ! with rusty key?
 39200      IF((OCAN(PKEY).EQ.(HERE-PRM+PKH1)).OR.
-      1      QEMPTY(HERE-PRM+PKH1)) GO TO 39300      ! keyhole empty?
+     &      QEMPTY(HERE-PRM+PKH1)) GO TO 39300      ! keyhole empty?
 39250      CALL RSPEAK(991)                  ! no
       RETURN
 C
@@ -2126,15 +2125,15 @@ C
       RETURN
 C
 39600      IF((OCAN(PKEY).NE.(HERE-PRM+PKH1)).AND.
-      1      .NOT.QEMPTY(HERE-PRM+PKH1)) GO TO 39250
+     &      .NOT.QEMPTY(HERE-PRM+PKH1)) GO TO 39250
       CALL RSPEAK(1000)                  ! now locked.
       PUNLKF=.FALSE.
       RETURN
 C
 39700      IF((PRSA.NE.PUTUNW).OR.((PRSO.NE.BLABE).AND.
-      1  (PRSO.NE.LABEL).AND.(PRSO.NE.CARD).AND.
-      2  (PRSO.NE.WARNI).AND.(PRSO.NE.RBTLB).AND.
-      3  (PRSO.NE.GUIDE))) GO TO 39800      ! put small paper?
+     &  (PRSO.NE.LABEL).AND.(PRSO.NE.CARD).AND.
+     &  (PRSO.NE.WARNI).AND.(PRSO.NE.RBTLB).AND.
+     &  (PRSO.NE.GUIDE))) GO TO 39800      ! put small paper?
       CALL NEWSTA(PRSO,1001,IEOR(HERE, 1),0,0)! put in other room.
       RETURN
 C
@@ -2188,8 +2187,8 @@ C
 42000      IF(PRSA.NE.LOOKIW) GO TO 42200            ! look in?
       I=988                              ! doesn't work.
       IF(QOPEN(PLID1).AND.QOPEN(PLID2).AND.
-      1      QEMPTY(PKH1).AND.QEMPTY(PKH2).AND.
-      2      LIT(IEOR(HERE, 1))) I=989            ! does work
+     &      QEMPTY(PKH1).AND.QEMPTY(PKH2).AND.
+     &      LIT(IEOR(HERE, 1))) I=989            ! does work
       CALL RSPEAK(I)
       RETURN
 C
@@ -2203,7 +2202,7 @@ C
       RETURN
 C
 42400      IF((PRSO.NE.SCREW).AND.(PRSO.NE.KEYS).AND.
-      1  (PRSO.NE.STICK).AND.(PRSO.NE.PKEY)) GO TO 42700
+     &  (PRSO.NE.STICK).AND.(PRSO.NE.PKEY)) GO TO 42700
       IF(QEMPTY(IEOR(PRSI, 1))) GO TO 10            ! nothing to shove.
       DO 42500 I=1,OLNT
         IF(OCAN(I).EQ.IEOR(PRSI, 1)) GO TO 42600      ! find obj in keyhole.
@@ -2239,7 +2238,7 @@ C
       IF(.NOT.LIT(J)) GO TO 44200            ! see destination?
       IF(K.EQ.0) GO TO 44100                  ! contained?
       IF((IAND(OFLAG1(K), TRANBT).EQ.0).AND..NOT.QOPEN(K))
-      1      GO TO 44200                  ! see out of it?
+     &      GO TO 44200                  ! see out of it?
 44100      CALL RSPEAK(1024)                  ! start vision.
       OFLAG1(OBJ)=IAND(OFLAG1(OBJ), NOT(VISIBT))      ! object not visible.
       SVHERE=HERE                        ! save state.
@@ -2263,7 +2262,7 @@ C
       RETURN
 C
 45100      IF(((PRSA.NE.TAKEW).AND.(PRSA.NE.MOVEW)).OR.(MATOBJ.EQ.0))
-      1      GO TO 10                  ! take or move?
+     &      GO TO 10                  ! take or move?
       CALL NEWSTA(MATOBJ,0,HERE,0,0)            ! materialize mat object.
       CALL RSPSUB(984,ODESC2(MATOBJ))
       MATOBJ=0
@@ -2274,8 +2273,8 @@ C
 C O77--      Stove
 C
 46000      IF((PRSA.NE.TAKEW).AND.(PRSA.NE.RUBW).AND.
-      1  (PRSA.NE.ATTACW).AND.(PRSA.NE.MUNGW))
-      2  GO TO 46100                        ! take, feel, attack, mung?
+     &  (PRSA.NE.ATTACW).AND.(PRSA.NE.MUNGW))
+     &  GO TO 46100                        ! take, feel, attack, mung?
       CALL RSPEAK(994)                  ! too hot.
       RETURN
 C
@@ -2312,9 +2311,9 @@ C
 C
 200      MRBF=0                              ! assume mirror ok.
       IF(((NUM.EQ.1).AND..NOT.MR1F).OR.
-      1  ((NUM.EQ.2).AND..NOT.MR2F)) MRBF=1
+     &  ((NUM.EQ.2).AND..NOT.MR2F)) MRBF=1
       IF(PNF.OR.((PRSA.NE.LOOKIW).AND.(PRSA.NE.EXAMIW).AND.
-      1      (PRSA.NE.LOOKW))) GO TO 300
+     &      (PRSA.NE.LOOKW))) GO TO 300
       CALL RSPEAK(844+MRBF)                  ! look in mirror.
       RETURN
 C
@@ -2379,7 +2378,7 @@ C
       RETURN
 C
 350      IF((PRSA.NE.PUTW).OR.(PRSI.NE.RECEP).OR.QEMPTY(RECEP))
-      1      GO TO 10                  ! recep already full.
+     &      GO TO 10                  ! recep already full.
       CALL RSPEAK(549)
       RETURN
 C
@@ -2388,7 +2387,7 @@ C
       CFLAG(CEVBRN)=.TRUE.
       CTICK(CEVBRN)=OSIZE(PRSO)*20
       OFLAG1(PRSO)=IAND(IOR(OFLAG1(PRSO), (ONBT+FLAMBT+LITEBT)),
-      1      NOT(TAKEBT+READBT))            ! burn it.
+     &      NOT(TAKEBT+READBT))            ! burn it.
       IF(BINFF.NE.0) RETURN                  ! already inflated?
       IF(.NOT.BLABF) CALL NEWSTA(BLABE,0,0,BALLO,0)      ! insert label.
       BLABF=.TRUE.                        ! only once.
@@ -2430,8 +2429,8 @@ C
       RETURN
 C
 1300      IF((PRSA.NE.INXW).AND.                  ! wake from fight demon?
-      1  (((PRSA.NE.ALARMW).AND.(PRSA.NE.KICKW)).OR.
-      2    (OCAPAC(TROLL).GE.0))) GO TO 1400      ! wake, kick while out?
+     &  (((PRSA.NE.ALARMW).AND.(PRSA.NE.KICKW)).OR.
+     &    (OCAPAC(TROLL).GE.0))) GO TO 1400      ! wake, kick while out?
       OCAPAC(TROLL)=IABS(OCAPAC(TROLL))      ! yes, wake him.
       OFLAG1(AXE)=IOR(OFLAG1(AXE), VISIBT)
       TROLLF=.FALSE.                        ! forbid exits.
@@ -2444,7 +2443,7 @@ C
       RETURN
 C
 1500      IF((PRSA.NE.MOVEW).AND.(PRSA.NE.TAKEW).AND.(PRSA.NE.MUNGW)
-      1      .AND.(PRSA.NE.THROWW).AND.(PRSA.NE.GIVEW)) GO TO 2000
+     &      .AND.(PRSA.NE.THROWW).AND.(PRSA.NE.GIVEW)) GO TO 2000
       IF(OCAPAC(TROLL).GE.0) GO TO 1550      ! troll out?
       OCAPAC(TROLL)=IABS(OCAPAC(TROLL))      ! yes, wake him.
       OFLAG1(AXE)=IOR(OFLAG1(AXE), VISIBT)
@@ -2492,8 +2491,8 @@ C
       CYCLOP=.TRUE.                        ! assume wins.
       IF(.NOT.CYCLOF) GO TO 100            ! asleep?
       IF((PRSA.NE.ALARMW).AND.(PRSA.NE.MUNGW).AND.(PRSA.NE.KICKW).AND.
-      1      (PRSA.NE.BURNW).AND.(PRSA.NE.KILLW).AND.(PRSA.NE.ATTACW))
-      2       GO TO 10
+     &      (PRSA.NE.BURNW).AND.(PRSA.NE.KILLW).AND.(PRSA.NE.ATTACW))
+     &       GO TO 10
       CYCLOF=.FALSE.                        ! wake cyclops.
       CALL RSPEAK(187)                  ! describe.
       RVCYC=IABS(RVCYC)
@@ -2527,7 +2526,7 @@ C
       RETURN
 C
 500      IF((PRSA.NE.KILLW).AND.(PRSA.NE.ATTACW).AND.
-      1  (PRSA.NE.MUNGW).AND.(PRSA.NE.THROWW)) GO TO 600
+     &  (PRSA.NE.MUNGW).AND.(PRSA.NE.THROWW)) GO TO 600
       CFLAG(CEVCYC)=.TRUE.                  ! turn on cyclops timer.
       CTICK(CEVCYC)=-1
       I=201                              ! assume not poke.
@@ -2570,13 +2569,13 @@ C
       J=501
       DO 125 I=1,OLNT                        ! loop.
         IF((I.EQ.CHALI).OR.(I.EQ.THIEF).OR..NOT.QHERE(I,HERE))
-      1      GO TO 125                  ! is it here?
+     &      GO TO 125                  ! is it here?
         OFLAG1(I)=IOR(OFLAG1(I), VISIBT)      ! rematerialize objects.
         CALL RSPSUB(J,ODESC2(I))            ! describe.
         J=502
         IF(.NOT.QEMPTY(I).AND.
-      1   ((IAND(OFLAG1(I), TRANBT).NE.0).OR.
-      2    (IAND(OFLAG2(I), OPENBT).NE.0))) CALL PRINCO(I,573,.TRUE.)
+     &   ((IAND(OFLAG1(I), TRANBT).NE.0).OR.
+     &    (IAND(OFLAG2(I), OPENBT).NE.0))) CALL PRINCO(I,573,.TRUE.)
 125      CONTINUE
 C
 150      J=500
@@ -2586,8 +2585,8 @@ C
         CALL RSPSUB(J,ODESC2(I))            ! describe.
         J=502
         IF(.NOT.QEMPTY(I).AND.
-      1   ((IAND(OFLAG1(I), TRANBT).NE.0).OR.
-      2    (IAND(OFLAG2(I), OPENBT).NE.0))) CALL PRINCO(I,573,.TRUE.)
+     &   ((IAND(OFLAG1(I), TRANBT).NE.0).OR.
+     &    (IAND(OFLAG2(I), OPENBT).NE.0))) CALL PRINCO(I,573,.TRUE.)
 175      CONTINUE
       RETURN
 C
@@ -2606,8 +2605,8 @@ C
       RETURN
 C
 400      IF((PRSA.NE.INXW).AND.                  ! wake from fight demon?
-      1  (((PRSA.NE.ALARMW).AND.(PRSA.NE.KICKW)).OR.
-      2    (OCAPAC(THIEF).GE.0))) GO TO 500      ! wake, kick while out?
+     &  (((PRSA.NE.ALARMW).AND.(PRSA.NE.KICKW)).OR.
+     &    (OCAPAC(THIEF).GE.0))) GO TO 500      ! wake, kick while out?
       OCAPAC(THIEF)=IABS(OCAPAC(THIEF))      ! wake him up.
       IF(QHERE(THIEF,HERE)) CALL RSPEAK(505)      ! can hero see?
       THFACT=.TRUE.                        ! enable demon.
@@ -2620,7 +2619,7 @@ C
       RETURN
 C
 600      IF((PRSA.NE.THROWW).OR.(PRSO.NE.KNIFE).OR.
-      1      (IAND(OFLAG2(THIEF), FITEBT).NE.0)) GO TO 700
+     &      (IAND(OFLAG2(THIEF), FITEBT).NE.0)) GO TO 700
       IF(PROB(10,10)) GO TO 650            ! threw knife, 10%?
       CALL RSPEAK(507)                  ! no, just makes
       OFLAG2(THIEF)=IOR(OFLAG2(THIEF), FITEBT)      ! thief mad.
@@ -2636,7 +2635,7 @@ C
       RETURN
 C
 700      IF(((PRSA.NE.THROWW).AND.(PRSA.NE.GIVEW)).OR.(PRSO.EQ.0).OR.
-      1      (PRSO.EQ.THIEF)) GO TO 10      ! throw/give to thief?
+     &      (PRSO.EQ.THIEF)) GO TO 10      ! throw/give to thief?
       IF(OCAPAC(THIEF).GE.0) GO TO 750
       OCAPAC(THIEF)=IABS(OCAPAC(THIEF))      ! wake him up.
       THFACT=.TRUE.                        ! enable demon.
@@ -2645,7 +2644,7 @@ C
       CALL RSPEAK(510)
 C
 750      IF((PRSO.NE.BRICK).OR.(OCAN(FUSE).NE.BRICK).OR.
-      1      (CTICK(CEVFUS).EQ.0)) GO TO 800
+     &      (CTICK(CEVFUS).EQ.0)) GO TO 800
       CALL RSPEAK(511)                  ! thief refuses bomb.
       RETURN
 C
