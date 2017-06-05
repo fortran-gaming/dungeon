@@ -1387,7 +1387,7 @@ C Declarations
 C
       LOGICAL FUNCTION NOBJS(RI,ARG)
       use state
-      logical,external :: QHERE
+
       integer,external :: mrhere,rnd
 
       integer,intent(in) :: RI,ARG
