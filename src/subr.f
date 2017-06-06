@@ -29,7 +29,7 @@ C RSPSUB-- Output random message with substitutable argument
 C
 C Called by--
 C
-C      CALL RSPSUB(MSGNUM,SUBNUM)
+!      CALL RSPSUB(MSGNUM,SUBNUM)
 C
       SUBROUTINE RSPSUB(N,S1)
       implicit none
@@ -43,14 +43,16 @@ C RSPSB2-- Output random message with substitutable arguments
 C
 C Called by--
 C
-C	CALL RSPSB2(MSGNUM,S1,S2)
+!	CALL RSPSB2(MSGNUM,S1,S2)
 C
 	SUBROUTINE RSPSB2(A,B,C)
       use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
-	use dparam
-	IMPLICIT INTEGER (A-Z)
+	use dparam, only: rtext,texlnt,dbch,telflg
+	IMPLICIT None
 
 	integer, intent(in) :: a,b,c
+
+      integer i,j,newrec,oldrec,x,y,z
 
 	CHARACTER(TEXLNT) B1,B2
 C
@@ -76,18 +78,18 @@ C
 	I=INDEX(B1,'#')				! look for #.
 	IF(I.GT.0) GO TO 1000			! found?
 C
-400	WRITE(output_unit,650) B1(1:MAX0(1,NBLEN(B1)))! output line.
+400	WRITE(output_unit,650) B1(1:MAX(1,len_trim(B1)))! output line.
 650	FORMAT(1X,A)
 	X=X+1					! on to next record.
 	READ(DBCH,REC=X) NEWREC,B1		! read next record.
-	IF(OLDREC.EQ.NEWREC) GO TO 100		! continuation?
+	IF(OLDREC==NEWREC) GO TO 100		! continuation?
 	RETURN					! no, exit.
 
 C RSPSB2, PAGE 2
 C
 C Substitution with substitutable available.
-C I is index of # in B1.
-C Y is number of record to substitute.
+! I is index of # in B1.
+! Y is number of record to substitute.
 C
 C Procedure:
 C   1) Copy rest of B1 to B2
@@ -101,7 +103,7 @@ C
 C
 	READ(DBCH,REC=Y) J,B1(I:TEXLNT)		! read sub record.
 	CALL TXCRYP(Y,B1(I:TEXLNT))		! decrypt sub record.
-	J=NBLEN(B1)				! backscan for blanks.
+	J=len_trim(B1)				! backscan for blanks.
 	B1(J+1:TEXLNT)=B2(1:TEXLNT-J)
 C
 	Y=Z					! set up for next
@@ -144,7 +146,7 @@ C
 	WRITE(output_unit,100) A,B			! gonzo
 	IF(DBGFLG.NE.0) RETURN
 	SUBBUF='CRASH.DAT'			! set up crash save name.
-	SUBLNT=NBLEN(SUBBUF)
+	SUBLNT=len_trim(SUBBUF)
 	CALL SAVEGM				! do final save.
 	WRITE(output_unit,200)
 	error stop ' abnormal termination'
@@ -177,36 +179,34 @@ C QHERE-- Test for object in room
 C
 C Declarations
 C
-	LOGICAL FUNCTION QHERE(OBJ,RM)
-	use dparam
-	IMPLICIT INTEGER (A-Z)
+        LOGICAL FUNCTION QHERE(OBJ,RM)
+        use dparam,only: oroom,r2lnt,o2,r2
+        IMPLICIT None
+        integer, intent(in) :: obj,rm
+        integer i
 
-C
-	QHERE=.TRUE.
-	IF(OROOM(OBJ).EQ.RM) RETURN		! in room?
-	DO 100 I=1,R2LNT			! no, sch room2.
-	  IF((O2(I).EQ.OBJ).AND.(R2(I).EQ.RM)) RETURN
-100	CONTINUE
-	QHERE=.FALSE.				! not present.
+        QHERE=.TRUE.
+        IF(OROOM(OBJ)==RM) RETURN		! in room?
+        DO I=1,R2LNT			! no, sch room2.
+          IF((O2(I).EQ.OBJ).AND.(R2(I).EQ.RM)) RETURN
+        enddo
+        QHERE=.FALSE.				! not present.
 
-	END
+        END FUNCTION QHERE
 
 C QEMPTY-- Test for object empty
-C
-C Declarations
-C
-	LOGICAL FUNCTION QEMPTY(OBJ)
-	use dparam
-	IMPLICIT INTEGER (A-Z)
+        LOGICAL FUNCTION QEMPTY(OBJ)
+        use dparam,only: olnt,ocan
+        IMPLICIT None
+        integer, intent(in) :: obj
+    !    print *,'hi from qempty'
+        IF (any(OCAN(:olnt)==OBJ)) then		! inside target?
+            qempty=.false.
+        else
+            QEMPTY=.TRUE.
+        endif
 
-	QEMPTY=.FALSE.				! assume lose.
-	DO 100 I=1,OLNT
-	  IF(OCAN(I).EQ.OBJ) RETURN		! inside target?
-100	CONTINUE
-	QEMPTY=.TRUE.
-	RETURN
-C
-	END
+        END FUNCTION QEMPTY
 
 C JIGSUP- You are dead
 C
@@ -309,17 +309,18 @@ C OACTOR-	Get actor associated with object
 C
 C Declarations
 C
-	INTEGER FUNCTION OACTOR(OBJ)
-	use dparam
-	IMPLICIT INTEGER (A-Z)
+        INTEGER FUNCTION OACTOR(OBJ)
+        use dparam,only: alnt,aobj
+        IMPLICIT None
+        integer, intent(in) :: obj
 
-	DO 100 OACTOR=1,ALNT			! loop thru actors.
-	  IF(AOBJ(OACTOR).EQ.OBJ) RETURN	! found it?
-100	CONTINUE
-	CALL BUG(40,OBJ)			! no, die.
-	RETURN
-C
-	END
+        DO OACTOR=1,ALNT			! loop thru actors.
+          IF(AOBJ(OACTOR)==OBJ) RETURN	! found it?
+        end do
+
+        CALL BUG(40,OBJ)			! no, die.
+
+        END
 
 C PROB-		Compute probability
 C
@@ -350,7 +351,7 @@ C
 C Declarations
 	use dparam
 	IMPLICIT INTEGER (A-Z)
-	LOGICAL PROB,LIT
+        LOGICAL, external :: PROB,LIT
 
 C
 	RMDESC=.TRUE.				! assume wins.
@@ -394,73 +395,110 @@ C
 	PRSA=WALKIW				! give him a surpise.
 	CALL RAPPLI(RA)				! let room handle
 	PRSA=FOOW
-	RETURN
-C
+
 	END
 
 C PRINCR- Print contents of room
 C
 C Declarations
 C
-	SUBROUTINE PRINCR(FULL,RM)
-	use dparam
-	IMPLICIT INTEGER (A-Z)
+      SUBROUTINE PRINCR(FULL,RM)
+      use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
+      use dparam
+      IMPLICIT none
+      logical,external :: QHERE,qempty
+      integer,external :: oactor
 
-	LOGICAL QEMPTY,QHERE
-C
+      integer,intent(in) :: full, rm
+      integer i,j,k
+
+!      print *,'start printing room'
+!      call sleep(1)
 	J=329					! assume superbrief format.
 	DO 500 I=1,OLNT				! loop on objects
+!      write(output_unit,'(I4)',advance='no') i
+
 	  IF(.NOT.QHERE(I,RM).OR.(IAND(OFLAG1(I), VISIBT).EQ.0).OR.
-	1	((IAND(OFLAG1(I), NDSCBT).NE.0).AND.(FULL.NE.1)).OR.
-	2	(I.EQ.AVEHIC(WINNER))) GO TO 500
+     &	((IAND(OFLAG1(I), NDSCBT).NE.0).AND.(FULL.NE.1)).OR.
+     &	(I.EQ.AVEHIC(WINNER))) then
+ !      print *,i,rm,qhere(i,rm)!,oflag(i)
+       cycle
+      endif
+
 	  IF((FULL.EQ.0).AND.(SUPERF.OR.(BRIEFF.AND.
-	1	(IAND(RFLAG(HERE), RSEEN).NE.0)))) GO TO 200
-C
-C Do long description of object.
-C
-	  K=ODESCO(I)				! get untouched.
-	  IF((K.EQ.0).OR.(IAND(OFLAG2(I), TCHBT).NE.0)) K=ODESC1(I)
-	  IF((K.EQ.0).AND.(FULL.EQ.1)) CALL RSPSUB(936,ODESC2(I))
+     &   (IAND(RFLAG(HERE), RSEEN).NE.0)))) then
+ !       print *,'not full'
+        GO TO 200
+      endif
+
+! Do long description of object.
+
+	  K = ODESCO(I)				! get untouched.
+
+	  IF((K.EQ.0).OR.(IAND(OFLAG2(I), TCHBT).NE.0)) then
+        K=ODESC1(I)
+!        print *,'new K',k,'i',i
+      endif
+
+	  IF((K.EQ.0).AND.(FULL.EQ.1)) then
+ !       print *,'talking:  i',i
+        CALL RSPSUB(936,ODESC2(I))
+ !       print *,'done talking:  i',i
+      endif
+
 	  CALL RSPEAK(K)			! describe.
-	  GO TO 500
-C
-C Do short description of object.
-C
+
+!      print '(A,I3,A,I8)','osdesco(',i,')',odesco(i)
+!      call sleep(1)
+	  cycle
+
+! Do short description of object.
 200	  CALL RSPSUB(J,ODESC2(I))		! you can see it.
+
 	  J=502
-C
+ !     print *,'label 500: i',i
 500	CONTINUE
-C
+ !     print *,'i',i
 C Now loop to print contents of objects in room.
 C
 	DO 1000 I=1,OLNT			! loop on objects.
 	  IF(.NOT.QHERE(I,RM).OR.(IAND(OFLAG1(I), VISIBT).EQ.0).OR.
-	1	((IAND(OFLAG1(I), NDSCBT).NE.0).AND.(FULL.NE.1)))
-	2	GO TO 1000
-	  IF(IAND(OFLAG2(I), ACTRBT).NE.0) CALL INVENT(OACTOR(I))
-	  IF(((IAND(OFLAG1(I), TRANBT).EQ.0).AND.(IAND(OFLAG2(I), OPENBT)
-	1	.EQ.0)).OR.QEMPTY(I)) GO TO 1000
+     &	((IAND(OFLAG1(I), NDSCBT).NE.0).AND.(FULL.NE.1))) then
+
+         cycle
+      endif
+
+      IF(IAND(OFLAG2(I), ACTRBT).NE.0) CALL INVENT(OACTOR(I))
+
+      IF(((IAND(OFLAG1(I), TRANBT).EQ.0).AND.(IAND(OFLAG2(I), OPENBT)
+     &	.EQ.0)).OR.QEMPTY(I)) cycle
 C
 C Object is not empty and is open or transparent.
 C
-	  IF(I.NE.TCASE) GO TO 600		! trophy case?
-	  IF((.NOT.(BRIEFF.OR.SUPERF)).OR.(FULL.EQ.1))
-	1	CALL PRINCO(I,1053,.FALSE.)	! print contents.
-	  GO TO 1000
-600	  CALL PRINCO(I,573,.TRUE.)		! print contents
-1000	CONTINUE
+      IF(I.NE.TCASE) GO TO 600		! trophy case?
 
-	END
+      IF((.NOT.(BRIEFF.OR.SUPERF)).OR.(FULL.EQ.1)) then
+        CALL PRINCO(I,1053,.FALSE.)	! print contents.
+      endif
+
+      cycle
+
+600	  CALL PRINCO(I,573,.TRUE.)		! print contents
+1000  CONTINUE
+
+ !     print *,'done printing room'
+ !     call sleep(1)
+	END subroutine princr
 
 C INVENT- Print contents of adventurer
 C
 C Declarations
 C
 	SUBROUTINE INVENT(ADV)
-	use dparam
+	use dparam, only: odesc2,oflag1,oadv,aobj,oflag2
 	IMPLICIT INTEGER (A-Z)
 
-	LOGICAL QEMPTY
+	LOGICAL,external :: QEMPTY
 C
 	I=575					! first line.
 	IF(ADV.NE.PLAYER) I=576			! if not me.
@@ -479,11 +517,10 @@ C
 25	DO 100 J=1,OLNT				! loop.
 	  IF((OADV(J).NE.ADV).OR.(IAND(OFLAG1(J), VISIBT).EQ.0).OR.
 	1	((IAND(OFLAG1(J), TRANBT).EQ.0).AND.
-	2	(IAND(OFLAG2(J), OPENBT).EQ.0))) GO TO 100
+	2	(IAND(OFLAG2(J), OPENBT).EQ.0))) cycle
 	  IF(.NOT.QEMPTY(J)) CALL PRINCO(J,573,.TRUE.) ! if not empty, list.
 100	CONTINUE
-	RETURN
-C
+
 	END
 
 C PRINCO-	Print contents of object

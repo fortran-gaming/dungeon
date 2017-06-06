@@ -547,10 +547,11 @@ C Declarations
 C
 C This routine details on bit 3 of PRSFLG
 C
-	INTEGER FUNCTION GETOBJ(OIDX,AIDX,SPCOBJ)
-	use dparam
-	IMPLICIT INTEGER(A-Z)
-	LOGICAL THISIT,GHERE,LIT,CHOMP,DFLAG,NOADJS
+        INTEGER FUNCTION GETOBJ(OIDX,AIDX,SPCOBJ)
+        use dparam
+        IMPLICIT INTEGER(A-Z)
+        LOGICAL GHERE,LIT,CHOMP,DFLAG
+        logical, external :: THISIT,NOADJS
 C
 	DFLAG=IAND(PRSFLG, 8).NE.0
 	CHOMP=.FALSE.
@@ -592,13 +593,13 @@ C
 C
 	IF(GETOBJ.NE.0) GO TO 1500		! got something?
 	DO 1200 I=STRBIT+1,OLNT			! no, search globals.
-	  IF(.NOT.THISIT(OIDX,AIDX,I,SPCOBJ)) GO TO 1200
-	  IF(.NOT.GHERE(I,HERE)) GO TO 1200	! can it be here?
+	  IF(.NOT.THISIT(OIDX,AIDX,I,SPCOBJ)) cycle
+	  IF(.NOT.GHERE(I,HERE)) cycle	! can it be here?
 	  IF(GETOBJ.EQ.0) GO TO 1150		! got one yet?
 	  IF(AIDX.NE.0) GO TO 1050		! yes, no adj?
 	  IF(NOADJS(GETOBJ).NEQV.NOADJS(I)) GO TO 1100	! only one with no adj?
 1050	  GETOBJ=-I				! ambiguous
-	  GO TO 1200
+	  cycle
 1100	  IF(NOADJS(GETOBJ)) GO TO 1200		! if old no adj, retain.
 1150	  GETOBJ=I				! new is target.
 1200	CONTINUE
@@ -1077,13 +1078,12 @@ C
 
 C
 	NOADJS=.FALSE.				! assume false.
-	DO 100 I=1,AVMAX			! search adj.
+	DO I=1,AVMAX			! search adj.
 	  IF(IABS(AVOC(I)).EQ.OBJ) RETURN	! found adjective?
 	  IF(AVOC(I).EQ.0) GO TO 200		! end of list?
-100	CONTINUE
+      enddo
 200	NOADJS=.TRUE.				! true.
-	RETURN
-C
+
 	END
 
 C LCIFY-	"Lower case"-ify a string for printing
