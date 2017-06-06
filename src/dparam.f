@@ -24,6 +24,8 @@ C 25-Jan-94      RMS      Added sandy beach room.
 !      INTEGER :: EQR(RMAX,5),EQO(OMAX,14),EQC(CMAX,2),EQV(VMAX,5),
 !     &           EQA(AMAX,7)
 !---------------------------------------------------
+      logical :: debug=.false.
+
       integer,PARAMETER :: MMAX=1500                  ! message
       integer,PARAMETER :: RMAX=200                  ! rooms
       integer,PARAMETER :: XXMAX=1000                  ! exits

@@ -19,31 +19,46 @@ C RDLINE-	Read input line
 C
 C Declarations
 C
-	SUBROUTINE RDLINE(INLINE,INLEN,WHO)
-      use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
-	use dparam
-	IMPLICIT INTEGER(A-Z)
+      SUBROUTINE RDLINE(INLINE,INLEN,WHO)
+      use, intrinsic:: iso_fortran_env, only: input_unit,output_unit,
+     & error_unit
+      use dparam
+      IMPLICIT INTEGER(A-Z)
 
-	CHARACTER*(TEXLNT) INLINE
+	  CHARACTER(TEXLNT), intent(out) :: INLINE
+      integer, intent(out) ::  inlen
+
+      character(120) iomsg
+      integer ios
+
 C
 	LUCVT=ICHAR('A')-ICHAR('a')		! case conversion factor.
 5	GO TO (90,10),WHO+1			! see who to prompt for.
 10	WRITE(output_unit,'(A)',advance='no') ' >'	! prompt for game.
-	flush(output_unit)
+      flush(output_unit)
 
-C
-90	READ(input_unit,100,END=5) INLINE		! get input.
-100	FORMAT(A)
-C
-	INLEN=NBLEN(INLINE)			! len w/o trailing blanks.
-	IF(INLEN.LE.0) GO TO 5			! anything left?
-	DO 400 I=1,INLEN			! convert to upper case.
-	  IF((INLINE(I:I).GE.'a').AND.(INLINE(I:I).LE.'z'))
-	1	INLINE(I:I)=CHAR(ICHAR(INLINE(I:I))+LUCVT)
-400	CONTINUE
-	PRSCON=1				! restart lex scan.
+! get input.
+90    READ(input_unit,100,END=5,iostat=ios,iomsg=iomsg) INLINE
+100   FORMAT(A)
 
-	END SUBROUTINE RDLINE
+      if (ios/=0) then  ! Ctrl D pressed
+       if (debug) write(error_unit,*) iomsg
+       backspace(input_unit)
+      endif
+
+      INLEN = len_trim(INLINE)			! len w/o trailing blanks.
+      IF(INLEN<=0) GO TO 5			! anything left?
+
+
+
+        DO I=1,INLEN			! convert to upper case.
+          IF((INLINE(I:I) >= 'a').AND.(INLINE(I:I) <= 'z')) then
+            INLINE(I:I)=CHAR(ICHAR(INLINE(I:I))+LUCVT)
+          endif
+          enddo
+        PRSCON=1				! restart lex scan.
+
+        END SUBROUTINE RDLINE
 
 C PARSE-	Top level parse routine
 C

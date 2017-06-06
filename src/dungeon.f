@@ -12,7 +12,11 @@ C
       PROGRAM DUNGEO
       use dparam
       IMPLICIT INTEGER (A-Z)
-      LOGICAL INITFL
+
+      LOGICAL, external :: INITFL
+
+      integer argc
+      character(10) argv
 
 C Data statements for constant arrays
 
@@ -184,9 +188,17 @@ C
 	FROMDR=0				! init scol goodies.
 	SCOLRM=0
 	SCOLAC=0
-C
+
+        argc = command_argument_count()
+        do i = 1,argc
+            call get_command_argument(i,argv)
+            if (argv=='-d') debug=.true.
+        enddo
+
+
 	IF(INITFL(X)) CALL GAME			! if init files, play game.
-	CALL EXIT				! done
+
+
 	END
 
 C TXCRYP - Subroutine to encrypt/decrypt text strings.
