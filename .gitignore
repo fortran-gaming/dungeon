@@ -1,4 +1,6 @@
+bin/
+*.mod
+*.cmake
 dungeon
 *.o
 fort.*
-
