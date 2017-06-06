@@ -197,6 +197,7 @@ C
 C This routine details on bit 2 of PRSFLG
 C
 	INTEGER FUNCTION SPARSE(LBUF,LLNT,VBFLAG)
+      use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
 	use dparam
 	IMPLICIT INTEGER(A-Z)
 	CHARACTER*(WRDLNT) LBUF(LEXMAX),WORD,LCWORD,LCIFY
@@ -719,6 +720,7 @@ C
 C This routine details on bit 4 of PRSFLG
 C
 	LOGICAL FUNCTION SYNMCH(X)
+      use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
 	use dparam
 	IMPLICIT INTEGER(A-Z)
 	LOGICAL SYNEQL,TAKEIT,DFLAG

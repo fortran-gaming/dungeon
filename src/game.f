@@ -28,6 +28,7 @@ C Start up, describe current location.
 C
 	CALL RSPEAK(1)				! welcome aboard.
 	F=RMDESC(3)				! start game.
+
 C
 C Now loop, reading and executing commands.
 C
@@ -194,6 +195,7 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION INITFL(X)
+      use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
 	use dparam
 	IMPLICIT INTEGER (A-Z)
 	LOGICAL PROTCT

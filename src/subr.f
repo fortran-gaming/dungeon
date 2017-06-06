@@ -188,8 +188,7 @@ C
 	  IF((O2(I).EQ.OBJ).AND.(R2(I).EQ.RM)) RETURN
 100	CONTINUE
 	QHERE=.FALSE.				! not present.
-	RETURN
-C
+
 	END
 
 C QEMPTY-- Test for object empty
@@ -450,8 +449,7 @@ C
 	  GO TO 1000
 600	  CALL PRINCO(I,573,.TRUE.)		! print contents
 1000	CONTINUE
-	RETURN
-C
+
 	END
 
 C INVENT- Print contents of adventurer
