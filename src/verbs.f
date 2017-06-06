@@ -23,8 +23,7 @@ C Declarations
 C
       module verbs
       use state
-      use timefnc,only: blow
-  
+
       use,intrinsic:: iso_fortran_env,only: output_unit
       implicit none
       contains
@@ -35,8 +34,7 @@ C
       use subr,only:lit,rnd,findxt,qhere,moveto,yesno,qempty,fights,
      & bug,newsta,princo,jigsup,orphan,score,gttime,invent,encryp
       use io,only: savegm,rspsub,rspeak,rspsb2,rstrgm
-      use timefnc,only: fightd
-      use rooms,only: clockd,rmdesc
+      use objapp,only: fightd, clockd,rmdesc
 
 
       integer,intent(in) :: ri
@@ -1400,8 +1398,7 @@ C
       LOGICAL FUNCTION TAKE(FLG)
       use state
       use subr,only: rnd,weighr,scrupd,newsta,qhere
-      use objapp,only: objact,oappli
-      use rooms,only: rmdesc
+      use objapp,only: objact,oappli,rmdesc
       use io,only: rspeak
       LOGICAL,intent(in) :: flg
 
@@ -1784,7 +1781,7 @@ C Declarations
 C
       LOGICAL FUNCTION WALK()
       use subr,only: findxt,lit,prob,moveto,bug,jigsup
-      use rooms,only: rmdesc
+      use objapp,only: rmdesc
       use io,only: rspeak,rspsub
       LOGICAL QOPEN
       integer o

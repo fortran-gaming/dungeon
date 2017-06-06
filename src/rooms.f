@@ -48,7 +48,7 @@ C
       use state
       use subr,only: lit,prob,moveto,mrhere,qhere,findxt,newsta,jigsup,
      & scrupd,bug
-      use timefnc,only: litint
+      use objapp,only: litint
       use io,only: rspeak,rspsub
       integer,intent(in) :: ri
 
