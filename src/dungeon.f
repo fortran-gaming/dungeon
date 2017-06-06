@@ -9,38 +9,35 @@ C 16-Aug-94	RMS	Version 3.2.
 C 30-Jun-92	RMS	Changed file names to lower case.
 C 29-Jun-92	RMS	Changed OUTCH to 6 for VAX, UNIX compatibility.
 C
-	PROGRAM DUNGEO
-C
-C Declarations
-C
-	IMPLICIT INTEGER (A-Z)
-	LOGICAL INITFL
-	INCLUDE 'dparam.for'
-C
+      PROGRAM DUNGEO
+      use dparam
+      IMPLICIT INTEGER (A-Z)
+      LOGICAL INITFL
+
 C Data statements for constant arrays
-C
-	DATA VMAJ/4/,VMIN/0/,VEDIT/'A'/
-C
-	DATA BATDRP/66,67,68,69,70,71,72,65,73/
-C
-	DATA SCOLDR/XNORTH,BKTWI,XSOUTH,BKVAU,XEAST,BKVE,XWEST,BKVW/
-	DATA SCOLWL/BKVW,271,XEAST,BKVE,272,XWEST,
-	1	BKTWI,270,XSOUTH,BKVAU,269,XNORTH/
-C
-	DATA CPDR/XNORTH,-8,XNE,-7,XEAST,1,XSE,9,
-	1	XSOUTH,8,XSW,7,XWEST,-1,XNW,-9/
-	DATA CPWL/269,-8,270,8,271,1,272,-1/
-	DATA CPVEC/1,1,1,1,1,1,1,1,
-	1	1,0,-1,0,0,-1,0,1,
-	2	1,-1,0,1,0,-2,0,1,
-	3	1,0,0,0,0,1,0,1,
-	4	1,-3,0,0,-1,-1,0,1,
-	5	1,0,0,-1,0,0,0,1,
-	6	1,1,1,0,0,0,1,1,
-	7	1,1,1,1,1,1,1,1/
-C
-	DATA XELNT/1,2,3,3/
-	
+
+      VMAJ=4; VMIN=0; VEDIT='A'
+
+      BATDRP=[66,67,68,69,70,71,72,65,73]
+
+      SCOLDR=[XNORTH,BKTWI,XSOUTH,BKVAU,XEAST,BKVE,XWEST,BKVW]
+      SCOLWL=[BKVW,271,XEAST,BKVE,272,XWEST,
+     &         BKTWI,270,XSOUTH,BKVAU,269,XNORTH]
+
+      CPDR=[XNORTH,-8,XNE,-7,XEAST,1,XSE,9,
+     &       XSOUTH,8,XSW,7,XWEST,-1,XNW,-9]
+      CPWL=[269,-8,270,8,271,1,272,-1]
+      CPVEC=[1,1,1,1,1,1,1,1,
+     &        1,0,-1,0,0,-1,0,1,
+     &        1,-1,0,1,0,-2,0,1,
+     &        1,0,0,0,0,1,0,1,
+     &        1,-3,0,0,-1,-1,0,1,
+     &        1,0,0,-1,0,0,0,1,
+     &        1,1,1,0,0,0,1,1,
+     &        1,1,1,1,1,1,1,1]
+
+      XELNT=[1,2,3,3]
+
 C DUNGEON, PAGE 2
 C
 C 1) Initialize data structures
@@ -91,7 +88,7 @@ C
 C
 	MBASE=0					! init melee base.
 	DBCH=2			! data base.
-	
+
 C DUNGEON, PAGE 3
 C
 C Init all arrays.
@@ -137,7 +134,7 @@ C
 	  VBEST(I)=0
 	  VMELEE(I)=0
 700	CONTINUE
-	
+
 C DUNGEON, PAGE 4
 C
 	DO 800 I=1,OMAX				! clear object arrays.
@@ -191,7 +188,7 @@ C
 	IF(INITFL(X)) CALL GAME			! if init files, play game.
 	CALL EXIT				! done
 	END
-	
+
 C TXCRYP - Subroutine to encrypt/decrypt text strings.
 C
 C This subroutine performs a reversible encryption on a text string.
@@ -203,10 +200,10 @@ C
 	SUBROUTINE TXCRYP(R,LINE)
 	IMPLICIT INTEGER (A-Z)
 	CHARACTER*(*) LINE
-C
+
 	DO 100 I=1,LEN(LINE)
 	  X=IAND(R, 31)+I
 	  LINE(I:I)=CHAR(IEOR(ICHAR(LINE(I:I)), X))
 100	CONTINUE
-	RETURN
+
 	END

@@ -15,12 +15,12 @@ C
 C Declarations
 C
 	SUBROUTINE GAME
-	use,intrinsic:: iso_fortran_env, only: output_Unit
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL RMDESC,VAPPLI,AAPPLI,OBJACT
 	LOGICAL F,PARSE,FINDXT,XVEHIC,LIT,PRVLIT
-	
+
 C GAME, PAGE 2
 C
 C Start up, describe current location.
@@ -63,7 +63,7 @@ C
 C
 900	CALL VALUAC(PRSO)			! collective object.
 	GO TO 350
-	
+
 C GAME, PAGE 3
 C
 C Special case-- Echo Room.
@@ -97,7 +97,7 @@ C
 1410	FORMAT(1X,A)
 	TELFLG=.TRUE.				! indicate output.
 	GO TO 1000		! more echo room.
-	
+
 C GAME, PAGE 4
 C
 C Special case-- TELL <ACTOR> "NEW COMMAND".
@@ -152,14 +152,14 @@ C
 	GO TO 2350
 
 	END SUBROUTINE GAME
-	
+
 C XENDMV-	Execute end of move functions.
 C
 C Declarations
 C
 	SUBROUTINE XENDMV(FLAG)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
 	LOGICAL F,CLOCKD,FLAG,XVEHIC
 C
 	IF(.NOT.FLAG) CALL RSPEAK(341)		! default remark.
@@ -170,14 +170,15 @@ C
 	IF(PRSWON) F=XVEHIC(2)			! vehicle readout.
 
 	END SUBROUTINE XENDMV
-	
+
 C XVEHIC- Execute vehicle function
 C
 C Declarations
 C
 	LOGICAL FUNCTION XVEHIC(N)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL OAPPLI
 C
 	XVEHIC=.FALSE.				! assume loses.
@@ -185,19 +186,18 @@ C
 	IF(AV /= 0) XVEHIC=OAPPLI(OACTIO(AV),N)
 
 	END FUNCTION XVEHIC
-	
+
 C INITFL-- DUNGEON file initialization subroutine
 C
 C Declarations
 C
 	LOGICAL FUNCTION INITFL(X)
-	use, intrinsic:: iso_fortran_env, only: output_unit
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
 	LOGICAL PROTCT
 	CHARACTER(1) KEDIT
-	integer :: u   
-	
+	integer :: u
+
 C INITFL, PAGE 2
 C
 C First check for protection violation.
@@ -249,7 +249,7 @@ C
 125	FORMAT(A)
 130	FORMAT(I8)
 135	FORMAT(L4)
-	
+
 C INITFL, PAGE 3
 C
 C The internal data base is now established.
@@ -298,7 +298,7 @@ C
 	7 ' The darkness becomes all encompassing, and your vision fails.')
 C
 	END  Function INITFL
-	
+
 C PROTCT-- Check for user violation
 C
 C This routine should be modified if you wish to add system

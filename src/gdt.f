@@ -5,13 +5,13 @@ C ALL RIGHTS RESERVED, COMMERCIAL USAGE STRICTLY PROHIBITED
 C WRITTEN BY R. M. SUPNIK
 C
 C 02-Dec-15     EMG     Compile using gfortran
-C	
+C
 C Declarations
 C
 	SUBROUTINE GDT
-	use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
+      use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	PARAMETER (DBGMAX=38)			! number of debug commands
 	CHARACTER*2 CMD,DBGCMD(DBGMAX),DBGSML(DBGMAX)
 	INTEGER ARGTYP(DBGMAX)
@@ -48,7 +48,7 @@ C
 	1	  1 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
 	2	  1 ,  0 ,  3 ,  3 ,  3 ,  3 ,  1 ,  3 ,  2 ,  2 ,
 	3    1 ,  2 ,  1 ,  0 ,  0 ,  0 ,  0 ,  1 /
-	
+
 C GDT, PAGE 2
 C
 C First, validate that the caller is an implementer.
@@ -100,7 +100,7 @@ C
 	2 29000,30000,31000,32000,33000,34000,35000,36000,37000,38000,
 	3 39000,40000,41000,42000,43000,44000,45000,46000,47000),I
 	GO TO 2200		! what???
-	
+
 C GDT, PAGE 3
 C
 C DR-- Display Rooms

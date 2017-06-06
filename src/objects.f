@@ -4,7 +4,7 @@ C COPYRIGHT 1980, 1990, INFOCOM COMPUTERS AND COMMUNICATIONS, CAMBRIDGE MA.
 C ALL RIGHTS RESERVED, COMMERCIAL USAGE STRICTLY PROHIBITED
 C WRITTEN BY R. M. SUPNIK
 
-C 02-Dec-15     EMG     Compile using gfortran      
+C 02-Dec-15     EMG     Compile using gfortran
 C 29-Sep-94	RMS	Fixed bugs in KILL MASTER, palantir, dial button,
 C			well, slide, bat, global brochure, granite wall,
 C			bottle, leaves, broken lamp, beam, robot, thief,
@@ -20,8 +20,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION OAPPLI(RI,ARG)
+      use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL SOBJS,NOBJS
 	LOGICAL QOPEN,QON,LIT,WASLIT
 	LOGICAL MOVETO,RMDESC,CLOCKD
@@ -744,8 +745,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION SOBJS(RI,ARG)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL MOVETO,OPNCLS,LIT,WASLIT
 	LOGICAL F,QOPEN
 C
@@ -1376,8 +1378,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION NOBJS(RI,ARG)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL QOPEN,MOVETO,F,RMDESC
 	LOGICAL QHERE,OPNCLS,MIRPAN
 	LOGICAL LIT,WASLIT,QEMPTY
@@ -1554,7 +1557,7 @@ C
 	CALL RSPEAK(648)			! oh yeah?
 	RETURN
 C
-C O38--	Wall 
+C O38--	Wall
 C
 7000	IF((IABS(HERE-MLOC).NE.1).OR.(MRHERE(HERE).NE.0).OR.
 	1	.NOT.ENDGMF) GO TO 7100		! mirror wall in endgame?
@@ -2041,7 +2044,7 @@ C
 C O65--	Guano
 C
 34000	IF(PRSA.NE.DIGW) GO TO 10		! dig?
-	RVGUA=MIN0(4,RVGUA+1)			! go to next state.	
+	RVGUA=MIN0(4,RVGUA+1)			! go to next state.
 	CALL RSPEAK(91+RVGUA)			! describe.
 	RETURN
 C
@@ -2259,7 +2262,7 @@ C
 	CALL NEWSTA(PRSO,983,HERE,0,0)
 	RETURN
 C
-45100	IF(((PRSA.NE.TAKEW).AND.(PRSA.NE.MOVEW)).OR.(MATOBJ.EQ.0)) 
+45100	IF(((PRSA.NE.TAKEW).AND.(PRSA.NE.MOVEW)).OR.(MATOBJ.EQ.0))
 	1	GO TO 10			! take or move?
 	CALL NEWSTA(MATOBJ,0,HERE,0,0)		! materialize mat object.
 	CALL RSPSUB(984,ODESC2(MATOBJ))
@@ -2293,8 +2296,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION MIRPAN(ST,PNF)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL PNF
 C
 	MIRPAN=.TRUE.
@@ -2339,8 +2343,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION BALLOP(ARG)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL FINDXT,QEMPTY
 C
 	BALLOP=.TRUE.				! assume wins.
@@ -2402,8 +2407,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION TROLLP(ARG)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL QHERE,PROB
 C
 	TROLLP=.TRUE.				! assume wins.
@@ -2483,8 +2489,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION CYCLOP(ARG)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 C
 	CYCLOP=.TRUE.				! assume wins.
 	IF(.NOT.CYCLOF) GO TO 100		! asleep?
@@ -2545,8 +2552,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION THIEFP(ARG)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL QHERE,PROB,QEMPTY
 C
 	THIEFP=.TRUE.				! assume wins.

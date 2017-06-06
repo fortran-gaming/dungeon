@@ -9,9 +9,14 @@ Most of Supnik's source code remains intact here, but it made extensive use of a
 The purpose of this update is to make DUNGEON compilable using gfortran, enabling a new generation of adventurers to "GET LAMP."
 
 ## COMPILATION
+You can use CMake or the traditional Makefile.
+
+    (cd bin; cmake ../src && make)
+    ./dungeon
+
+or using just the Makefile
 
     (cd src; make && mv dungeon ..)
-
     ./dungeon
 
 `dungeon` executable *must* be run from the directory containing the `dindx` and `dtext` files. 
