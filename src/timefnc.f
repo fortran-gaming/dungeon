@@ -4,7 +4,7 @@ C COPYRIGHT 1980, 1990, INFOCOM COMPUTERS AND COMMUNICATIONS, CAMBRIDGE MA.
 C ALL RIGHTS RESERVED, COMMERCIAL USAGE STRICTLY PROHIBITED
 C WRITTEN BY R. M. SUPNIK
 C
-C 02-Dec-15     EMG     Compile using gfortran      
+C 02-Dec-15     EMG     Compile using gfortran
 C 27-Sep-94	RMS	Fixed bugs in thief demon, fight demon, master actor,
 C			robot actor, dead player, balloon, bell.
 C 30-Jan-94	RMS	Fixed bugs from MS DOS port.
@@ -17,8 +17,10 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION CLOCKD(X)
-	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+		use dparam
+      IMPLICIT INTEGER (A-Z)
+
+
 C
 	CLOCKD=.FALSE.				! assume no action.
 	DO 100 I=1,CLNT
@@ -38,8 +40,9 @@ C
 C Declarations
 C
 	SUBROUTINE CEVAPP(RI)
+    	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	INTEGER CNDTCK(10),LMPTCK(12)
 	LOGICAL FINDXT,LIT,RMDESC,QOPEN,MOVETO
 	LOGICAL F,QLEDGE,QHERE,PROB,WASLIT
@@ -150,7 +153,7 @@ C
 	F=RMDESC(0)
 	RETURN
 C
-C Balloon is in midair and is inflated, up-up-and-away! 
+C Balloon is in midair and is inflated, up-up-and-away!
 c
 6500	IF(BLOC.NE.VAIR4) GO TO 6600		! at vair4?
 	CFLAG(CEVBRN)=.FALSE.			! disable interrupts.
@@ -527,8 +530,9 @@ C
 C Declarations
 C
 	SUBROUTINE LITINT(OBJ,CTR,CEV,TICKS,TICKLN)
+    	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	INTEGER TICKS(TICKLN)
 C
 	CTR=CTR+1				! advance state cntr.
@@ -551,8 +555,9 @@ C
 C Declarations
 C
 	SUBROUTINE FIGHTD
+    	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL PROB,OAPPLI,F
 C
 C Functions and data
@@ -637,8 +642,9 @@ C
 C Declarations
 C
 	INTEGER FUNCTION BLOW(H,V,RMK,HFLG,OUT)
+    	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL HFLG,OAPPLI,PROB,F
 	INTEGER DEF1R(3),DEF2R(4),DEF3R(5)
 	INTEGER RVECTR(66),RSTATE(45)
@@ -828,8 +834,9 @@ C
 C Declarations
 C
 	SUBROUTINE SWORDD
+    	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL INFEST,FINDXT
 C
 	IF(OADV(SWORD).NE.PLAYER) GO TO 500	! holding sword?
@@ -857,8 +864,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION INFEST(R)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 C
 	IF(.NOT.ENDGMF) INFEST=(OROOM(CYCLO).EQ.R).OR.
 	1	(OROOM(TROLL).EQ.R).OR.
@@ -874,8 +882,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION AAPPLI(RI)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL F,MOVETO,QHERE,FINDXT
 C
 	IF(RI.EQ.0) GO TO 10			! if zero, no app.
@@ -1035,8 +1044,9 @@ C
 C This routine details on bit 6 of PRSFLG
 C
 	SUBROUTINE THIEFD
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL DFLAG,ONCE,PROB,QHERE,QSTILL,LIT,WINNIN,WASLIT
 C
 C Functions AND DATA

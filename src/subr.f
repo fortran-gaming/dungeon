@@ -46,9 +46,9 @@ C
 C	CALL RSPSB2(MSGNUM,S1,S2)
 C
 	SUBROUTINE RSPSB2(A,B,C)
-	use,intrinsic:: iso_fortran_env, only: output_unit
+      use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
 
 	integer, intent(in) :: a,b,c
 
@@ -109,14 +109,15 @@ C
 	GO TO 200				! recheck line.
 
 	END SUBROUTINE RSPSB2
- 
+
 C OBJACT-- Apply objects from parse vector
 C
 C Declarations
 C
 	LOGICAL FUNCTION OBJACT(X)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL OAPPLI
 C
 	OBJACT=.TRUE.				! assume wins.
@@ -135,9 +136,10 @@ C
 C Declarations
 C
 	SUBROUTINE BUG(A,B)
-	use,intrinsic:: iso_fortran_env, only: output_unit
+      use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 C
 	WRITE(output_unit,100) A,B			! gonzo
 	IF(DBGFLG.NE.0) RETURN
@@ -159,9 +161,9 @@ C
 C	CALL NEWSTA(OBJECT,STRING,NEWROOM,NEWCON,NEWADV)
 C
       SUBROUTINE NEWSTA(O,R,RM,CN,AD)
+      use dparam
       implicit None
-      INCLUDE 'dparam.for'
-    
+
       integer, intent(in) :: o,r, rm, cn, ad
 
       CALL RSPEAK(R)
@@ -176,8 +178,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION QHERE(OBJ,RM)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 C
 	QHERE=.TRUE.
 	IF(OROOM(OBJ).EQ.RM) RETURN		! in room?
@@ -194,9 +197,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION QEMPTY(OBJ)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
-C
+
 	QEMPTY=.FALSE.				! assume lose.
 	DO 100 I=1,OLNT
 	  IF(OCAN(I).EQ.OBJ) RETURN		! inside target?
@@ -211,8 +214,9 @@ C
 C Declarations
 C
 	SUBROUTINE JIGSUP(DESC)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL MOVETO,QHERE,F
 	INTEGER RLIST(8)
 C
@@ -307,9 +311,9 @@ C
 C Declarations
 C
 	INTEGER FUNCTION OACTOR(OBJ)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
-C
+
 	DO 100 OACTOR=1,ALNT			! loop thru actors.
 	  IF(AOBJ(OACTOR).EQ.OBJ) RETURN	! found it?
 100	CONTINUE
@@ -323,8 +327,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION PROB(G,B)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 C
 	I=G					! assume good luck.
 	IF(BADLKF) I=B				! if bad, too bad.
@@ -344,10 +349,10 @@ C
 C FULL=	0/1/2/3=	full/obj/room/full but no applicable
 C
 C Declarations
-C
+	use dparam
 	IMPLICIT INTEGER (A-Z)
 	LOGICAL PROB,LIT
-	INCLUDE 'dparam.for'
+
 C
 	RMDESC=.TRUE.				! assume wins.
 	RA=RACTIO(HERE)				! get room action.
@@ -399,8 +404,9 @@ C
 C Declarations
 C
 	SUBROUTINE PRINCR(FULL,RM)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL QEMPTY,QHERE
 C
 	J=329					! assume superbrief format.
@@ -453,8 +459,9 @@ C
 C Declarations
 C
 	SUBROUTINE INVENT(ADV)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL QEMPTY
 C
 	I=575					! first line.
@@ -486,8 +493,9 @@ C
 C Declarations
 C
 	SUBROUTINE PRINCO(OBJ,DESC,LDESCF)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL QEMPTY,LDESCF,MOREF,QSEEIN,QUAL
 C
 C Functions and data
@@ -538,8 +546,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION MOVETO(NR,WHO)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL NLV,LHR,LNR
 C
 	MOVETO=.FALSE.				! assume fails.
@@ -583,9 +592,10 @@ C
 C Declarations
 C
 	SUBROUTINE SCORE(FLG)
-	use,intrinsic:: iso_fortran_env, only: output_unit
+      use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL FLG
 	INTEGER RANK(10),ERANK(5)
 C
@@ -635,8 +645,9 @@ C
 C Declarations
 C
 	SUBROUTINE SCRUPD(N)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 C
 	IF(ENDGMF) GO TO 100			! endgame?
 	ASCORE(WINNER)=ASCORE(WINNER)+N		! update score
@@ -656,8 +667,8 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION FINDXT(DIR,RM)
+      use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
 C
 	FINDXT=.TRUE.				! assume wins.
 	XI=REXIT(RM)				! find first entry.
@@ -685,8 +696,9 @@ C
 C Declarations
 C
 	INTEGER FUNCTION FWIM(F1,F2,RM,CON,ADV,NOCARE)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL NOCARE,QHERE
 C
 	FWIM=0					! assume nothing.
@@ -731,8 +743,9 @@ C
 C Declarations
 C
 	SUBROUTINE ORPHAN(OR1,OR2,OR3,OR4,OR5,OR6,OR7,OR8)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	CHARACTER*(*) OR6
 C
 	OFLAG=OR1
@@ -754,9 +767,10 @@ C
 C	YES-IS-TRUE=YESNO(QUESTION,YES-STRING,NO-STRING)
 C
 	LOGICAL FUNCTION YESNO(Q,Y,N)
-	use, intrinsic:: iso_fortran_env,only: input_unit
+      use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
+      use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	CHARACTER*1 ANS
 C
 100	CALL RSPEAK(Q)				! ask
@@ -781,8 +795,9 @@ C
 C Declarations
 C
 	INTEGER FUNCTION ROBADV(ADV,NR,NC,NA)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 C
 	ROBADV=0				! count objects
 	DO 100 I=1,OLNT
@@ -800,8 +815,9 @@ C
 C Declarations
 C
 	INTEGER FUNCTION ROBRM(RM,PR,NR,NC,NA)
+      use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL PROB,QHERE
 C
 	ROBRM=0					! count objects
@@ -826,8 +842,8 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION WINNIN(VL,HR)
+      use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
 	LOGICAL PROB
 C
 	VS=OCAPAC(VL)				! villain strength
@@ -850,8 +866,9 @@ C
 C Declarations
 C
 	INTEGER FUNCTION FIGHTS(H,FLG)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	PARAMETER (STRMAX=7)
 	PARAMETER (STRMIN=2)
 	LOGICAL FLG
@@ -867,9 +884,9 @@ C
 C Declarations
 C
 	INTEGER FUNCTION VILSTR(V)
+      use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
-C
+
 	VILSTR=OCAPAC(V)
 	IF(VILSTR.LE.0) RETURN
 	IF((V.NE.THIEF).OR..NOT.THFENF) GO TO 100
@@ -889,8 +906,9 @@ C
 C Declarations
 C
 	SUBROUTINE GTTIME(T)
+      use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 C
 	CALL ITIME(TMARRAY)
 	H=TMARRAY(1)
@@ -908,8 +926,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION OPNCLS(OBJ,SO,SC)
+      use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL QOPEN
 C
 C Functions and data
@@ -942,8 +961,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION LIT(RM)
+          use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL QHERE
 C
 	LIT=.TRUE.				! assume wins
@@ -979,8 +999,9 @@ C
 C Declarations
 C
 	INTEGER FUNCTION WEIGHR(CN,AD)
+          use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL QHERE
 C
 	WEIGHR=0
@@ -1003,8 +1024,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION GHERE(OBJ,RM)
+          use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 C
 	GHERE=.TRUE.				! assume wins.
 	IF(OBJ.LE.GLOBAL) RETURN		! if untested, return.
@@ -1106,8 +1128,9 @@ C
 C Declarations
 C
 	INTEGER FUNCTION MRHERE(RM)
+          use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 C
 	IF((RM.LT.MRAE).OR.(RM.GT.MRDW)) GO TO 100
 C
@@ -1137,8 +1160,10 @@ C
 C Declarations
 C
 	SUBROUTINE ENCRYP(INW,OUTW)
+          use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
+
 	CHARACTER*(WRDLNT) INW,OUTW,KEYW
 	INTEGER UINW(8),UKEYW(8)
 	DATA KEYW/'ECOVXRMS'/
@@ -1171,8 +1196,9 @@ C
 C Declarations
 C
 	SUBROUTINE CPGOTO(ST)
+          use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 C
 	RFLAG(CPUZZ)=IAND(RFLAG(CPUZZ), NOT(RSEEN))
 	DO 100 I=1,OLNT				! relocate objects.
@@ -1191,9 +1217,11 @@ C
 C Declarations
 C
 	SUBROUTINE CPINFO(RMK,ST)
-	use,intrinsic:: iso_fortran_env,only: output_unit
+          use dparam
+
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
+
 	INTEGER DGMOFT(8)
 	CHARACTER*2 DGM(8),PICT(5),QMK
 C

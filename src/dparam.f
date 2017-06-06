@@ -16,10 +16,13 @@ C 25-Jan-94      RMS      Added sandy beach room.
 ! Array size parameters
 
       module dparam
-
       use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
-! hack for parser.f only
+	  IMPLICIT INTEGER (A-Z)
+      ! hack for parser.f only
       INTEGER OBJVEC(2),PRPVEC(2)
+      ! hack for gdt.f only
+!      INTEGER :: EQR(RMAX,5),EQO(OMAX,14),EQC(CMAX,2),EQV(VMAX,5),
+!     &           EQA(AMAX,7)
 !---------------------------------------------------
       integer,PARAMETER :: MMAX=1500                  ! message
       integer,PARAMETER :: RMAX=200                  ! rooms
@@ -624,8 +627,6 @@ C Rooms
 
       integer  RLNT,RDESC2,RDESC1(RMAX),REXIT(RMAX),
      &      RACTIO(RMAX),RVAL(RMAX),RFLAG(RMAX)
-      COMMON /ROOMS/ RLNT,RDESC2,RDESC1,REXIT,
-     &      RACTIO,RVAL,RFLAG
 C
 C Exits
 
@@ -671,8 +672,6 @@ C
       integer ALNT,AROOM(AMAX),ASCORE(AMAX),AVEHIC(AMAX),
      &      AOBJ(AMAX),AACTIO(AMAX),ASTREN(AMAX),AFLAG(AMAX)
 
-      COMMON /ADVS/ ALNT,AROOM,ASCORE,AVEHIC,
-     &      AOBJ,AACTIO,ASTREN,AFLAG
 C
 C Flags
 C
@@ -1308,5 +1307,11 @@ C
 
 ! hack to avoid refactoring code: moved from parser.f--variables not used anywhere else.
       	EQUIVALENCE (OBJVEC(1),OBJ1),(PRPVEC(1),PREP1)
+! hack for gdt.f
+ !       EQUIVALENCE (EQR(1,1),RDESC1(1))
+ !       EQUIVALENCE (EQO(1,1),ODESC1(1))
+  !      EQUIVALENCE (EQC(1,1),CTICK(1))
+   !     EQUIVALENCE (EQV(1,1),VILLNS(1))
+  !      EQUIVALENCE (EQA(1,1),AROOM(1))
 
       end module

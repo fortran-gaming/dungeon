@@ -20,6 +20,7 @@ C
 C Declarations
 C
 	SUBROUTINE RDLINE(INLINE,INLEN,WHO)
+      use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
 	use dparam
 	IMPLICIT INTEGER(A-Z)
 

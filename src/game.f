@@ -15,6 +15,7 @@ C
 C Declarations
 C
 	SUBROUTINE GAME
+      use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
 	use dparam
 	IMPLICIT INTEGER (A-Z)
 
@@ -35,7 +36,8 @@ C
 	IF(PRSCON.LE.1) CALL RDLINE(INBUF,INLNT,1) ! read command.
 C
 	IF(INBUF(PRSCON:INLNT).NE.'GDT') GO TO 200	! call on gdt?
-	CALL GDT				! yes, invoke.
+!	CALL GDT				! yes, invoke.
+      error stop ' GDT has temporarily been disabled MH 6/2017'
 	PRSCON=1				! force restart.
 	GO TO 100				! onward.
 C

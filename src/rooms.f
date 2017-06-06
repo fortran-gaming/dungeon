@@ -4,7 +4,7 @@ C COPYRIGHT 1980, 1990, INFOCOM COMPUTERS AND COMMUNICATIONS, CAMBRIDGE MA.
 C ALL RIGHTS RESERVED, COMMERCIAL USAGE STRICTLY PROHIBITED
 C WRITTEN BY R. M. SUPNIK
 C
-C 02-Dec-15     EMG     Compile using gfortran      
+C 02-Dec-15     EMG     Compile using gfortran
 C 11-Sep-94	RMS	Fixed bugs in Tree, Slide, Cave2, Magnet, object
 C			substitution.  Added Puzzle Anteroom.
 C 30-Jun-92	RMS	Changed file names to lower case.
@@ -14,8 +14,9 @@ C
 C Declarations
 C
 	SUBROUTINE RAPPLI(RI)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL QOPEN,QON,QHERE,PROB,F
 	LOGICAL MOVETO,LIT,RMDESC,QEMPTY
 C
@@ -801,8 +802,9 @@ C
 C Declarations
 C
 	SUBROUTINE LOOKTO(NRM,SRM,NT,ST,HT)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 C
 	CALL RSPEAK(HT)				! describe hall.
 	CALL RSPEAK(NT)				! describe north view.
@@ -838,8 +840,9 @@ C
 C Declarations
 C
 	SUBROUTINE EWTELL(RM,ST)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL M1
 C
 C Note that we are east or west of mirror, and

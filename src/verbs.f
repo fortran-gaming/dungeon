@@ -4,7 +4,7 @@ C COPYRIGHT 1980, 1990, INFOCOM COMPUTERS AND COMMUNICATIONS, CAMBRIDGE MA.
 C ALL RIGHTS RESERVED, COMMERCIAL USAGE STRICTLY PROHIBITED
 C WRITTEN BY R. M. SUPNIK
 C
-C 02-Dec-15     EMG     Compile using gfortran      
+C 02-Dec-15     EMG     Compile using gfortran
 C 01-Oct-94	RMS	Fixed bugs in ANSWER, INCANT, UNTIE FROM, FILL,
 C			GIVE, SHAKE, PLAY, POUR, POUR ON, TAKE, SPIN, BURN,
 C			ALARM, collectives, subcripting.
@@ -22,9 +22,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION VAPPLI(RI)
-	use,intrinsic:: iso_fortran_env,only: input_unit,output_unit
+    	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	PARAMETER (MXNOP=39,MXJOKE=64,MXSMP=99)
 	PARAMETER (NUMANS=16)
 	LOGICAL LIT,OBJACT,WASLIT
@@ -1386,12 +1386,9 @@ C
 C Take an object (for verbs take, put, drop, read, etc.)
 C
 	LOGICAL FUNCTION TAKE(FLG)
-C
-C Declarations
-C
+	use dparam
 	IMPLICIT INTEGER (A-Z)
 	LOGICAL FLG,OBJACT,OAPPLI,QHERE
-	INCLUDE 'dparam.for'
 
 C TAKE, PAGE 2
 C
@@ -1447,8 +1444,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION DROP(FLG)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL F,PUT,OBJACT,FLG
 C
 	IF(IAND(OFLAG2(PRSO), NOCHBT).EQ.0) GO TO 100
@@ -1492,8 +1490,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION PUT(FLG)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL QOPEN,QHERE,OBJACT,FLG,TAKE
 C
 C Functions and data
@@ -1583,9 +1582,9 @@ C
 C Declarations
 C
 	SUBROUTINE VALUAC(V)
-	use,intrinsic:: iso_fortran_env,only: input_unit,output_unit
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL LIT,F,F1,TAKE,PUT,DROP,NOTHIS,NOHERE,QHERE,QBUNCH
 C
 C Functions and data
@@ -1739,7 +1738,7 @@ C
 4500	IF(F) CALL RSPEAK(I)			! not lit, nothing, wrong verb?
 	PRSO=SAVEP				! restore PRSO.
 	BUNSUB=0				! cancel EXCEPT/BUT.
- 
+
 	END SUBROUTINE VALUAC
 
 C QBUNCH-	Is object in bunch vector?
@@ -1747,8 +1746,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION QBUNCH(OBJ)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 C
 	IF(BUNLNT.EQ.0) GO TO 200		! bunch vector empty?
 	QBUNCH=.TRUE.				! assume found.
@@ -1764,8 +1764,9 @@ C
 C Declarations
 C
 	SUBROUTINE SAVEGM
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 C
 	IF(SUBLNT == 0) SUBBUF='DSAVE.DAT'
 	OPEN (UNIT=1,FILE=SUBBUF,ACCESS='SEQUENTIAL',
@@ -1796,8 +1797,9 @@ C
 C Declarations
 
 	SUBROUTINE RSTRGM
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
       integer :: u
 C
 	IF(SUBLNT.EQ.0) SUBBUF='DSAVE.DAT'
@@ -1834,8 +1836,9 @@ C
 C Declarations
 C
 	LOGICAL FUNCTION WALK(X)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 	LOGICAL FINDXT,QOPEN,LIT,PROB,MOVETO,RMDESC
 C
 C Functions and data
@@ -1904,8 +1907,9 @@ C
 C Declarations
 C
 	INTEGER FUNCTION CXAPPL(RI)
+	use dparam
 	IMPLICIT INTEGER (A-Z)
-	INCLUDE 'dparam.for'
+
 C
 	CXAPPL=0				! no return.
 	IF(RI.EQ.0) RETURN			! if no action, done.
