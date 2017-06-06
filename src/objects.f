@@ -46,6 +46,7 @@ C
       use state
       use subr
       use rooms,only: clockd,rmdesc
+      use io,only: rspeak,rspsub
 
       integer, intent(in) :: ri,arg
 
@@ -772,6 +773,7 @@ C
       LOGICAL FUNCTION SOBJS(RI,ARG)
       use state
       use subr
+      use io,only: rspsub,rspeak
       integer,intent(in) :: ri,arg
 
       LOGICAL WASLIT,F,QOPEN
@@ -1405,7 +1407,7 @@ C
       LOGICAL FUNCTION NOBJS(RI,ARG)
       use state
       use subr,only: qhere,newsta,bug,qempty,lit,moveto,mrhere,rnd,
-     &  opncls
+     &  opncls,cpgoto,cpinfo,jigsup,princr
       use io,only:rspsub,rspeak
       use rooms,only: rmdesc
 
@@ -2327,6 +2329,7 @@ C
       LOGICAL FUNCTION MIRPAN(ST,PNF)
       use state
       use subr
+      use io,only: rspeak
       integer,intent(in) :: ST
       LOGICAL,intent(in) :: PNF
       
@@ -2375,6 +2378,7 @@ C
       LOGICAL FUNCTION BALLOP(ARG)
       use state
       use subr
+      use io,only: rspeak,rspsub
       integer, intent(in) :: arg
 
       BALLOP=.TRUE.                        ! assume wins.
@@ -2436,6 +2440,7 @@ C
       LOGICAL FUNCTION TROLLP()
       use state
       use subr
+      use io,only: rspsub,rspeak
 
       integer i
 

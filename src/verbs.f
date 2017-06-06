@@ -32,10 +32,11 @@ C
       LOGICAL FUNCTION VAPPLI(RI)
       use state
       use objapp
-      use subr,only:lit
-      use io,only: savegm
+      use subr,only:lit,rnd,findxt,qhere,moveto,yesno,qempty,fights,
+     & bug,newsta,princo,jigsup,orphan,score,gttime,invent,encryp
+      use io,only: savegm,rspsub,rspeak,rspsb2,rstrgm
       use timefnc,only: fightd
-      use rooms,only: clockd
+      use rooms,only: clockd,rmdesc
 
 
       integer,intent(in) :: ri
@@ -1398,8 +1399,10 @@ C Take an object (for verbs take, put, drop, read, etc.)
 C
       LOGICAL FUNCTION TAKE(FLG)
       use state
-      use subr,only: objact,rspeak,rnd,weighr,scrupd,newsta,qhere
-      use objapp,only: oappli
+      use subr,only: rnd,weighr,scrupd,newsta,qhere
+      use objapp,only: objact,oappli
+      use rooms,only: rmdesc
+      use io,only: rspeak
       LOGICAL,intent(in) :: flg
 
       integer i,x,r
@@ -1459,7 +1462,9 @@ C
 C Declarations
 C
       LOGICAL FUNCTION DROP()
-      use subr,only: rspsub,newsta,rspeak,objact,scrupd
+      use subr,only: newsta,scrupd
+      use objapp,only: objact
+      use io,only: rspeak,rspsub
       LOGICAL F
       integer i,x
       
@@ -1503,7 +1508,9 @@ C
 C Declarations
 C
       LOGICAL FUNCTION PUT()
-      use subr
+      use subr,only: qhere,weighr,newsta,scrupd
+      use objapp,only: objact
+      use io,only: rspeak,rspsb2,rspsub
       LOGICAL QOPEN
       integer r,j,svi,svo
 
@@ -1592,7 +1599,8 @@ C Declarations
 C
       SUBROUTINE VALUAC()
       use state
-      use subr
+      use subr,only:qhere,lit
+      use io,only: rspsub,rspeak
       
       integer r,av,i,j,k,l,saveh,savep
       LOGICAL F,F1,NOTHIS,NOHERE
@@ -1775,7 +1783,9 @@ C
 C Declarations
 C
       LOGICAL FUNCTION WALK()
-      use subr
+      use subr,only: findxt,lit,prob,moveto,bug,jigsup
+      use rooms,only: rmdesc
+      use io,only: rspeak,rspsub
       LOGICAL QOPEN
       integer o
       QOPEN(O)=IAND(OFLAG2(O), OPENBT).NE.0
@@ -1841,7 +1851,9 @@ C CXAPPL- Conditional exit processors
 
       INTEGER FUNCTION CXAPPL(RI)
       use state
-      use subr
+      use subr,only: rnd,mrhere,weighr,bug,cpgoto
+      use objapp,only:objact
+      use io,only: rspeak
       integer,intent(in) :: ri
       integer i,j,k,ldir,nxt
 

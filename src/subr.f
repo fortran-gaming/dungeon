@@ -95,7 +95,7 @@ C
 C Declarations
 C
       SUBROUTINE JIGSUP(DESC)
-      use io,only: rspeak
+      use io,only: rspeak,rspsub
        use state!,only: KITCH,CLEAR,FORE3,FORE2,SHOUS,FORE2,KITCH,EHOUS,
 
       integer, intent(in) :: desc
@@ -226,7 +226,7 @@ C Declarations
 C
       SUBROUTINE PRINCR(FULL,RM)
        use state
-      use io,only: rspeak
+      use io,only: rspeak,rspsub
       integer, intent(in) :: FULL,RM
 
       integer i,j,k
@@ -281,7 +281,7 @@ C Declarations
 C
       SUBROUTINE INVENT(ADV)
       use state
-        use io,only: rspeak
+        use io,only: rspeak,rspsub
       integer, intent(in) :: adv
 
       integer i,j
@@ -313,7 +313,7 @@ C PRINCO-      Print contents of object
 
       SUBROUTINE PRINCO(OBJ,DESC,LDESCF)
       use state
-      use io,only: rspeak
+      use io,only: rspeak,rspsub
       integer, intent(in) :: obj,desc
       logical, intent(in) :: LDESCF
 
@@ -368,7 +368,7 @@ C Declarations
 C
       LOGICAL FUNCTION MOVETO(NR,WHO)
       use state
-      use io,only: rspeak
+      use io,only: rspeak,rspsub
       integer, intent(in) :: nr,who
 
       integer j,bits

@@ -46,7 +46,10 @@ C Declarations
 C
       SUBROUTINE CEVAPP(RI)
       use state
-      use subr,only: lit,prob,moveto,mrhere,qhere,findxt
+      use subr,only: lit,prob,moveto,mrhere,qhere,findxt,newsta,jigsup,
+     & scrupd,bug
+      use timefnc,only: litint
+      use io,only: rspeak,rspsub
       integer,intent(in) :: ri
 
 
@@ -540,8 +543,8 @@ C when there is no direct object.
 C
       LOGICAL FUNCTION RMDESC(FULL)
       use state
-      use subr,only: lit,prob
-      use io,only: rspeak
+      use subr,only: lit,prob,princr
+      use io,only: rspeak,rspsub
       integer, intent(in) :: full
 
       integer i,ra
@@ -594,8 +597,9 @@ C
 
       SUBROUTINE RAPPLI(RI)
       use state
-      use subr
-
+      use subr,only:fights,qhere,qempty,moveto,lit,prob,rnd,newsta,
+     & jigsup,bug,scrupd,score,cpinfo
+      use io,only: rspeak,rspsub,rspsb2
 	  integer, intent(in) :: RI
     
       
@@ -1384,6 +1388,7 @@ C
       SUBROUTINE LOOKTO(NRM,SRM,NT,ST,HT)
       use state, only: here,mdir,mloc,mr1f,mr2f,mropnf
       use subr
+      use io,only: rspeak,rspsub,rspsb2
       integer, intent(in) :: NRM,SRM,NT,ST,HT
 
       integer dir,i,m1,mrbf

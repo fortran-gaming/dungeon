@@ -24,10 +24,12 @@ C Declarations
       SUBROUTINE GAME
       use state
       use subr
-      use verbs
-      use timefnc
-      use parser
-      use rooms
+      use timefnc,only: aappli
+      use verbs,only: vappli,valuac
+      use parser,only: parse,rdline
+      use rooms,only: rmdesc,rappli
+      use objapp,only: objact
+      use io,only: rspeak,rspsub
 
       LOGICAL F,PRVLIT
       integer vprsc,SVPRSO,SVPRSC,PRVHER,i
@@ -171,7 +173,9 @@ C
       SUBROUTINE XENDMV(FLAG)
       use state
       use subr
-      use timefnc
+      use timefnc,only: thiefd,fightd,swordd
+      use rooms,only: clockd
+      use io,only: rspeak
       logical, intent(in) :: FLAG
       LOGICAL F
 C

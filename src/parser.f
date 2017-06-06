@@ -129,7 +129,7 @@ C
 C This routine details on bit 1 of PRSFLG
 C
       LOGICAL FUNCTION LEX(INLINE,INLEN,OUTBUF,OP,VBFLAG)
-       use subr, only: rspeak
+       use io, only: rspeak
       CHARACTER(*),intent(in) :: INLINE
       integer, intent(in) :: inlen
       CHARACTER(WRDLNT), intent(out) :: OUTBUF(LEXMAX)
@@ -226,6 +226,7 @@ C
       INTEGER FUNCTION SPARSE(LBUF,LLNT,VBFLAG)
       use state,only: vword,prep1,obj1
       use subr
+      use io,only: rspeak,rspsub
       character(*), intent(inout) :: LBUF(:)
       integer, intent(inout) :: llnt
       logical, intent(in) :: vbflag
@@ -1083,6 +1084,7 @@ C
       LOGICAL FUNCTION TAKEIT(OBJ,SFLAG)
       use state, only: odesc2
       use subr
+      use io,only: rspeak,rspsub
       use verbs,only: take
       integer, intent(in) :: obj,sflag
 

@@ -130,7 +130,7 @@ C
       INTEGER FUNCTION BLOW(H,V,RMK,HFLG,OUT)
       use state
       use objapp,only: oappli
-      use subr,only: fights,fwim,prob,rnd,vilstr
+      use subr,only: fights,fwim,prob,rnd,vilstr,jigsup
 
       integer, intent(in) :: H,V,RMK,OUT
       LOGICAL,intent(in) :: HFLG
