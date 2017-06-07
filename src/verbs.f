@@ -1799,11 +1799,11 @@ C Declarations
 
 	SUBROUTINE RSTRGM
 	use dparam
-	IMPLICIT INTEGER (A-Z)
+	IMPLICIT None
 
-      integer :: u
+      integer :: u,i,j
 C
-	IF(SUBLNT.EQ.0) SUBBUF='DSAVE.DAT'
+	IF(SUBLNT.EQ.0) SUBBUF=savegameFN
 	OPEN (newUNIT=u,FILE=SUBBUF,ACCESS='SEQUENTIAL',
 	1	STATUS='OLD',FORM='UNFORMATTED',ERR=100)
 C

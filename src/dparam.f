@@ -18,6 +18,9 @@ C 25-Jan-94      RMS      Added sandy beach room.
       module dparam
       use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
 	  IMPLICIT none
+
+      character(*), parameter :: savegameFN = 'dungeon_save.dat'
+
       ! hack for parser.f only
       INTEGER OBJVEC(2),PRPVEC(2)
       ! hack for gdt.f only
@@ -602,7 +605,6 @@ C
       integer INLNT,SUBLNT
       CHARACTER(TEXLNT) INBUF,SUBBUF
       CHARACTER(1) VEDIT
-      COMMON /INPUT/ INLNT,INBUF,SUBLNT,SUBBUF
 
       integer :: MBASE,STRBIT,
      &      PLTIME,DARRAY(3),SHOUR,SMIN,
