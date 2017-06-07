@@ -193,6 +193,11 @@ C
         do i = 1,argc
             call get_command_argument(i,argv)
             if (argv=='-d') debug=.true.
+            if (argv=='-c') then
+                cheat=.true.
+                open(ucheat,file='../cheat.asc',
+     &               status='old',action='read')
+            endif
         enddo
 
 
@@ -201,21 +206,3 @@ C
 
 	END
 
-C TXCRYP - Subroutine to encrypt/decrypt text strings.
-C
-C This subroutine performs a reversible encryption on a text string.
-C The purpose is not to protect the data base but to make it more
-C difficult for the casual game user to read the data base file.
-C It is located here, rather than in the SUBRoutine module, because
-C it is used by both the game and the separate data base compiler.
-C
-	SUBROUTINE TXCRYP(R,LINE)
-	IMPLICIT INTEGER (A-Z)
-	CHARACTER*(*) LINE
-
-	DO 100 I=1,LEN(LINE)
-	  X=IAND(R, 31)+I
-	  LINE(I:I)=CHAR(IEOR(ICHAR(LINE(I:I)), X))
-100	CONTINUE
-
-	END

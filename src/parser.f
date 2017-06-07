@@ -23,23 +23,39 @@ C
       use, intrinsic:: iso_fortran_env, only: input_unit,output_unit,
      & error_unit
       use dparam
-      IMPLICIT INTEGER(A-Z)
+      IMPLICIT None
 
 	  CHARACTER(TEXLNT), intent(out) :: INLINE
       integer, intent(out) ::  inlen
+      integer, intent(in) :: who
 
       character(120) iomsg
-      integer ios
-
-C
-	LUCVT=ICHAR('A')-ICHAR('a')		! case conversion factor.
-5	GO TO (90,10),WHO+1			! see who to prompt for.
-10	WRITE(output_unit,'(A)',advance='no') ' >'	! prompt for game.
+      integer :: ios,i,icom
+      integer, parameter :: LUCVT=ICHAR('A')-ICHAR('a')	! case conversion factor.
+      
+5     GO TO (90,10),WHO+1			! see who to prompt for.
+10    WRITE(output_unit,'(A)',advance='no') ' >'	! prompt for game.
       flush(output_unit)
 
 ! get input.
-90    READ(input_unit,100,END=5,iostat=ios,iomsg=iomsg) INLINE
-100   FORMAT(A)
+90    if (cheat) then
+        call sleep(0)
+        read(ucheat,'(A)',iostat=ios) INLINE ! fortran reads until newline
+        if (ios==0) then
+            if (inline(1:1)=='!') goto 90  ! a comment line
+            icom = index(inline,'!')  ! inline comment
+            if (icom>0) inline = inline(1:icom-1)
+            write(output_unit,*) INLINE
+        else ! EOF
+            write(output_unit,*) "reached the end of the cheat file..."
+     & //"now it's your adventure..."
+            cheat=.false.
+            flush(input_unit)
+            goto 5
+        endif  
+      else  ! normal play
+        READ(input_unit,'(A)',END=5,iostat=ios,iomsg=iomsg) INLINE
+      endif
 
       if (ios/=0) then  ! Ctrl D pressed
        if (debug) write(error_unit,*) iomsg
@@ -298,7 +314,7 @@ C Not recognizable
 C
 	  IF(.NOT.VBFLAG) RETURN		! if mute, return
 	  LCWORD=LCIFY(WORD,1)			! convert to lower case
-	  WRITE(output_unit,600) LCWORD(1:NBLEN(LCWORD)) ! don't recognize
+	  WRITE(output_unit,600) LCWORD(1:len_trim(LCWORD)) ! don't recognize
 600	  FORMAT(' I don''t understand "',A,'".')
 	  CALL RSPEAK(ERRVOC)			! if extra verb, say so
 800	  TELFLG=.TRUE.				! something said.
@@ -475,7 +491,7 @@ C
 	GO TO 800				! go clean up state.
 C
 7100	IF(VBFLAG) WRITE(output_unit,7110)
-	1	LCWRD1(1:NBLEN(LCWRD1)+1),LCWORD(1:NBLEN(LCWORD))
+	1	LCWRD1(1:len_trim(LCWRD1)+1),LCWORD(1:len_trim(LCWORD))
 7110	FORMAT(' I can''t see any',A,A,' here.')
 	GO TO 800				! go clean up state.
 C
@@ -486,7 +502,7 @@ C
 7300	IF(ACT.EQ.0) ACT=IAND(OFLAG, OACT)		! if no act, get orphan.
 	CALL ORPHAN(-1,ACT,PREP1,OBJ1,PREP,WORD,0,0)	! orphan the world.
 	IF(VBFLAG) WRITE(output_unit,7310)
-	1	LCWRD1(1:NBLEN(LCWRD1)+1),LCWORD(1:NBLEN(LCWORD))
+	1	LCWRD1(1:len_trim(LCWRD1)+1),LCWORD(1:len_trim(LCWORD))
 7310	FORMAT(' Which',A,A,' do you mean?')
 	GO TO 800				! go clean up state.
 C
@@ -541,12 +557,12 @@ C
 C 13000--	EXCEPT/BUT errors.
 C
 13000	LCWORD=LCIFY(WORD,1)
-	IF(VBFLAG) WRITE(output_unit,13010) LCWORD(1:NBLEN(LCWORD))	! wrong place.
+	IF(VBFLAG) WRITE(output_unit,13010) LCWORD(1:len_trim(LCWORD))	! wrong place.
 13010	FORMAT(' Misplaced "',A,'".')
 	GO TO 800				! go clean up state.
 C
 13100	LCWORD=LCIFY(WORD,2)				! wrong case.
-	IF(VBFLAG) WRITE(output_unit,13110) LCWORD(1:NBLEN(LCWORD))	! not coll.
+	IF(VBFLAG) WRITE(output_unit,13110) LCWORD(1:len_trim(LCWORD))	! not coll.
 13110	FORMAT(' "',A,'" can only be used with "everything",',
 	1 ' "valuables", or "possessions".')
 	GO TO 800				! go clean up state.
@@ -826,7 +842,7 @@ C
 	BUNSUB=0				! no EXCEPT clause.
 	IF(OBJ2.GT.0) GO TO 3800		! if iobj, go print.
 3700	WRITE(output_unit,3750)
-	1	LCWORD(1:NBLEN(LCWORD)),LCPRP1(1:NBLEN(LCPRP1)+1)
+	1	LCWORD(1:len_trim(LCWORD)),LCPRP1(1:len_trim(LCPRP1)+1)
 3750	FORMAT(1X,A,A,'what?')
 	TELFLG=.TRUE.
 	RETURN
@@ -834,9 +850,9 @@ C
 3800	X=IABS(ODESC2(OBJ2))			! get iobj description.
 	READ(DBCH,REC=X) J,STR			! read data base.
 	CALL TXCRYP(X,STR)			! decrypt the line.
-	WRITE(output_unit,3880) LCWORD(1:NBLEN(LCWORD)),
-	1	LCPRP1(1:NBLEN(LCPRP1)+1),
-	2	LCPRP2(1:NBLEN(LCPRP2)+1),STR(1:NBLEN(STR))
+	WRITE(output_unit,3880) LCWORD(1:len_trim(LCWORD)),
+	1	LCPRP1(1:len_trim(LCPRP1)+1),
+	2	LCPRP2(1:len_trim(LCPRP2)+1),STR(1:len_trim(STR))
 3880	FORMAT(1X,A,A,'what',A,'the ',A,'?')
 	TELFLG=.TRUE.
 	RETURN
@@ -867,9 +883,9 @@ C
 	X=IABS(ODESC2(OBJ1))			! get dobj description.
 	READ(DBCH,REC=X) J,STR			! read data base.
 	CALL TXCRYP(X,STR)			! decrypt the line.
-	WRITE(output_unit,4660) LCWORD(1:NBLEN(LCWORD)),
-	1	LCPRP1(1:NBLEN(LCPRP1)+1),
-	2	STR(1:NBLEN(STR)),LCPRP2(1:NBLEN(LCPRP2)+1)
+	WRITE(output_unit,4660) LCWORD(1:len_trim(LCWORD)),
+	1	LCPRP1(1:len_trim(LCPRP1)+1),
+	2	STR(1:len_trim(STR)),LCPRP2(1:len_trim(LCPRP2)+1)
 4660	FORMAT(1X,A,A,'the ',A,A,'what?')
 	TELFLG=.TRUE.
 	RETURN

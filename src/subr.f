@@ -163,7 +163,7 @@ C
 C	CALL NEWSTA(OBJECT,STRING,NEWROOM,NEWCON,NEWADV)
 C
       SUBROUTINE NEWSTA(O,R,RM,CN,AD)
-      use dparam
+      use dparam,only: oroom,ocan,oadv
       implicit None
 
       integer, intent(in) :: o,r, rm, cn, ad
@@ -320,23 +320,22 @@ C
 
         CALL BUG(40,OBJ)			! no, die.
 
-        END
+        END FUNCTION OACTOR
 
 C PROB-		Compute probability
-C
-C Declarations
-C
-	LOGICAL FUNCTION PROB(G,B)
-	use dparam
-	IMPLICIT INTEGER (A-Z)
 
-C
-	I=G					! assume good luck.
-	IF(BADLKF) I=B				! if bad, too bad.
-	PROB=RND(100).LT.I			! compute.
-	RETURN
-C
-	END
+        LOGICAL FUNCTION PROB(G,B)
+        use dparam,only: badlkf
+        IMPLICIT none
+        integer, external :: rnd
+        integer, intent(in) :: g,b
+        integer i
+
+        I=G					! assume good luck.
+        IF(BADLKF) I=B				! if bad, too bad.
+        PROB=RND(100) < I			! compute.
+
+        END FUNCTION PROB
 
 C RMDESC-- Print room description
 C
@@ -494,12 +493,15 @@ C INVENT- Print contents of adventurer
 C
 C Declarations
 C
-	SUBROUTINE INVENT(ADV)
-	use dparam, only: odesc2,oflag1,oadv,aobj,oflag2
-	IMPLICIT INTEGER (A-Z)
+      SUBROUTINE INVENT(ADV)
+      use dparam, only: odesc2,oflag1,oadv,aobj,oflag2,olnt,openbt,
+     & tranbt,visibt,player
+      IMPLICIT none
+      
+      integer adv,i,j
 
-	LOGICAL,external :: QEMPTY
-C
+      LOGICAL,external :: QEMPTY
+
 	I=575					! first line.
 	IF(ADV.NE.PLAYER) I=576			! if not me.
 	DO 10 J=1,OLNT				! loop
@@ -1251,8 +1253,8 @@ C CPINFO--	Describe puzzle room
 C
 C Declarations
 C
-	SUBROUTINE CPINFO(RMK,ST)
-          use dparam
+      SUBROUTINE CPINFO(RMK,ST)
+      use dparam
 
 	IMPLICIT INTEGER (A-Z)
 
@@ -1294,23 +1296,7 @@ C
 C
 	END SUBROUTINE CPINFO
 
-C NBLEN-	Compute string length without trailing blanks
-C
-C Declarations
-C
-	INTEGER FUNCTION NBLEN(STRING)
-	IMPLICIT INTEGER (A-Z)
-	CHARACTER*(*) STRING
-C
-	NBLEN=LEN(STRING)			! get nominal length
-100	IF(NBLEN.LE.0) RETURN			! any string left?
-	IF(STRING(NBLEN:NBLEN).NE.' ') RETURN	! found a non-blank?
-	NBLEN=NBLEN-1				! no, trim len by 1
-	GO TO 100				! and continue.
-C
-	END
 
-C
 C RND - Return a random integer mod n
 C
 	INTEGER FUNCTION RND (N)

@@ -25,6 +25,8 @@ C 25-Jan-94      RMS      Added sandy beach room.
 !     &           EQA(AMAX,7)
 !---------------------------------------------------
       logical :: debug=.false.
+      logical :: cheat=.false.
+      integer :: ucheat  ! file handle for cheat file
 
       integer,PARAMETER :: MMAX=1500                  ! message
       integer,PARAMETER :: RMAX=200                  ! rooms

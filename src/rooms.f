@@ -14,14 +14,13 @@ C
 C Declarations
 C
 	SUBROUTINE RAPPLI(RI)
+	    use,intrinsic:: iso_fortran_env, only: input_unit
 	use dparam
 	IMPLICIT INTEGER (A-Z)
 
 	LOGICAL QOPEN,QON,QHERE,PROB,F
-	LOGICAL MOVETO,LIT,RMDESC,QEMPTY
-C
-C Functions and data
-C
+	LOGICAL,external :: MOVETO,LIT,RMDESC,QEMPTY
+
 	QOPEN(R)=IAND(OFLAG2(R), OPENBT).NE.0
 	QON(R)=IAND(OFLAG1(R), ONBT).NE.0
 C
@@ -679,11 +678,13 @@ C
 C R57--	Nirvana and end of game
 C
 57000	IF(PRSA.NE.WALKIW) RETURN		! walkin?
-	PAUSE '--More--'
+      write(output_unit,*) '--More--'
+	read(input_unit,*)  ! pause
 	CALL RSPEAK(726)
-	PAUSE '--More--'
+      write(output_unit,*) '--More--'
+	read(input_unit,*) ! pause
 	CALL SCORE(.FALSE.)
-	CALL EXIT
+      stop
 C
 C R58--	Tomb Room
 C
