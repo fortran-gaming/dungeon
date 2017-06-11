@@ -195,7 +195,7 @@ C
             if (argv=='-d') debug=.true.
             if (argv=='-c') then
                 cheat=.true.
-                open(ucheat,file='../cheat.asc',
+                open(ucheat,file='cheat.asc',
      &               status='old',action='read')
             endif
         enddo

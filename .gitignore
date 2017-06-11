@@ -1,3 +1,4 @@
+*.DAT
 *.exe
 *.dat
 bin/
