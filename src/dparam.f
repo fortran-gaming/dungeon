@@ -17,7 +17,7 @@ C 25-Jan-94      RMS      Added sandy beach room.
 
       module dparam
       use, intrinsic:: iso_fortran_env, only: input_unit,output_unit
-	  IMPLICIT none
+	    implicit none
 
       character(*), parameter :: savegameFN = 'dungeon_save.dat'
 

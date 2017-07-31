@@ -1,0 +1,33 @@
+language: c
+
+os:
+  - linux
+  - osx
+
+# remember OS X still doesn't have Python at all on Travis!
+
+notifications:
+  email: false
+
+git:
+  depth: 3
+
+addons:
+  apt:
+    packages:
+      - gfortran
+
+before_install:
+    - if [[ $TRAVIS_OS_NAME == osx ]]; then
+        brew update;
+        brew install gcc;
+      fi
+
+install: 
+    - export FC=gfortran
+    - cd bin
+    - cmake ../src
+    - make
+    - cd ..
+
+
