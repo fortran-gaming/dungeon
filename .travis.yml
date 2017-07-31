@@ -28,6 +28,8 @@ install:
     - cd bin
     - cmake ../src
     - make
+
+script:
     - cd ..
 
 
