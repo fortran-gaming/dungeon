@@ -3,7 +3,7 @@ project(dungeon Fortran)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ..)
 
-add_compile_options(-Wline-truncation -g -fbacktrace )# -Wall -Wfatal-errors)
+add_compile_options(-Wline-truncation -g -fbacktrace -Werror=array-bounds)# -Wall -Wfatal-errors)
 
 add_library(dparam dparam.f io.f90)
 

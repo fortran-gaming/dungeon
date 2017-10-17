@@ -3,6 +3,8 @@ language: c
 os:
   - linux
   - osx
+  
+env: FC=gfortran
 
 # remember OS X still doesn't have Python at all on Travis!
 
@@ -24,7 +26,6 @@ before_install:
       fi
 
 install: 
-    - export FC=gfortran
     - cd bin
     - cmake ../src
     - make
