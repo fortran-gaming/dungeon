@@ -1,12 +1,12 @@
 language: c
+fast_finish: true
 
 os:
   - linux
   - osx
   
-env: FC=gfortran
-
-# remember OS X still doesn't have Python at all on Travis!
+env: 
+  - FC=gfortran
 
 notifications:
   email: false
